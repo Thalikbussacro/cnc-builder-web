@@ -679,39 +679,46 @@ vercel --prod # Ou usar interface da Vercel
 
 ## Progresso Atual
 
-- [ ] **Estágio 1**: Setup Inicial
-  - [ ] Sub-estágio 1.1: Configuração do Ambiente
-  - [ ] Sub-estágio 1.2: Definição de Tipos TypeScript
+- [x] **Estágio 1**: Setup Inicial ✅
+  - [x] Sub-estágio 1.1: Configuração do Ambiente
+  - [x] Sub-estágio 1.2: Definição de Tipos TypeScript
 
-- [ ] **Estágio 2**: Algoritmo de Nesting
-  - [ ] Sub-estágio 2.1: Função de Validação de Espaço
-  - [ ] Sub-estágio 2.2: Algoritmo de Posicionamento
+- [x] **Estágio 2**: Algoritmo de Nesting ✅
+  - [x] Sub-estágio 2.1: Função de Validação de Espaço
+  - [x] Sub-estágio 2.2: Algoritmo de Posicionamento
 
-- [ ] **Estágio 3**: Geração de G-Code
-  - [ ] Sub-estágio 3.1: Função de Geração de G-code
-  - [ ] Sub-estágio 3.2: Função de Download
+- [x] **Estágio 3**: Geração de G-Code ✅
+  - [x] Sub-estágio 3.1: Função de Geração de G-code
+  - [x] Sub-estágio 3.2: Função de Download
 
-- [ ] **Estágio 4**: Componentes de UI - Configurações
-  - [ ] Sub-estágio 4.1: Componente de Configurações da Chapa
-  - [ ] Sub-estágio 4.2: Componente de Configurações de Corte
+- [x] **Estágio 4**: Componentes de UI - Configurações ✅
+  - [x] Sub-estágio 4.1: Componente de Configurações da Chapa
+  - [x] Sub-estágio 4.2: Componente de Configurações de Corte
 
-- [ ] **Estágio 5**: Componentes de UI - Cadastro e Lista
-  - [ ] Sub-estágio 5.1: Componente de Cadastro de Peças
-  - [ ] Sub-estágio 5.2: Componente de Lista de Peças
+- [x] **Estágio 5**: Componentes de UI - Cadastro e Lista ✅
+  - [x] Sub-estágio 5.1: Componente de Cadastro de Peças
+  - [x] Sub-estágio 5.2: Componente de Lista de Peças
 
-- [ ] **Estágio 6**: Preview Visual
-  - [ ] Sub-estágio 6.1: Componente Canvas Base
-  - [ ] Sub-estágio 6.2: Renderização de Peças no Canvas
+- [x] **Estágio 6**: Preview Visual ✅
+  - [x] Sub-estágio 6.1: Componente Canvas Base
+  - [x] Sub-estágio 6.2: Renderização de Peças no Canvas
 
-- [ ] **Estágio 7**: Integração e Página Principal
-  - [ ] Sub-estágio 7.1: Gerenciamento de Estado
-  - [ ] Sub-estágio 7.2: Layout e Composição dos Componentes
-  - [ ] Sub-estágio 7.3: Funcionalidade de Gerar G-code
+- [x] **Estágio 7**: Integração e Página Principal ✅
+  - [x] Sub-estágio 7.1: Gerenciamento de Estado
+  - [x] Sub-estágio 7.2: Layout e Composição dos Componentes
+  - [x] Sub-estágio 7.3: Funcionalidade de Gerar G-code
 
-- [ ] **Estágio 8**: Ajustes Finais e Testes
-  - [ ] Sub-estágio 8.1: Validações e Tratamento de Erros
-  - [ ] Sub-estágio 8.2: Melhorias de UX
-  - [ ] Sub-estágio 8.3: Testes Manuais Completos
+- [x] **Estágio 8**: Ajustes Finais e Testes ✅
+  - [x] Sub-estágio 8.1: Validações e Tratamento de Erros
+  - [x] Sub-estágio 8.2: Melhorias de UX
+  - [x] Sub-estágio 8.3: Testes Manuais Completos
+
+- [x] **Estágio 8.5**: Melhorias de UX Avançadas ✅ (NOVO - 2025-10-07)
+  - [x] Sub-estágio 8.5.1: Melhorar contraste e visibilidade de textos
+  - [x] Sub-estágio 8.5.2: Dar mais evidência aos botões
+  - [x] Sub-estágio 8.5.3: Manter valores nos campos ao adicionar peça
+  - [x] Sub-estágio 8.5.4: Reduzir tamanho do preview canvas
+  - [x] Sub-estágio 8.5.5: Implementar visualizador de G-code com painel lateral
 
 - [ ] **Estágio 9**: Documentação e Deploy
   - [ ] Sub-estágio 9.1: Documentação
