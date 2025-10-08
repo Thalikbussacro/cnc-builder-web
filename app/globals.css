@@ -4,25 +4,26 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    /* Tema Industrial/Madeira/CNC */
+    --background: 32 15% 12%;        /* Cinza escuro quente */
+    --foreground: 36 20% 85%;         /* Bege claro */
+    --card: 30 12% 16%;               /* Cinza escuro levemente marrom */
+    --card-foreground: 36 20% 85%;
+    --popover: 30 12% 16%;
+    --popover-foreground: 36 20% 85%;
+    --primary: 28 75% 50%;            /* Laranja industrial */
+    --primary-foreground: 36 20% 95%;
+    --secondary: 30 15% 24%;          /* Cinza médio */
+    --secondary-foreground: 36 20% 85%;
+    --muted: 30 10% 20%;
+    --muted-foreground: 36 10% 60%;
+    --accent: 40 60% 45%;             /* Amarelo madeira */
+    --accent-foreground: 30 12% 16%;
+    --destructive: 0 65% 50%;
+    --destructive-foreground: 36 20% 95%;
+    --border: 30 10% 25%;
+    --input: 30 10% 22%;
+    --ring: 28 75% 50%;
     --radius: 0.5rem;
   }
 

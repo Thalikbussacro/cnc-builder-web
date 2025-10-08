@@ -10,14 +10,14 @@ type PreviewCanvasProps = {
   pecasPosicionadas: PecaPosicionada[];
 };
 
-// Cores alternadas para melhor visualização
+// Cores para peças - tons industriais/metálicos
 const CORES = [
-  { hex: "#3b82f6", nome: "Azul" },
-  { hex: "#10b981", nome: "Verde" },
-  { hex: "#f59e0b", nome: "Amarelo" },
-  { hex: "#ef4444", nome: "Vermelho" },
-  { hex: "#8b5cf6", nome: "Roxo" },
-  { hex: "#ec4899", nome: "Rosa" },
+  { hex: "#e67e22", nome: "Laranja" },  // Laranja industrial
+  { hex: "#3498db", nome: "Azul" },     // Azul metálico
+  { hex: "#95a5a6", nome: "Cinza" },    // Cinza aço
+  { hex: "#e74c3c", nome: "Vermelho" }, // Vermelho
+  { hex: "#16a085", nome: "Verde" },    // Verde petróleo
+  { hex: "#f39c12", nome: "Amarelo" },  // Amarelo industrial
 ];
 
 export function PreviewCanvas({
@@ -42,10 +42,11 @@ export function PreviewCanvas({
     const updateCanvasSize = () => {
       if (containerRef.current) {
         const containerWidth = containerRef.current.clientWidth - 32; // padding
-        const containerHeight = Math.min(600, window.innerHeight - 300);
+        // Altura menor para caber tudo na tela
+        const containerHeight = Math.min(420, window.innerHeight - 400);
         setCanvasSize({
           width: Math.max(300, containerWidth),
-          height: Math.max(300, containerHeight),
+          height: Math.max(280, containerHeight),
         });
       }
     };
@@ -66,8 +67,8 @@ export function PreviewCanvas({
     const canvasWidth = canvasSize.width;
     const canvasHeight = canvasSize.height;
 
-    // Limpa canvas
-    ctx.fillStyle = "#fafafa";
+    // Limpa canvas com cor de fundo escura
+    ctx.fillStyle = "#1a1613";
     ctx.fillRect(0, 0, canvasWidth, canvasHeight);
 
     // Calcula escala para caber a chapa no canvas com margem
@@ -82,7 +83,7 @@ export function PreviewCanvas({
     const offsetY = margem;
 
     // GRID DE FUNDO - Linhas a cada 100mm
-    ctx.strokeStyle = "#e5e7eb";
+    ctx.strokeStyle = "#3a342e";
     ctx.lineWidth = 0.5;
     ctx.setLineDash([2, 2]);
 
@@ -104,15 +105,15 @@ export function PreviewCanvas({
 
     ctx.setLineDash([]);
 
-    // Desenha chapa (borda preta, fundo branco)
-    ctx.fillStyle = "white";
+    // Desenha chapa (madeira clara)
+    ctx.fillStyle = "#d4a574"; // Tom de madeira clara
     ctx.fillRect(offsetX, offsetY, chapaLargura * escala, chapaAltura * escala);
-    ctx.strokeStyle = "#1f2937";
+    ctx.strokeStyle = "#c89858"; // Borda madeira mais escura
     ctx.lineWidth = 3;
     ctx.strokeRect(offsetX, offsetY, chapaLargura * escala, chapaAltura * escala);
 
     // Indicador de origem (0,0)
-    ctx.fillStyle = "#1f2937";
+    ctx.fillStyle = "#2d251f";
     ctx.font = "bold 10px sans-serif";
     ctx.textAlign = "left";
     ctx.textBaseline = "top";
@@ -180,41 +181,42 @@ export function PreviewCanvas({
         <CardTitle className="text-lg sm:text-xl">Preview da Chapa e Peças</CardTitle>
       </CardHeader>
       <CardContent className="p-4">
-        <div className="flex items-center justify-center bg-gray-100 rounded-lg p-2 sm:p-4 overflow-auto">
+        <div className="flex items-center justify-center bg-black/20 rounded-lg p-2 sm:p-4 overflow-auto">
           <canvas
             ref={canvasRef}
             width={canvasSize.width}
             height={canvasSize.height}
-            className="border border-gray-300 bg-white max-w-full"
+            className="border border-border max-w-full"
+            style={{ backgroundColor: "#1a1613" }}
           />
         </div>
         <div className="mt-3 sm:mt-4 space-y-3">
           {/* Informações gerais */}
           <div className="grid grid-cols-2 gap-2 text-xs sm:text-sm">
-            <div className="bg-gray-50 p-2 rounded">
-              <p className="text-gray-500 text-xs">Chapa</p>
-              <p className="font-semibold text-gray-900">
+            <div className="bg-secondary/50 p-2 rounded">
+              <p className="text-muted-foreground text-xs">Chapa</p>
+              <p className="font-semibold">
                 {chapaLargura.toFixed(0)} × {chapaAltura.toFixed(0)} mm
               </p>
             </div>
-            <div className="bg-gray-50 p-2 rounded">
-              <p className="text-gray-500 text-xs">Peças</p>
-              <p className="font-semibold text-gray-900">
+            <div className="bg-secondary/50 p-2 rounded">
+              <p className="text-muted-foreground text-xs">Peças</p>
+              <p className="font-semibold">
                 {pecasPosicionadas.length}
               </p>
             </div>
-            <div className="bg-gray-50 p-2 rounded">
-              <p className="text-gray-500 text-xs">Área ocupada</p>
-              <p className="font-semibold text-gray-900">
+            <div className="bg-secondary/50 p-2 rounded">
+              <p className="text-muted-foreground text-xs">Área ocupada</p>
+              <p className="font-semibold">
                 {(areaPecas / 1000000).toFixed(2)} m²
               </p>
             </div>
-            <div className="bg-gray-50 p-2 rounded">
-              <p className="text-gray-500 text-xs">Aproveitamento</p>
+            <div className="bg-secondary/50 p-2 rounded">
+              <p className="text-muted-foreground text-xs">Aproveitamento</p>
               <p className={`font-semibold ${
-                taxaAproveitamento >= 70 ? 'text-green-600' :
-                taxaAproveitamento >= 50 ? 'text-amber-600' :
-                'text-red-600'
+                taxaAproveitamento >= 70 ? 'text-green-500' :
+                taxaAproveitamento >= 50 ? 'text-amber-500' :
+                'text-red-500'
               }`}>
                 {taxaAproveitamento.toFixed(1)}%
               </p>
@@ -223,8 +225,8 @@ export function PreviewCanvas({
 
           {/* Legenda de cores */}
           {pecasPosicionadas.length > 0 && (
-            <div className="border-t pt-3">
-              <p className="text-xs font-medium text-gray-700 mb-2">Legenda de Peças</p>
+            <div className="border-t border-border pt-3">
+              <p className="text-xs font-medium mb-2">Legenda de Peças</p>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                 {pecasPosicionadas.slice(0, 6).map((peca, index) => (
                   <div key={peca.id} className="flex items-center gap-2">
@@ -235,14 +237,14 @@ export function PreviewCanvas({
                         borderColor: CORES[index % CORES.length].hex,
                       }}
                     />
-                    <span className="text-xs text-gray-600">
+                    <span className="text-xs text-muted-foreground">
                       #{index + 1} - {peca.largura.toFixed(0)}×{peca.altura.toFixed(0)}
                     </span>
                   </div>
                 ))}
               </div>
               {pecasPosicionadas.length > 6 && (
-                <p className="text-xs text-gray-500 mt-2">
+                <p className="text-xs text-muted-foreground mt-2">
                   + {pecasPosicionadas.length - 6} peças adicionais
                 </p>
               )}
