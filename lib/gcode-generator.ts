@@ -1,4 +1,4 @@
-import type { PecaPosicionada, ConfiguracoesChapa, ConfiguracoesCorte, FormatoArquivo } from "@/types";
+import type { PecaPosicionada, ConfiguracoesChapa, ConfiguracoesCorte, FormatoArquivo, ConfiguracoesFerramenta } from "@/types";
 
 /**
  * Formata número para G-code garantindo ponto como separador decimal
@@ -17,12 +17,14 @@ function formatarNumero(num: number, decimals: number = 2): string {
  * @param pecasPos - Array de peças já posicionadas na chapa
  * @param config - Configurações da chapa
  * @param corte - Configurações do corte
+ * @param ferramenta - Configurações da ferramenta (opcional)
  * @returns String com código G-code completo
  */
 export function gerarGCode(
   pecasPos: PecaPosicionada[],
   config: ConfiguracoesChapa,
-  corte: ConfiguracoesCorte
+  corte: ConfiguracoesCorte,
+  ferramenta?: ConfiguracoesFerramenta
 ): string {
   const { largura: chapaL, altura: chapaA } = config;
   const { profundidade, profundidadePorPassada, feedrate, plungeRate, spindleSpeed } = corte;
@@ -40,14 +42,32 @@ export function gerarGCode(
   gcode += `(  Feedrate: ${feedrate} mm/min)\n`;
   gcode += `(  Plunge Rate: ${plungeRate} mm/min)\n`;
   gcode += `(  Prof. por Passada: ${formatarNumero(profundidadePorPassada)} mm)\n`;
-  gcode += `(  Num. Passadas: ${Math.ceil(profundidade / profundidadePorPassada)})\n\n`;
+  gcode += `(  Num. Passadas: ${Math.ceil(profundidade / profundidadePorPassada)})\n`;
+
+  if (ferramenta) {
+    gcode += `(Ferramenta:)\n`;
+    gcode += `(  Diametro: ${formatarNumero(ferramenta.diametro)} mm)\n`;
+    gcode += `(  Tipo: ${ferramenta.tipo} - ${ferramenta.material})\n`;
+    gcode += `(  Numero: T${ferramenta.numeroFerramenta})\n`;
+    gcode += `(  Tipo Corte: ${ferramenta.tipoCorte})\n`;
+  }
+  gcode += '\n';
 
   gcode += 'G21 ; Define unidades em milímetros\n';
   gcode += 'G90 ; Usa coordenadas absolutas\n';
   gcode += 'G0 Z5 ; Levanta a fresa para posição segura\n';
+
+  if (ferramenta) {
+    gcode += `T${ferramenta.numeroFerramenta} M6 ; Troca para ferramenta T${ferramenta.numeroFerramenta}\n`;
+  }
+
   gcode += `M3 S${spindleSpeed} ; Liga o spindle\n`;
 
   const numPassadas = Math.ceil(profundidade / profundidadePorPassada);
+
+  // Calcula offset baseado na ferramenta e tipo de corte
+  const offset = ferramenta ? ferramenta.diametro / 2 : 0;
+  const aplicarOffset = ferramenta && ferramenta.tipoCorte !== 'na-linha';
 
   let cortadas = 0;
 
@@ -65,6 +85,15 @@ export function gerarGCode(
       gcode += `G0 X${formatarNumero(peca.x)} Y${formatarNumero(peca.y)} ; Posiciona no início da peça\n`;
       gcode += `G1 Z${formatarNumero(z)} F${plungeRate} ; Desce a fresa com plunge rate\n`;
 
+      // Ativa compensação de ferramenta se necessário
+      if (aplicarOffset && j === 1) {
+        if (ferramenta!.tipoCorte === 'externo') {
+          gcode += `G41 D${ferramenta!.numeroFerramenta} ; Ativa compensação esquerda (externo)\n`;
+        } else if (ferramenta!.tipoCorte === 'interno') {
+          gcode += `G42 D${ferramenta!.numeroFerramenta} ; Ativa compensação direita (interno)\n`;
+        }
+      }
+
       // Corta retângulo (4 lados)
       // Lado inferior (esquerda -> direita)
       gcode += `G1 X${formatarNumero(peca.x + peca.largura)} Y${formatarNumero(peca.y)} F${feedrate} ; Corta lado inferior\n`;
@@ -77,6 +106,11 @@ export function gerarGCode(
 
       // Lado esquerdo (cima -> baixo) - fecha o retângulo
       gcode += `G1 X${formatarNumero(peca.x)} Y${formatarNumero(peca.y)} ; Corta lado esquerdo (fecha o retângulo)\n`;
+
+      // Desativa compensação após última passada da peça
+      if (aplicarOffset && j === numPassadas) {
+        gcode += 'G40 ; Cancela compensação de ferramenta\n';
+      }
 
       gcode += `G0 Z5 F${plungeRate} ; Levanta fresa com plunge rate\n`;
     }
