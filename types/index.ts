@@ -33,7 +33,16 @@ export type ConfiguracoesChapa = {
 export type ConfiguracoesCorte = {
   profundidade: number;
   espacamento: number;
+  profundidadePorPassada: number;  // mm - Quanto desce em cada passada
+  feedrate: number;                 // mm/min - Velocidade de avanço durante corte
+  plungeRate: number;               // mm/min - Velocidade de descida (mergulho) no eixo Z
+  spindleSpeed: number;             // RPM - Rotação da fresa
 };
+
+/**
+ * Formatos disponíveis para exportação de G-code
+ */
+export type FormatoArquivo = 'nc' | 'tap' | 'gcode' | 'cnc';
 
 /**
  * Ponto candidato para posicionar próxima peça

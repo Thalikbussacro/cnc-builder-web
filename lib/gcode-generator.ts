@@ -1,4 +1,4 @@
-import type { PecaPosicionada, ConfiguracoesChapa, ConfiguracoesCorte } from "@/types";
+import type { PecaPosicionada, ConfiguracoesChapa, ConfiguracoesCorte, FormatoArquivo } from "@/types";
 
 /**
  * Formata número para G-code garantindo ponto como separador decimal
@@ -25,7 +25,7 @@ export function gerarGCode(
   corte: ConfiguracoesCorte
 ): string {
   const { largura: chapaL, altura: chapaA } = config;
-  const { profundidade, espacamento } = corte;
+  const { profundidade, profundidadePorPassada, feedrate, plungeRate, spindleSpeed } = corte;
 
   // Bloco de legenda explicativa
   let gcode = '';
@@ -33,15 +33,21 @@ export function gerarGCode(
   gcode += '(G21 mm | G90 absoluto | G0 rapido | G1 corte | M3 ligar | M5 desligar | M30 fim)\n';
   gcode += '(------------------------------------)\n\n';
 
-  // Cabeçalho do corte
+  // Cabeçalho com configurações de corte
   gcode += `(Chapa ${formatarNumero(chapaL, 0)}x${formatarNumero(chapaA, 0)} mm, Z ${formatarNumero(profundidade, 0)} mm)\n`;
+  gcode += `(Configuracoes de Corte:)\n`;
+  gcode += `(  Spindle Speed: ${spindleSpeed} RPM)\n`;
+  gcode += `(  Feedrate: ${feedrate} mm/min)\n`;
+  gcode += `(  Plunge Rate: ${plungeRate} mm/min)\n`;
+  gcode += `(  Prof. por Passada: ${formatarNumero(profundidadePorPassada)} mm)\n`;
+  gcode += `(  Num. Passadas: ${Math.ceil(profundidade / profundidadePorPassada)})\n\n`;
+
   gcode += 'G21 ; Define unidades em milímetros\n';
   gcode += 'G90 ; Usa coordenadas absolutas\n';
   gcode += 'G0 Z5 ; Levanta a fresa para posição segura\n';
-  gcode += 'M3 S18000 ; Liga o spindle a 18000 RPM\n';
+  gcode += `M3 S${spindleSpeed} ; Liga o spindle\n`;
 
-  const passada = 5; // Profundidade por camada em mm
-  const numPassadas = Math.ceil(profundidade / passada);
+  const numPassadas = Math.ceil(profundidade / profundidadePorPassada);
 
   let cortadas = 0;
 
@@ -51,17 +57,17 @@ export function gerarGCode(
 
     // Para cada passada (profundidade)
     for (let j = 1; j <= numPassadas; j++) {
-      const z = -Math.min(j * passada, profundidade);
+      const z = -Math.min(j * profundidadePorPassada, profundidade);
 
       gcode += '\n';
       gcode += `; Peca ${cortadas} (${formatarNumero(peca.largura, 0)}x${formatarNumero(peca.altura, 0)}) passada ${j}\n`;
       gcode += 'G0 Z5 ; Levanta fresa antes de posicionar\n';
       gcode += `G0 X${formatarNumero(peca.x)} Y${formatarNumero(peca.y)} ; Posiciona no início da peça\n`;
-      gcode += `G1 Z${formatarNumero(z)} F300 ; Desce a fresa até ${formatarNumero(z)}mm\n`;
+      gcode += `G1 Z${formatarNumero(z)} F${plungeRate} ; Desce a fresa com plunge rate\n`;
 
       // Corta retângulo (4 lados)
       // Lado inferior (esquerda -> direita)
-      gcode += `G1 X${formatarNumero(peca.x + peca.largura)} Y${formatarNumero(peca.y)} F2000 ; Corta lado inferior\n`;
+      gcode += `G1 X${formatarNumero(peca.x + peca.largura)} Y${formatarNumero(peca.y)} F${feedrate} ; Corta lado inferior\n`;
 
       // Lado direito (baixo -> cima)
       gcode += `G1 X${formatarNumero(peca.x + peca.largura)} Y${formatarNumero(peca.y + peca.altura)} ; Corta lado direito\n`;
@@ -72,7 +78,7 @@ export function gerarGCode(
       // Lado esquerdo (cima -> baixo) - fecha o retângulo
       gcode += `G1 X${formatarNumero(peca.x)} Y${formatarNumero(peca.y)} ; Corta lado esquerdo (fecha o retângulo)\n`;
 
-      gcode += 'G0 Z5 ; Levanta fresa após corte\n';
+      gcode += `G0 Z5 F${plungeRate} ; Levanta fresa com plunge rate\n`;
     }
   }
 
@@ -89,13 +95,12 @@ export function gerarGCode(
 /**
  * Faz download de arquivo G-code
  * @param conteudo - String com código G-code
- * @param nomeArquivo - Nome do arquivo (padrão: 'corte.nc')
+ * @param formato - Formato do arquivo (.nc, .tap, .gcode, .cnc)
  */
-export function downloadGCode(conteudo: string, nomeArquivo: string = 'corte.nc'): void {
-  // Garante extensão .nc
-  if (!nomeArquivo.endsWith('.nc')) {
-    nomeArquivo += '.nc';
-  }
+export function downloadGCode(conteudo: string, formato: FormatoArquivo = 'nc'): void {
+  // Gera nome do arquivo com timestamp
+  const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+  const nomeArquivo = `corte_${timestamp}.${formato}`;
 
   // Cria Blob com codificação UTF-8
   const blob = new Blob([conteudo], { type: 'text/plain;charset=utf-8' });

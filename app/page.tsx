@@ -9,7 +9,7 @@ import { PreviewCanvas } from "@/components/PreviewCanvas";
 import { VisualizadorGCode } from "@/components/VisualizadorGCode";
 import { SeletorNesting } from "@/components/SeletorNesting";
 import { Button } from "@/components/ui/button";
-import type { Peca, PecaPosicionada, ConfiguracoesChapa as TConfigChapa, ConfiguracoesCorte as TConfigCorte } from "@/types";
+import type { Peca, PecaPosicionada, ConfiguracoesChapa as TConfigChapa, ConfiguracoesCorte as TConfigCorte, FormatoArquivo } from "@/types";
 import { posicionarPecas, type MetodoNesting } from "@/lib/nesting-algorithm";
 import { gerarGCode, downloadGCode } from "@/lib/gcode-generator";
 
@@ -24,6 +24,10 @@ export default function Home() {
   const [configCorte, setConfigCorte] = useState<TConfigCorte>({
     profundidade: 15,
     espacamento: 50,
+    profundidadePorPassada: 4,  // 4mm por passada (bom para MDF/madeira)
+    feedrate: 1500,              // 1500 mm/min
+    plungeRate: 500,             // 500 mm/min (33% do feedrate)
+    spindleSpeed: 18000,         // 18000 RPM
   });
 
   const [pecas, setPecas] = useState<Peca[]>([]);
@@ -72,9 +76,9 @@ export default function Home() {
   };
 
   // Handler para baixar G-code
-  const handleBaixarGCode = () => {
+  const handleBaixarGCode = (formato: FormatoArquivo) => {
     if (gcodeGerado) {
-      downloadGCode(gcodeGerado, "corte.nc");
+      downloadGCode(gcodeGerado, formato);
     }
   };
 
