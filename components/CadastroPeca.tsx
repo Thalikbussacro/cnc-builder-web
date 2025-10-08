@@ -6,13 +6,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import type { Peca, ConfiguracoesChapa } from "@/types";
-import { posicionarPecas } from "@/lib/nesting-algorithm";
+import { posicionarPecas, type MetodoNesting } from "@/lib/nesting-algorithm";
 
 type CadastroPecaProps = {
   onAdicionar: (peca: Peca) => void;
   configChapa: ConfiguracoesChapa;
   espacamento: number;
   pecasExistentes: Peca[];
+  metodoNesting?: MetodoNesting;
 };
 
 export function CadastroPeca({
@@ -20,6 +21,7 @@ export function CadastroPeca({
   configChapa,
   espacamento,
   pecasExistentes,
+  metodoNesting = 'greedy',
 }: CadastroPecaProps) {
   const [largura, setLargura] = useState<string>("500");
   const [altura, setAltura] = useState<string>("500");
@@ -61,7 +63,8 @@ export function CadastroPeca({
       pecasTemp,
       configChapa.largura,
       configChapa.altura,
-      espacamento
+      espacamento,
+      metodoNesting
     );
 
     // Verifica se a nova peça coube
