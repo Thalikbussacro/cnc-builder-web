@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { PecaPosicionada } from "@/types";
 
@@ -16,6 +16,26 @@ export function PreviewCanvas({
   pecasPosicionadas,
 }: PreviewCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [canvasSize, setCanvasSize] = useState({ width: 800, height: 600 });
+
+  // Ajusta tamanho do canvas baseado no container
+  useEffect(() => {
+    const updateCanvasSize = () => {
+      if (containerRef.current) {
+        const containerWidth = containerRef.current.clientWidth - 32; // padding
+        const containerHeight = Math.min(600, window.innerHeight - 300);
+        setCanvasSize({
+          width: Math.max(300, containerWidth),
+          height: Math.max(300, containerHeight),
+        });
+      }
+    };
+
+    updateCanvasSize();
+    window.addEventListener("resize", updateCanvasSize);
+    return () => window.removeEventListener("resize", updateCanvasSize);
+  }, []);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -25,8 +45,8 @@ export function PreviewCanvas({
     if (!ctx) return;
 
     // Dimensões do canvas
-    const canvasWidth = canvas.width;
-    const canvasHeight = canvas.height;
+    const canvasWidth = canvasSize.width;
+    const canvasHeight = canvasSize.height;
 
     // Limpa canvas
     ctx.fillStyle = "white";
@@ -88,23 +108,23 @@ export function PreviewCanvas({
         (peca.y + peca.altura / 2) * escala
       );
     });
-  }, [chapaLargura, chapaAltura, pecasPosicionadas]);
+  }, [chapaLargura, chapaAltura, pecasPosicionadas, canvasSize]);
 
   return (
-    <Card className="h-full">
-      <CardHeader>
-        <CardTitle>Preview da Chapa e Peças</CardTitle>
+    <Card className="h-full" ref={containerRef}>
+      <CardHeader className="pb-3">
+        <CardTitle className="text-lg sm:text-xl">Preview da Chapa e Peças</CardTitle>
       </CardHeader>
-      <CardContent>
-        <div className="flex items-center justify-center bg-gray-100 rounded-lg p-4">
+      <CardContent className="p-4">
+        <div className="flex items-center justify-center bg-gray-100 rounded-lg p-2 sm:p-4 overflow-auto">
           <canvas
             ref={canvasRef}
-            width={700}
-            height={500}
-            className="border border-gray-300 bg-white"
+            width={canvasSize.width}
+            height={canvasSize.height}
+            className="border border-gray-300 bg-white max-w-full"
           />
         </div>
-        <div className="mt-4 text-sm text-gray-600">
+        <div className="mt-3 sm:mt-4 text-xs sm:text-sm text-gray-600 space-y-1">
           <p>
             <strong>Chapa:</strong> {chapaLargura.toFixed(0)} x {chapaAltura.toFixed(0)} mm
           </p>

@@ -18,13 +18,15 @@ export function ConfiguracoesChapa({ config, onChange }: ConfiguracoesChapaProps
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Configurações Gerais</CardTitle>
+      <CardHeader className="pb-3">
+        <CardTitle className="text-lg sm:text-xl">Configurações Gerais</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="grid grid-cols-2 gap-4">
+      <CardContent className="space-y-3 sm:space-y-4">
+        <div className="grid grid-cols-2 gap-3 sm:gap-4">
           <div className="space-y-2">
-            <Label htmlFor="chapaLargura">Largura da Chapa (mm)</Label>
+            <Label htmlFor="chapaLargura" className="text-xs sm:text-sm">
+              Largura (mm)
+            </Label>
             <Input
               id="chapaLargura"
               type="number"
@@ -32,10 +34,13 @@ export function ConfiguracoesChapa({ config, onChange }: ConfiguracoesChapaProps
               onChange={(e) => handleChange("largura", e.target.value)}
               min="0"
               step="10"
+              className="h-9 sm:h-10"
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="chapaAltura">Altura da Chapa (mm)</Label>
+            <Label htmlFor="chapaAltura" className="text-xs sm:text-sm">
+              Altura (mm)
+            </Label>
             <Input
               id="chapaAltura"
               type="number"
@@ -43,11 +48,14 @@ export function ConfiguracoesChapa({ config, onChange }: ConfiguracoesChapaProps
               onChange={(e) => handleChange("altura", e.target.value)}
               min="0"
               step="10"
+              className="h-9 sm:h-10"
             />
           </div>
         </div>
         <div className="space-y-2">
-          <Label htmlFor="chapaEspessura">Espessura da Chapa (mm)</Label>
+          <Label htmlFor="chapaEspessura" className="text-xs sm:text-sm">
+            Espessura (mm)
+          </Label>
           <Input
             id="chapaEspessura"
             type="number"
@@ -55,6 +63,7 @@ export function ConfiguracoesChapa({ config, onChange }: ConfiguracoesChapaProps
             onChange={(e) => handleChange("espessura", e.target.value)}
             min="0"
             step="1"
+            className="h-9 sm:h-10"
           />
         </div>
       </CardContent>
