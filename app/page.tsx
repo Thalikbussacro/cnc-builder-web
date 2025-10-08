@@ -3,13 +3,14 @@
 import { useState, useEffect } from "react";
 import { ConfiguracoesChapa } from "@/components/ConfiguracoesChapa";
 import { ConfiguracoesCorte } from "@/components/ConfiguracoesCorte";
+import { ConfiguracoesFerramenta } from "@/components/ConfiguracoesFerramenta";
 import { CadastroPeca } from "@/components/CadastroPeca";
 import { ListaPecas } from "@/components/ListaPecas";
 import { PreviewCanvas } from "@/components/PreviewCanvas";
 import { VisualizadorGCode } from "@/components/VisualizadorGCode";
 import { SeletorNesting } from "@/components/SeletorNesting";
 import { Button } from "@/components/ui/button";
-import type { Peca, PecaPosicionada, ConfiguracoesChapa as TConfigChapa, ConfiguracoesCorte as TConfigCorte, FormatoArquivo } from "@/types";
+import type { Peca, PecaPosicionada, ConfiguracoesChapa as TConfigChapa, ConfiguracoesCorte as TConfigCorte, ConfiguracoesFerramenta as TConfigFerramenta, FormatoArquivo } from "@/types";
 import { posicionarPecas, type MetodoNesting } from "@/lib/nesting-algorithm";
 import { gerarGCode, downloadGCode } from "@/lib/gcode-generator";
 
@@ -28,6 +29,14 @@ export default function Home() {
     feedrate: 1500,              // 1500 mm/min
     plungeRate: 500,             // 500 mm/min (33% do feedrate)
     spindleSpeed: 18000,         // 18000 RPM
+  });
+
+  const [configFerramenta, setConfigFerramenta] = useState<TConfigFerramenta>({
+    diametro: 6,                 // 6mm
+    tipo: 'flat',                // Flat end
+    material: 'Carbide',         // Carbide
+    numeroFerramenta: 1,         // T1
+    tipoCorte: 'na-linha',       // Na linha (sem compensação)
   });
 
   const [pecas, setPecas] = useState<Peca[]>([]);
@@ -70,7 +79,7 @@ export default function Home() {
       return;
     }
 
-    const gcode = gerarGCode(pecasPosicionadas, configChapa, configCorte);
+    const gcode = gerarGCode(pecasPosicionadas, configChapa, configCorte, configFerramenta);
     setGcodeGerado(gcode);
     setVisualizadorAberto(true);
   };
@@ -125,6 +134,7 @@ export default function Home() {
           <div className="space-y-2 sm:space-y-3 order-1 xl:order-1">
             <ConfiguracoesChapa config={configChapa} onChange={setConfigChapa} />
             <ConfiguracoesCorte config={configCorte} onChange={setConfigCorte} />
+            <ConfiguracoesFerramenta config={configFerramenta} onChange={setConfigFerramenta} />
             <SeletorNesting
               metodo={metodoNesting}
               onChange={setMetodoNesting}

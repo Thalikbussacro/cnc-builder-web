@@ -45,6 +45,27 @@ export type ConfiguracoesCorte = {
 export type FormatoArquivo = 'nc' | 'tap' | 'gcode' | 'cnc';
 
 /**
+ * Tipo de corte: como a fresa deve cortar em relação à marcação
+ */
+export type TipoCorte = 'externo' | 'interno' | 'na-linha';
+
+/**
+ * Tipo de ponta da fresa
+ */
+export type TipoFresa = 'flat' | 'ball' | 'vbit';
+
+/**
+ * Configurações da ferramenta (fresa)
+ */
+export type ConfiguracoesFerramenta = {
+  diametro: number;           // mm - Diâmetro da fresa
+  tipo: TipoFresa;            // Tipo de ponta
+  material: string;           // HSS, Carbide, Diamond
+  numeroFerramenta: number;   // T1, T2, etc.
+  tipoCorte: TipoCorte;       // Corte interno/externo/na-linha
+};
+
+/**
  * Ponto candidato para posicionar próxima peça
  * Usado pelo algoritmo de nesting
  */
