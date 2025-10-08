@@ -41,12 +41,12 @@ export function PreviewCanvas({
   useEffect(() => {
     const updateCanvasSize = () => {
       if (containerRef.current) {
-        const containerWidth = containerRef.current.clientWidth - 32; // padding
-        // Altura menor para caber tudo na tela
-        const containerHeight = Math.min(420, window.innerHeight - 400);
+        const containerWidth = containerRef.current.clientWidth - 16; // padding reduzido
+        // Altura ainda MENOR para interface compacta
+        const containerHeight = Math.min(280, window.innerHeight - 400);
         setCanvasSize({
           width: Math.max(300, containerWidth),
-          height: Math.max(280, containerHeight),
+          height: Math.max(220, containerHeight),
         });
       }
     };
@@ -176,12 +176,41 @@ export function PreviewCanvas({
   }, [chapaLargura, chapaAltura, pecasPosicionadas, canvasSize]);
 
   return (
-    <Card className="h-full" ref={containerRef}>
-      <CardHeader className="pb-3">
-        <CardTitle className="text-lg sm:text-xl">Preview da Chapa e Peças</CardTitle>
+    <Card ref={containerRef}>
+      <CardHeader className="pb-2">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+          <CardTitle className="text-base sm:text-lg">Pré-visualização</CardTitle>
+          <div className="flex flex-wrap items-center gap-2 text-xs">
+            <div className="flex items-center gap-1.5">
+              <span className="text-muted-foreground">Chapa:</span>
+              <span className="font-semibold">{chapaLargura.toFixed(0)}×{chapaAltura.toFixed(0)}mm</span>
+            </div>
+            <div className="w-px h-4 bg-border hidden sm:block" />
+            <div className="flex items-center gap-1.5">
+              <span className="text-muted-foreground">Peças:</span>
+              <span className="font-semibold">{pecasPosicionadas.length}</span>
+            </div>
+            <div className="w-px h-4 bg-border hidden sm:block" />
+            <div className="flex items-center gap-1.5">
+              <span className="text-muted-foreground">Área:</span>
+              <span className="font-semibold">{(areaPecas / 1000000).toFixed(2)}m²</span>
+            </div>
+            <div className="w-px h-4 bg-border hidden sm:block" />
+            <div className="flex items-center gap-1.5">
+              <span className="text-muted-foreground">Aproveitamento:</span>
+              <span className={`font-semibold ${
+                taxaAproveitamento >= 70 ? 'text-green-500' :
+                taxaAproveitamento >= 50 ? 'text-amber-500' :
+                'text-red-500'
+              }`}>
+                {taxaAproveitamento.toFixed(1)}%
+              </span>
+            </div>
+          </div>
+        </div>
       </CardHeader>
-      <CardContent className="p-4">
-        <div className="flex items-center justify-center bg-black/20 rounded-lg p-2 sm:p-4 overflow-auto">
+      <CardContent className="p-2 pb-3">
+        <div className="flex items-center justify-center bg-black/20 rounded-lg p-1.5 overflow-auto">
           <canvas
             ref={canvasRef}
             width={canvasSize.width}
@@ -189,67 +218,6 @@ export function PreviewCanvas({
             className="border border-border max-w-full"
             style={{ backgroundColor: "#1a1613" }}
           />
-        </div>
-        <div className="mt-3 sm:mt-4 space-y-3">
-          {/* Informações gerais */}
-          <div className="grid grid-cols-2 gap-2 text-xs sm:text-sm">
-            <div className="bg-secondary/50 p-2 rounded">
-              <p className="text-muted-foreground text-xs">Chapa</p>
-              <p className="font-semibold">
-                {chapaLargura.toFixed(0)} × {chapaAltura.toFixed(0)} mm
-              </p>
-            </div>
-            <div className="bg-secondary/50 p-2 rounded">
-              <p className="text-muted-foreground text-xs">Peças</p>
-              <p className="font-semibold">
-                {pecasPosicionadas.length}
-              </p>
-            </div>
-            <div className="bg-secondary/50 p-2 rounded">
-              <p className="text-muted-foreground text-xs">Área ocupada</p>
-              <p className="font-semibold">
-                {(areaPecas / 1000000).toFixed(2)} m²
-              </p>
-            </div>
-            <div className="bg-secondary/50 p-2 rounded">
-              <p className="text-muted-foreground text-xs">Aproveitamento</p>
-              <p className={`font-semibold ${
-                taxaAproveitamento >= 70 ? 'text-green-500' :
-                taxaAproveitamento >= 50 ? 'text-amber-500' :
-                'text-red-500'
-              }`}>
-                {taxaAproveitamento.toFixed(1)}%
-              </p>
-            </div>
-          </div>
-
-          {/* Legenda de cores */}
-          {pecasPosicionadas.length > 0 && (
-            <div className="border-t border-border pt-3">
-              <p className="text-xs font-medium mb-2">Legenda de Peças</p>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                {pecasPosicionadas.slice(0, 6).map((peca, index) => (
-                  <div key={peca.id} className="flex items-center gap-2">
-                    <div
-                      className="w-4 h-4 rounded border-2 flex-shrink-0"
-                      style={{
-                        backgroundColor: CORES[index % CORES.length].hex + '40',
-                        borderColor: CORES[index % CORES.length].hex,
-                      }}
-                    />
-                    <span className="text-xs text-muted-foreground">
-                      #{index + 1} - {peca.largura.toFixed(0)}×{peca.altura.toFixed(0)}
-                    </span>
-                  </div>
-                ))}
-              </div>
-              {pecasPosicionadas.length > 6 && (
-                <p className="text-xs text-muted-foreground mt-2">
-                  + {pecasPosicionadas.length - 6} peças adicionais
-                </p>
-              )}
-            </div>
-          )}
         </div>
       </CardContent>
     </Card>

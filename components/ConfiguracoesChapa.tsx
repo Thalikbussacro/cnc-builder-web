@@ -18,12 +18,12 @@ export function ConfiguracoesChapa({ config, onChange }: ConfiguracoesChapaProps
 
   return (
     <Card>
-      <CardHeader className="pb-3">
-        <CardTitle className="text-lg sm:text-xl">Configurações Gerais</CardTitle>
+      <CardHeader className="pb-2">
+        <CardTitle className="text-base sm:text-lg">Configurações Gerais</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-3 sm:space-y-4">
-        <div className="grid grid-cols-2 gap-3 sm:gap-4">
-          <div className="space-y-2">
+      <CardContent className="space-y-2 sm:space-y-3">
+        <div className="grid grid-cols-2 gap-2 sm:gap-3">
+          <div className="space-y-1.5">
             <Label htmlFor="chapaLargura" className="text-xs sm:text-sm">
               Largura (mm)
             </Label>
@@ -52,7 +52,7 @@ export function ConfiguracoesChapa({ config, onChange }: ConfiguracoesChapaProps
             />
           </div>
         </div>
-        <div className="space-y-2">
+        <div className="space-y-1.5">
           <Label htmlFor="chapaEspessura" className="text-xs sm:text-sm">
             Espessura (mm)
           </Label>

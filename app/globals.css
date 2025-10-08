@@ -6,23 +6,23 @@
   :root {
     /* Tema Industrial/Madeira/CNC */
     --background: 32 15% 12%;        /* Cinza escuro quente */
-    --foreground: 36 20% 85%;         /* Bege claro */
-    --card: 30 12% 16%;               /* Cinza escuro levemente marrom */
-    --card-foreground: 36 20% 85%;
+    --foreground: 0 0% 98%;          /* BRANCO quase puro para máximo contraste */
+    --card: 30 12% 16%;              /* Cinza escuro levemente marrom */
+    --card-foreground: 0 0% 98%;     /* BRANCO quase puro */
     --popover: 30 12% 16%;
-    --popover-foreground: 36 20% 85%;
-    --primary: 28 75% 50%;            /* Laranja industrial */
-    --primary-foreground: 36 20% 95%;
-    --secondary: 30 15% 24%;          /* Cinza médio */
-    --secondary-foreground: 36 20% 85%;
+    --popover-foreground: 0 0% 98%;  /* BRANCO quase puro */
+    --primary: 28 75% 50%;           /* Laranja industrial */
+    --primary-foreground: 0 0% 98%;
+    --secondary: 30 15% 24%;         /* Cinza médio */
+    --secondary-foreground: 0 0% 98%; /* BRANCO quase puro */
     --muted: 30 10% 20%;
-    --muted-foreground: 36 10% 60%;
-    --accent: 40 60% 45%;             /* Amarelo madeira */
+    --muted-foreground: 0 0% 75%;    /* AUMENTADO para 75% */
+    --accent: 40 60% 45%;            /* Amarelo madeira */
     --accent-foreground: 30 12% 16%;
     --destructive: 0 65% 50%;
-    --destructive-foreground: 36 20% 95%;
-    --border: 30 10% 25%;
-    --input: 30 10% 22%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 30 10% 32%;            /* AUMENTADO para 32% */
+    --input: 0 0% 95%;               /* FUNDO BRANCO para inputs */
     --ring: 28 75% 50%;
     --radius: 0.5rem;
   }

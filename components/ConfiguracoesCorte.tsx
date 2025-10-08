@@ -18,11 +18,11 @@ export function ConfiguracoesCorte({ config, onChange }: ConfiguracoesCorteProps
 
   return (
     <Card>
-      <CardHeader className="pb-3">
-        <CardTitle className="text-lg sm:text-xl">Configurações do Corte</CardTitle>
+      <CardHeader className="pb-2">
+        <CardTitle className="text-base sm:text-lg">Configurações do Corte</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-3 sm:space-y-4">
-        <div className="space-y-2">
+      <CardContent className="space-y-2 sm:space-y-3">
+        <div className="space-y-1.5">
           <Label htmlFor="profundidade" className="text-xs sm:text-sm">
             Profundidade (mm)
           </Label>
@@ -36,7 +36,7 @@ export function ConfiguracoesCorte({ config, onChange }: ConfiguracoesCorteProps
             className="h-9 sm:h-10"
           />
         </div>
-        <div className="space-y-2">
+        <div className="space-y-1.5">
           <Label htmlFor="espacamento" className="text-xs sm:text-sm">
             Espaçamento (mm)
           </Label>

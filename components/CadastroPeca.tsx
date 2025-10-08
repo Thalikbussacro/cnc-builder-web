@@ -75,9 +75,9 @@ export function CadastroPeca({
     // Adiciona a peça
     onAdicionar(novaPeca);
 
-    // Limpa os campos
-    setLargura("500");
-    setAltura("500");
+    // Mantém os valores nos campos (não reseta mais)
+    // setLargura("500");
+    // setAltura("500");
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -88,12 +88,12 @@ export function CadastroPeca({
 
   return (
     <Card>
-      <CardHeader className="pb-3">
-        <CardTitle className="text-lg sm:text-xl">Cadastro de Peças</CardTitle>
+      <CardHeader className="pb-2">
+        <CardTitle className="text-base sm:text-lg">Cadastro de Peças</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-3 sm:space-y-4">
-        <div className="grid grid-cols-2 gap-3 sm:gap-4">
-          <div className="space-y-2">
+      <CardContent className="space-y-2 sm:space-y-3">
+        <div className="grid grid-cols-2 gap-2 sm:gap-3">
+          <div className="space-y-1.5">
             <Label htmlFor="pecaLargura" className="text-xs sm:text-sm">
               Largura (mm)
             </Label>
@@ -129,8 +129,12 @@ export function CadastroPeca({
           <p className="text-xs sm:text-sm text-red-600 font-medium">{erro}</p>
         )}
 
-        <Button onClick={handleAdicionar} className="w-full h-9 sm:h-10">
-          Adicionar Peça
+        <Button
+          onClick={handleAdicionar}
+          className="w-full h-10 sm:h-11 font-semibold border-2 border-primary/50 shadow-md hover:shadow-lg transition-all"
+          size="lg"
+        >
+          ✚ Adicionar Peça
         </Button>
       </CardContent>
     </Card>
