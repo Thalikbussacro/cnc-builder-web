@@ -7,9 +7,10 @@ import { CadastroPeca } from "@/components/CadastroPeca";
 import { ListaPecas } from "@/components/ListaPecas";
 import { PreviewCanvas } from "@/components/PreviewCanvas";
 import { VisualizadorGCode } from "@/components/VisualizadorGCode";
+import { SeletorNesting } from "@/components/SeletorNesting";
 import { Button } from "@/components/ui/button";
 import type { Peca, PecaPosicionada, ConfiguracoesChapa as TConfigChapa, ConfiguracoesCorte as TConfigCorte } from "@/types";
-import { posicionarPecas } from "@/lib/nesting-algorithm";
+import { posicionarPecas, type MetodoNesting } from "@/lib/nesting-algorithm";
 import { gerarGCode, downloadGCode } from "@/lib/gcode-generator";
 
 export default function Home() {
@@ -29,6 +30,8 @@ export default function Home() {
   const [pecasPosicionadas, setPecasPosicionadas] = useState<PecaPosicionada[]>([]);
   const [visualizadorAberto, setVisualizadorAberto] = useState(false);
   const [gcodeGerado, setGcodeGerado] = useState("");
+  const [metodoNesting, setMetodoNesting] = useState<MetodoNesting>('greedy');
+  const [metricas, setMetricas] = useState<{ areaUtilizada: number; eficiencia: number; tempo: number } | undefined>();
 
   // Atualiza posicionamento sempre que algo mudar
   useEffect(() => {
@@ -36,10 +39,12 @@ export default function Home() {
       pecas,
       configChapa.largura,
       configChapa.altura,
-      configCorte.espacamento
+      configCorte.espacamento,
+      metodoNesting
     );
     setPecasPosicionadas(resultado.posicionadas);
-  }, [pecas, configChapa.largura, configChapa.altura, configCorte.espacamento]);
+    setMetricas(resultado.metricas);
+  }, [pecas, configChapa.largura, configChapa.altura, configCorte.espacamento, metodoNesting]);
 
   // Handler para adicionar peça
   const handleAdicionarPeca = (peca: Peca) => {
@@ -116,11 +121,17 @@ export default function Home() {
           <div className="space-y-2 sm:space-y-3 order-1 xl:order-1">
             <ConfiguracoesChapa config={configChapa} onChange={setConfigChapa} />
             <ConfiguracoesCorte config={configCorte} onChange={setConfigCorte} />
+            <SeletorNesting
+              metodo={metodoNesting}
+              onChange={setMetodoNesting}
+              metricas={metricas}
+            />
             <CadastroPeca
               onAdicionar={handleAdicionarPeca}
               configChapa={configChapa}
               espacamento={configCorte.espacamento}
               pecasExistentes={pecas}
+              metodoNesting={metodoNesting}
             />
           </div>
 
