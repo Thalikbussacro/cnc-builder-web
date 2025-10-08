@@ -10,6 +10,16 @@ type PreviewCanvasProps = {
   pecasPosicionadas: PecaPosicionada[];
 };
 
+// Cores alternadas para melhor visualização
+const CORES = [
+  { hex: "#3b82f6", nome: "Azul" },
+  { hex: "#10b981", nome: "Verde" },
+  { hex: "#f59e0b", nome: "Amarelo" },
+  { hex: "#ef4444", nome: "Vermelho" },
+  { hex: "#8b5cf6", nome: "Roxo" },
+  { hex: "#ec4899", nome: "Rosa" },
+];
+
 export function PreviewCanvas({
   chapaLargura,
   chapaAltura,
@@ -18,6 +28,14 @@ export function PreviewCanvas({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [canvasSize, setCanvasSize] = useState({ width: 800, height: 600 });
+
+  // Calcula taxa de aproveitamento
+  const areaTotalChapa = chapaLargura * chapaAltura;
+  const areaPecas = pecasPosicionadas.reduce(
+    (total, peca) => total + peca.largura * peca.altura,
+    0
+  );
+  const taxaAproveitamento = areaTotalChapa > 0 ? (areaPecas / areaTotalChapa) * 100 : 0;
 
   // Ajusta tamanho do canvas baseado no container
   useEffect(() => {
@@ -49,64 +67,110 @@ export function PreviewCanvas({
     const canvasHeight = canvasSize.height;
 
     // Limpa canvas
-    ctx.fillStyle = "white";
+    ctx.fillStyle = "#fafafa";
     ctx.fillRect(0, 0, canvasWidth, canvasHeight);
 
-    // Calcula escala para caber a chapa no canvas
+    // Calcula escala para caber a chapa no canvas com margem
+    const margem = 20;
     const escala = Math.min(
-      canvasWidth / chapaLargura,
-      canvasHeight / chapaAltura
+      (canvasWidth - margem * 2) / chapaLargura,
+      (canvasHeight - margem * 2) / chapaAltura
     );
 
+    // Offset para centralizar a chapa
+    const offsetX = margem;
+    const offsetY = margem;
+
+    // GRID DE FUNDO - Linhas a cada 100mm
+    ctx.strokeStyle = "#e5e7eb";
+    ctx.lineWidth = 0.5;
+    ctx.setLineDash([2, 2]);
+
+    // Grid vertical
+    for (let x = 0; x <= chapaLargura; x += 100) {
+      ctx.beginPath();
+      ctx.moveTo(offsetX + x * escala, offsetY);
+      ctx.lineTo(offsetX + x * escala, offsetY + chapaAltura * escala);
+      ctx.stroke();
+    }
+
+    // Grid horizontal
+    for (let y = 0; y <= chapaAltura; y += 100) {
+      ctx.beginPath();
+      ctx.moveTo(offsetX, offsetY + y * escala);
+      ctx.lineTo(offsetX + chapaLargura * escala, offsetY + y * escala);
+      ctx.stroke();
+    }
+
+    ctx.setLineDash([]);
+
     // Desenha chapa (borda preta, fundo branco)
-    ctx.strokeStyle = "black";
-    ctx.lineWidth = 2;
-    ctx.strokeRect(0, 0, chapaLargura * escala, chapaAltura * escala);
+    ctx.fillStyle = "white";
+    ctx.fillRect(offsetX, offsetY, chapaLargura * escala, chapaAltura * escala);
+    ctx.strokeStyle = "#1f2937";
+    ctx.lineWidth = 3;
+    ctx.strokeRect(offsetX, offsetY, chapaLargura * escala, chapaAltura * escala);
+
+    // Indicador de origem (0,0)
+    ctx.fillStyle = "#1f2937";
+    ctx.font = "bold 10px sans-serif";
+    ctx.textAlign = "left";
+    ctx.textBaseline = "top";
+    ctx.fillText("(0,0)", offsetX + 4, offsetY + 4);
 
     // Desenha peças posicionadas
-    ctx.lineWidth = 1;
-
-    // Cores alternadas para melhor visualização
-    const cores = [
-      "#3b82f6", // blue-500
-      "#10b981", // green-500
-      "#f59e0b", // amber-500
-      "#ef4444", // red-500
-      "#8b5cf6", // violet-500
-      "#ec4899", // pink-500
-    ];
+    ctx.lineWidth = 2;
 
     pecasPosicionadas.forEach((peca, index) => {
-      const cor = cores[index % cores.length];
+      const cor = CORES[index % CORES.length].hex;
+      const x = offsetX + peca.x * escala;
+      const y = offsetY + peca.y * escala;
+      const w = peca.largura * escala;
+      const h = peca.altura * escala;
+
+      // Sombra para profundidade
+      ctx.shadowColor = "rgba(0, 0, 0, 0.15)";
+      ctx.shadowBlur = 4;
+      ctx.shadowOffsetX = 2;
+      ctx.shadowOffsetY = 2;
 
       // Preenche com cor transparente
-      ctx.fillStyle = cor + "30"; // Adiciona opacidade
-      ctx.fillRect(
-        peca.x * escala,
-        peca.y * escala,
-        peca.largura * escala,
-        peca.altura * escala
-      );
+      ctx.fillStyle = cor + "40";
+      ctx.fillRect(x, y, w, h);
+
+      // Remove sombra para borda
+      ctx.shadowColor = "transparent";
+      ctx.shadowBlur = 0;
+      ctx.shadowOffsetX = 0;
+      ctx.shadowOffsetY = 0;
 
       // Borda da peça
       ctx.strokeStyle = cor;
-      ctx.strokeRect(
-        peca.x * escala,
-        peca.y * escala,
-        peca.largura * escala,
-        peca.altura * escala
-      );
+      ctx.strokeRect(x, y, w, h);
 
-      // Número da peça no centro
+      // Texto da peça (número + dimensões)
       ctx.fillStyle = cor;
-      ctx.font = "14px sans-serif";
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
-      ctx.fillText(
-        `${index + 1}`,
-        (peca.x + peca.largura / 2) * escala,
-        (peca.y + peca.altura / 2) * escala
-      );
+
+      const centerX = x + w / 2;
+      const centerY = y + h / 2;
+
+      // Número da peça
+      const fontSize = Math.max(12, Math.min(16, w / 8, h / 8));
+      ctx.font = `bold ${fontSize}px sans-serif`;
+      ctx.fillText(`#${index + 1}`, centerX, centerY - fontSize / 2);
+
+      // Dimensões (se houver espaço)
+      if (w > 60 && h > 40) {
+        ctx.font = `${fontSize * 0.7}px sans-serif`;
+        ctx.fillStyle = cor + "dd";
+        ctx.fillText(
+          `${peca.largura.toFixed(0)}×${peca.altura.toFixed(0)}mm`,
+          centerX,
+          centerY + fontSize / 2 + 2
+        );
+      }
     });
   }, [chapaLargura, chapaAltura, pecasPosicionadas, canvasSize]);
 
@@ -124,13 +188,66 @@ export function PreviewCanvas({
             className="border border-gray-300 bg-white max-w-full"
           />
         </div>
-        <div className="mt-3 sm:mt-4 text-xs sm:text-sm text-gray-600 space-y-1">
-          <p>
-            <strong>Chapa:</strong> {chapaLargura.toFixed(0)} x {chapaAltura.toFixed(0)} mm
-          </p>
-          <p>
-            <strong>Peças posicionadas:</strong> {pecasPosicionadas.length}
-          </p>
+        <div className="mt-3 sm:mt-4 space-y-3">
+          {/* Informações gerais */}
+          <div className="grid grid-cols-2 gap-2 text-xs sm:text-sm">
+            <div className="bg-gray-50 p-2 rounded">
+              <p className="text-gray-500 text-xs">Chapa</p>
+              <p className="font-semibold text-gray-900">
+                {chapaLargura.toFixed(0)} × {chapaAltura.toFixed(0)} mm
+              </p>
+            </div>
+            <div className="bg-gray-50 p-2 rounded">
+              <p className="text-gray-500 text-xs">Peças</p>
+              <p className="font-semibold text-gray-900">
+                {pecasPosicionadas.length}
+              </p>
+            </div>
+            <div className="bg-gray-50 p-2 rounded">
+              <p className="text-gray-500 text-xs">Área ocupada</p>
+              <p className="font-semibold text-gray-900">
+                {(areaPecas / 1000000).toFixed(2)} m²
+              </p>
+            </div>
+            <div className="bg-gray-50 p-2 rounded">
+              <p className="text-gray-500 text-xs">Aproveitamento</p>
+              <p className={`font-semibold ${
+                taxaAproveitamento >= 70 ? 'text-green-600' :
+                taxaAproveitamento >= 50 ? 'text-amber-600' :
+                'text-red-600'
+              }`}>
+                {taxaAproveitamento.toFixed(1)}%
+              </p>
+            </div>
+          </div>
+
+          {/* Legenda de cores */}
+          {pecasPosicionadas.length > 0 && (
+            <div className="border-t pt-3">
+              <p className="text-xs font-medium text-gray-700 mb-2">Legenda de Peças</p>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                {pecasPosicionadas.slice(0, 6).map((peca, index) => (
+                  <div key={peca.id} className="flex items-center gap-2">
+                    <div
+                      className="w-4 h-4 rounded border-2 flex-shrink-0"
+                      style={{
+                        backgroundColor: CORES[index % CORES.length].hex + '40',
+                        borderColor: CORES[index % CORES.length].hex,
+                      }}
+                    />
+                    <span className="text-xs text-gray-600">
+                      #{index + 1} - {peca.largura.toFixed(0)}×{peca.altura.toFixed(0)}
+                    </span>
+                  </div>
+                ))}
+              </div>
+              {pecasPosicionadas.length > 6 && (
+                <p className="text-xs text-gray-500 mt-2">
+                  + {pecasPosicionadas.length - 6} peças adicionais
+                </p>
+              )}
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>
