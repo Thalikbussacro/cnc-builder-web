@@ -3,12 +3,21 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import type { FormatoArquivo } from "@/types";
 
 type VisualizadorGCodeProps = {
   isOpen: boolean;
   onClose: () => void;
   gcode: string;
-  onDownload: () => void;
+  onDownload: (formato: FormatoArquivo) => void;
 };
 
 export function VisualizadorGCode({
@@ -18,6 +27,7 @@ export function VisualizadorGCode({
   onDownload,
 }: VisualizadorGCodeProps) {
   const [copiado, setCopiado] = useState(false);
+  const [formato, setFormato] = useState<FormatoArquivo>('nc');
 
   // Fecha com ESC
   useEffect(() => {
@@ -96,7 +106,49 @@ export function VisualizadorGCode({
           </div>
 
           {/* Footer - Botões de ação */}
-          <div className="p-4 sm:p-6 border-t border-border bg-card/50 backdrop-blur-sm">
+          <div className="p-4 sm:p-6 border-t border-border bg-card/50 backdrop-blur-sm space-y-3">
+            {/* Seletor de formato */}
+            <div className="space-y-2">
+              <Label htmlFor="formato" className="text-xs font-medium">
+                Formato do Arquivo
+              </Label>
+              <Select value={formato} onValueChange={(value) => setFormato(value as FormatoArquivo)}>
+                <SelectTrigger id="formato" className="h-10">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="nc">
+                    <div className="flex flex-col items-start">
+                      <span className="font-medium">.nc (Numerical Control)</span>
+                      <span className="text-xs text-muted-foreground">Padrão moderno - Recomendado</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="tap">
+                    <div className="flex flex-col items-start">
+                      <span className="font-medium">.tap (Tape)</span>
+                      <span className="text-xs text-muted-foreground">Compatibilidade com máquinas antigas</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="gcode">
+                    <div className="flex flex-col items-start">
+                      <span className="font-medium">.gcode</span>
+                      <span className="text-xs text-muted-foreground">Formato genérico (3D printers + CNC)</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="cnc">
+                    <div className="flex flex-col items-start">
+                      <span className="font-medium">.cnc</span>
+                      <span className="text-xs text-muted-foreground">Variação alternativa</span>
+                    </div>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">
+                ℹ️ Todos os formatos são idênticos (apenas extensão diferente)
+              </p>
+            </div>
+
+            {/* Botões de ação */}
             <div className="flex flex-col sm:flex-row gap-3">
               <Button
                 onClick={handleCopiar}
@@ -108,13 +160,13 @@ export function VisualizadorGCode({
               </Button>
               <Button
                 onClick={() => {
-                  onDownload();
+                  onDownload(formato);
                   onClose();
                 }}
                 variant="default"
                 className="flex-1 h-11 font-semibold !border-2 !border-primary/50 shadow-md hover:shadow-lg transition-all"
               >
-                💾 Baixar Arquivo
+                💾 Baixar .{formato}
               </Button>
               <Button
                 onClick={onClose}
