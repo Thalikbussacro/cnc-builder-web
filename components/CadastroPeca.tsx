@@ -88,13 +88,15 @@ export function CadastroPeca({
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Cadastro de Peças</CardTitle>
+      <CardHeader className="pb-3">
+        <CardTitle className="text-lg sm:text-xl">Cadastro de Peças</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="grid grid-cols-2 gap-4">
+      <CardContent className="space-y-3 sm:space-y-4">
+        <div className="grid grid-cols-2 gap-3 sm:gap-4">
           <div className="space-y-2">
-            <Label htmlFor="pecaLargura">Largura (mm)</Label>
+            <Label htmlFor="pecaLargura" className="text-xs sm:text-sm">
+              Largura (mm)
+            </Label>
             <Input
               id="pecaLargura"
               type="number"
@@ -103,10 +105,13 @@ export function CadastroPeca({
               onKeyPress={handleKeyPress}
               min="0"
               step="10"
+              className="h-9 sm:h-10"
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="pecaAltura">Altura (mm)</Label>
+            <Label htmlFor="pecaAltura" className="text-xs sm:text-sm">
+              Altura (mm)
+            </Label>
             <Input
               id="pecaAltura"
               type="number"
@@ -115,15 +120,16 @@ export function CadastroPeca({
               onKeyPress={handleKeyPress}
               min="0"
               step="10"
+              className="h-9 sm:h-10"
             />
           </div>
         </div>
 
         {erro && (
-          <p className="text-sm text-red-600 font-medium">{erro}</p>
+          <p className="text-xs sm:text-sm text-red-600 font-medium">{erro}</p>
         )}
 
-        <Button onClick={handleAdicionar} className="w-full">
+        <Button onClick={handleAdicionar} className="w-full h-9 sm:h-10">
           Adicionar Peça
         </Button>
       </CardContent>

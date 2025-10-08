@@ -18,12 +18,14 @@ export function ConfiguracoesCorte({ config, onChange }: ConfiguracoesCorteProps
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Configurações do Corte</CardTitle>
+      <CardHeader className="pb-3">
+        <CardTitle className="text-lg sm:text-xl">Configurações do Corte</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-3 sm:space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="profundidade">Profundidade do Corte (mm)</Label>
+          <Label htmlFor="profundidade" className="text-xs sm:text-sm">
+            Profundidade (mm)
+          </Label>
           <Input
             id="profundidade"
             type="number"
@@ -31,10 +33,13 @@ export function ConfiguracoesCorte({ config, onChange }: ConfiguracoesCorteProps
             onChange={(e) => handleChange("profundidade", e.target.value)}
             min="0"
             step="1"
+            className="h-9 sm:h-10"
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="espacamento">Espaçamento Entre Cortes (mm)</Label>
+          <Label htmlFor="espacamento" className="text-xs sm:text-sm">
+            Espaçamento (mm)
+          </Label>
           <Input
             id="espacamento"
             type="number"
@@ -42,6 +47,7 @@ export function ConfiguracoesCorte({ config, onChange }: ConfiguracoesCorteProps
             onChange={(e) => handleChange("espacamento", e.target.value)}
             min="0"
             step="5"
+            className="h-9 sm:h-10"
           />
         </div>
       </CardContent>
