@@ -10,41 +10,46 @@ import { PreviewCanvas } from "@/components/PreviewCanvas";
 import { VisualizadorGCode } from "@/components/VisualizadorGCode";
 import { SeletorNesting } from "@/components/SeletorNesting";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { Peca, PecaPosicionada, ConfiguracoesChapa as TConfigChapa, ConfiguracoesCorte as TConfigCorte, ConfiguracoesFerramenta as TConfigFerramenta, FormatoArquivo } from "@/types";
 import { posicionarPecas, type MetodoNesting } from "@/lib/nesting-algorithm";
 import { gerarGCode, downloadGCode } from "@/lib/gcode-generator";
+import { useLocalStorage } from "@/hooks/useLocalStorage";
 
 export default function Home() {
-  // Estados
-  const [configChapa, setConfigChapa] = useState<TConfigChapa>({
+  // Estados com localStorage
+  const [configChapa, setConfigChapa] = useLocalStorage<TConfigChapa>('cnc-config-chapa', {
     largura: 2850,
     altura: 1500,
     espessura: 15,
   });
 
-  const [configCorte, setConfigCorte] = useState<TConfigCorte>({
+  const [configCorte, setConfigCorte] = useLocalStorage<TConfigCorte>('cnc-config-corte', {
     profundidade: 15,
     espacamento: 50,
-    profundidadePorPassada: 4,  // 4mm por passada (bom para MDF/madeira)
-    feedrate: 1500,              // 1500 mm/min
-    plungeRate: 500,             // 500 mm/min (33% do feedrate)
-    spindleSpeed: 18000,         // 18000 RPM
+    profundidadePorPassada: 4,
+    feedrate: 1500,
+    plungeRate: 500,
+    spindleSpeed: 18000,
   });
 
-  const [configFerramenta, setConfigFerramenta] = useState<TConfigFerramenta>({
-    diametro: 6,                 // 6mm
-    tipo: 'flat',                // Flat end
-    material: 'Carbide',         // Carbide
-    numeroFerramenta: 1,         // T1
-    tipoCorte: 'na-linha',       // Na linha (sem compensação)
+  const [configFerramenta, setConfigFerramenta] = useLocalStorage<TConfigFerramenta>('cnc-config-ferramenta', {
+    diametro: 6,
+    tipo: 'flat',
+    material: 'Carbide',
+    numeroFerramenta: 1,
+    tipoCorte: 'na-linha',
   });
 
+  const [metodoNesting, setMetodoNesting] = useLocalStorage<MetodoNesting>('cnc-metodo-nesting', 'greedy');
+
+  // Estados sem localStorage (temporários)
   const [pecas, setPecas] = useState<Peca[]>([]);
   const [pecasPosicionadas, setPecasPosicionadas] = useState<PecaPosicionada[]>([]);
   const [visualizadorAberto, setVisualizadorAberto] = useState(false);
   const [gcodeGerado, setGcodeGerado] = useState("");
-  const [metodoNesting, setMetodoNesting] = useState<MetodoNesting>('greedy');
   const [metricas, setMetricas] = useState<{ areaUtilizada: number; eficiencia: number; tempo: number } | undefined>();
+  const [abaAtiva, setAbaAtiva] = useLocalStorage<string>('cnc-aba-ativa', 'chapa');
 
   // Atualiza posicionamento sempre que algo mudar
   useEffect(() => {
@@ -130,23 +135,47 @@ export default function Home() {
       {/* Main Content */}
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
         <div className="grid grid-cols-1 xl:grid-cols-[420px,1fr] gap-4 lg:gap-6">
-          {/* Coluna Esquerda - Configurações */}
-          <div className="space-y-2 sm:space-y-3 order-1 xl:order-1">
-            <ConfiguracoesChapa config={configChapa} onChange={setConfigChapa} />
-            <ConfiguracoesCorte config={configCorte} onChange={setConfigCorte} />
-            <ConfiguracoesFerramenta config={configFerramenta} onChange={setConfigFerramenta} />
-            <SeletorNesting
-              metodo={metodoNesting}
-              onChange={setMetodoNesting}
-              metricas={metricas}
-            />
-            <CadastroPeca
-              onAdicionar={handleAdicionarPeca}
-              configChapa={configChapa}
-              espacamento={configCorte.espacamento}
-              pecasExistentes={pecas}
-              metodoNesting={metodoNesting}
-            />
+          {/* Coluna Esquerda - Configurações com Abas */}
+          <div className="order-1 xl:order-1">
+            <Tabs value={abaAtiva} onValueChange={setAbaAtiva} className="w-full">
+              <TabsList className="grid w-full grid-cols-4 mb-3">
+                <TabsTrigger value="chapa" className="text-xs sm:text-sm">Chapa</TabsTrigger>
+                <TabsTrigger value="corte" className="text-xs sm:text-sm">Corte</TabsTrigger>
+                <TabsTrigger value="ferramenta" className="text-xs sm:text-sm">Fresa</TabsTrigger>
+                <TabsTrigger value="nesting" className="text-xs sm:text-sm">Nesting</TabsTrigger>
+              </TabsList>
+
+              <div className="space-y-3">
+                <TabsContent value="chapa" className="mt-0 space-y-3">
+                  <ConfiguracoesChapa config={configChapa} onChange={setConfigChapa} />
+                </TabsContent>
+
+                <TabsContent value="corte" className="mt-0 space-y-3">
+                  <ConfiguracoesCorte config={configCorte} onChange={setConfigCorte} />
+                </TabsContent>
+
+                <TabsContent value="ferramenta" className="mt-0 space-y-3">
+                  <ConfiguracoesFerramenta config={configFerramenta} onChange={setConfigFerramenta} />
+                </TabsContent>
+
+                <TabsContent value="nesting" className="mt-0 space-y-3">
+                  <SeletorNesting
+                    metodo={metodoNesting}
+                    onChange={setMetodoNesting}
+                    metricas={metricas}
+                  />
+                </TabsContent>
+
+                {/* Cadastro de Peças sempre visível */}
+                <CadastroPeca
+                  onAdicionar={handleAdicionarPeca}
+                  configChapa={configChapa}
+                  espacamento={configCorte.espacamento}
+                  pecasExistentes={pecas}
+                  metodoNesting={metodoNesting}
+                />
+              </div>
+            </Tabs>
           </div>
 
           {/* Coluna Direita - Preview e Lista */}
