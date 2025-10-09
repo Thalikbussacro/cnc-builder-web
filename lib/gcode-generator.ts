@@ -46,9 +46,8 @@ export function gerarGCode(
 
   if (ferramenta) {
     gcode += `(Ferramenta:)\n`;
-    gcode += `(  Diametro: ${formatarNumero(ferramenta.diametro)} mm)\n`;
-    gcode += `(  Tipo: ${ferramenta.tipo} - ${ferramenta.material})\n`;
     gcode += `(  Numero: T${ferramenta.numeroFerramenta})\n`;
+    gcode += `(  Diametro: ${formatarNumero(ferramenta.diametro)} mm)\n`;
     gcode += `(  Tipo Corte: ${ferramenta.tipoCorte})\n`;
   }
   gcode += '\n';

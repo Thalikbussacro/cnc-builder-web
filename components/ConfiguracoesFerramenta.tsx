@@ -10,7 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import type { ConfiguracoesFerramenta, TipoCorte, TipoFresa } from "@/types";
+import type { ConfiguracoesFerramenta, TipoCorte } from "@/types";
 
 type ConfiguracoesFerramentaProps = {
   config: ConfiguracoesFerramenta;
@@ -60,54 +60,7 @@ export function ConfiguracoesFerramenta({ config, onChange }: ConfiguracoesFerra
           </div>
         </div>
 
-        <div className="space-y-1.5">
-          <Label htmlFor="tipo" className="text-xs sm:text-sm">
-            Tipo de Ponta
-          </Label>
-          <Select value={config.tipo} onValueChange={(value) => handleChange("tipo", value as TipoFresa)}>
-            <SelectTrigger id="tipo" className="h-9 sm:h-10">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="flat">
-                <div className="flex flex-col items-start">
-                  <span className="font-medium">Flat End (Ponta Reta)</span>
-                  <span className="text-xs text-muted-foreground">Uso geral, cortes retos</span>
-                </div>
-              </SelectItem>
-              <SelectItem value="ball">
-                <div className="flex flex-col items-start">
-                  <span className="font-medium">Ball Nose (Ponta Esférica)</span>
-                  <span className="text-xs text-muted-foreground">Contornos 3D, superfícies curvas</span>
-                </div>
-              </SelectItem>
-              <SelectItem value="vbit">
-                <div className="flex flex-col items-start">
-                  <span className="font-medium">V-Bit (Ponta em V)</span>
-                  <span className="text-xs text-muted-foreground">Gravação, chanfros, letras</span>
-                </div>
-              </SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="space-y-1.5">
-          <Label htmlFor="material" className="text-xs sm:text-sm">
-            Material da Fresa
-          </Label>
-          <Select value={config.material} onValueChange={(value) => handleChange("material", value)}>
-            <SelectTrigger id="material" className="h-9 sm:h-10">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="HSS">HSS (High Speed Steel)</SelectItem>
-              <SelectItem value="Carbide">Carbide (Metal Duro)</SelectItem>
-              <SelectItem value="Diamond">Diamond (Diamante)</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="pt-2 border-t">
+        <div className="pt-1">
           <div className="space-y-1.5">
             <Label htmlFor="tipoCorte" className="text-xs sm:text-sm font-semibold">
               Tipo de Corte
