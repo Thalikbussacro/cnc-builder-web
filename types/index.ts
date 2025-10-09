@@ -50,19 +50,13 @@ export type FormatoArquivo = 'nc' | 'tap' | 'gcode' | 'cnc';
 export type TipoCorte = 'externo' | 'interno' | 'na-linha';
 
 /**
- * Tipo de ponta da fresa
- */
-export type TipoFresa = 'flat' | 'ball' | 'vbit';
-
-/**
  * Configurações da ferramenta (fresa)
+ * Apenas os parâmetros que realmente afetam o G-code gerado
  */
 export type ConfiguracoesFerramenta = {
-  diametro: number;           // mm - Diâmetro da fresa
-  tipo: TipoFresa;            // Tipo de ponta
-  material: string;           // HSS, Carbide, Diamond
-  numeroFerramenta: number;   // T1, T2, etc.
-  tipoCorte: TipoCorte;       // Corte interno/externo/na-linha
+  diametro: number;           // mm - Diâmetro da fresa (usado para compensação G41/G42)
+  numeroFerramenta: number;   // T1, T2, etc. - Usado no comando de troca de ferramenta
+  tipoCorte: TipoCorte;       // Corte interno/externo/na-linha (G41/G42/G40)
 };
 
 /**

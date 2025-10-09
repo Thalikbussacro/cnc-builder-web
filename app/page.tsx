@@ -9,6 +9,7 @@ import { ListaPecas } from "@/components/ListaPecas";
 import { PreviewCanvas } from "@/components/PreviewCanvas";
 import { VisualizadorGCode } from "@/components/VisualizadorGCode";
 import { SeletorNesting } from "@/components/SeletorNesting";
+import { DicionarioGCode } from "@/components/DicionarioGCode";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { Peca, PecaPosicionada, ConfiguracoesChapa as TConfigChapa, ConfiguracoesCorte as TConfigCorte, ConfiguracoesFerramenta as TConfigFerramenta, FormatoArquivo } from "@/types";
@@ -35,8 +36,6 @@ export default function Home() {
 
   const [configFerramenta, setConfigFerramenta] = useLocalStorage<TConfigFerramenta>('cnc-config-ferramenta', {
     diametro: 6,
-    tipo: 'flat',
-    material: 'Carbide',
     numeroFerramenta: 1,
     tipoCorte: 'na-linha',
   });
@@ -109,6 +108,7 @@ export default function Home() {
               </p>
             </div>
             <div className="flex items-center gap-2 flex-shrink-0">
+              <DicionarioGCode />
               <Button
                 onClick={handleVisualizarGCode}
                 variant="default"
