@@ -48,7 +48,6 @@ export function gerarGCode(
     gcode += `(Ferramenta:)\n`;
     gcode += `(  Numero: T${ferramenta.numeroFerramenta})\n`;
     gcode += `(  Diametro: ${formatarNumero(ferramenta.diametro)} mm)\n`;
-    gcode += `(  Tipo Corte: ${ferramenta.tipoCorte})\n`;
   }
   gcode += '\n';
 
@@ -64,31 +63,30 @@ export function gerarGCode(
 
   const numPassadas = Math.ceil(profundidade / profundidadePorPassada);
 
-  // Calcula offset baseado na ferramenta e tipo de corte
-  const offset = ferramenta ? ferramenta.diametro / 2 : 0;
-  const aplicarOffset = ferramenta && ferramenta.tipoCorte !== 'na-linha';
-
   let cortadas = 0;
 
   // Para cada peça posicionada
   for (const peca of pecasPos) {
     cortadas++;
 
+    // Verifica se deve aplicar compensação baseado no tipo de corte da peça
+    const aplicarOffset = ferramenta && peca.tipoCorte !== 'na-linha';
+
     // Para cada passada (profundidade)
     for (let j = 1; j <= numPassadas; j++) {
       const z = -Math.min(j * profundidadePorPassada, profundidade);
 
       gcode += '\n';
-      gcode += `; Peca ${cortadas} (${formatarNumero(peca.largura, 0)}x${formatarNumero(peca.altura, 0)}) passada ${j}\n`;
+      gcode += `; Peca ${cortadas} (${formatarNumero(peca.largura, 0)}x${formatarNumero(peca.altura, 0)}) - Tipo: ${peca.tipoCorte} - passada ${j}\n`;
       gcode += 'G0 Z5 ; Levanta fresa antes de posicionar\n';
       gcode += `G0 X${formatarNumero(peca.x)} Y${formatarNumero(peca.y)} ; Posiciona no início da peça\n`;
       gcode += `G1 Z${formatarNumero(z)} F${plungeRate} ; Desce a fresa com plunge rate\n`;
 
       // Ativa compensação de ferramenta se necessário
       if (aplicarOffset && j === 1) {
-        if (ferramenta!.tipoCorte === 'externo') {
+        if (peca.tipoCorte === 'externo') {
           gcode += `G41 D${ferramenta!.numeroFerramenta} ; Ativa compensação esquerda (externo)\n`;
-        } else if (ferramenta!.tipoCorte === 'interno') {
+        } else if (peca.tipoCorte === 'interno') {
           gcode += `G42 D${ferramenta!.numeroFerramenta} ; Ativa compensação direita (interno)\n`;
         }
       }

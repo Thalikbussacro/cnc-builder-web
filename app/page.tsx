@@ -37,7 +37,6 @@ export default function Home() {
   const [configFerramenta, setConfigFerramenta] = useLocalStorage<TConfigFerramenta>('cnc-config-ferramenta', {
     diametro: 6,
     numeroFerramenta: 1,
-    tipoCorte: 'na-linha',
   });
 
   const [metodoNesting, setMetodoNesting] = useLocalStorage<MetodoNesting>('cnc-metodo-nesting', 'greedy');
