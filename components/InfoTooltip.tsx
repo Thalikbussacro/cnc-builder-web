@@ -32,14 +32,14 @@ export function InfoTooltip({ title, content }: InfoTooltipProps) {
       </Button>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto bg-[#1a1510] border-2 border-border shadow-2xl">
           <DialogHeader>
-            <DialogTitle className="text-xl">{title}</DialogTitle>
+            <DialogTitle className="text-xl text-foreground">{title}</DialogTitle>
             <DialogDescription className="sr-only">
               Informações detalhadas sobre o parâmetro
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4 text-sm">
+          <div className="space-y-4 text-sm text-foreground/90">
             {content}
           </div>
         </DialogContent>
