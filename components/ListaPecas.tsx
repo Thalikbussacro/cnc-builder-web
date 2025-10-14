@@ -1,10 +1,13 @@
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { X } from "lucide-react";
 import type { Peca } from "@/types";
 
 type ListaPecasProps = {
   pecas: Peca[];
+  onRemover?: (id: string) => void;
 };
 
 // Mesmas cores do PreviewCanvas
@@ -17,7 +20,14 @@ const CORES = [
   { hex: "#f39c12", nome: "Amarelo" },
 ];
 
-export function ListaPecas({ pecas }: ListaPecasProps) {
+// Mapeamento de tipo de corte para emoji e label
+const TIPO_CORTE_INFO = {
+  'externo': { emoji: '🔵', label: 'Ext' },
+  'interno': { emoji: '🔴', label: 'Int' },
+  'na-linha': { emoji: '⚪', label: 'Linha' },
+} as const;
+
+export function ListaPecas({ pecas, onRemover }: ListaPecasProps) {
   return (
     <Card>
       <CardHeader className="pb-2">
@@ -31,13 +41,14 @@ export function ListaPecas({ pecas }: ListaPecasProps) {
             Nenhuma peça cadastrada
           </p>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 max-h-48 sm:max-h-64 overflow-y-auto pr-1">
+          <div className="grid grid-cols-1 gap-2 max-h-48 sm:max-h-64 overflow-y-auto pr-1">
             {pecas.map((peca, index) => {
               const cor = CORES[index % CORES.length];
+              const tipoInfo = TIPO_CORTE_INFO[peca.tipoCorte];
               return (
                 <div
                   key={peca.id}
-                  className="flex items-center gap-1.5 p-2 bg-secondary/30 rounded-md border border-border"
+                  className="flex items-center gap-2 p-2 bg-secondary/30 rounded-md border border-border"
                 >
                   {/* Indicador de cor */}
                   <div
@@ -47,15 +58,31 @@ export function ListaPecas({ pecas }: ListaPecasProps) {
                       borderColor: cor.hex,
                     }}
                   />
-                  {/* Número e dimensões */}
-                  <div className="flex flex-col flex-1 min-w-0">
-                    <span className="text-xs font-semibold truncate">
-                      #{index + 1}
-                    </span>
-                    <span className="text-xs font-medium text-muted-foreground truncate">
-                      {peca.largura.toFixed(0)}×{peca.altura.toFixed(0)}mm
-                    </span>
+                  {/* Número */}
+                  <span className="text-xs font-semibold w-6 flex-shrink-0">
+                    #{index + 1}
+                  </span>
+                  {/* Dimensões */}
+                  <span className="text-xs font-medium text-muted-foreground flex-1 min-w-0 truncate">
+                    {peca.largura.toFixed(0)}×{peca.altura.toFixed(0)}mm
+                  </span>
+                  {/* Tipo de Corte */}
+                  <div className="flex items-center gap-1 flex-shrink-0">
+                    <span className="text-xs">{tipoInfo.emoji}</span>
+                    <span className="text-xs font-medium">{tipoInfo.label}</span>
                   </div>
+                  {/* Botão Remover */}
+                  {onRemover && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 w-6 p-0 hover:bg-destructive/20 hover:text-destructive flex-shrink-0"
+                      onClick={() => onRemover(peca.id)}
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  )}
                 </div>
               );
             })}

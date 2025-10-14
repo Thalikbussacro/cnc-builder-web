@@ -67,6 +67,11 @@ export default function Home() {
     setPecas([...pecas, peca]);
   };
 
+  // Handler para remover peça individual
+  const handleRemoverPeca = (id: string) => {
+    setPecas(pecas.filter(p => p.id !== id));
+  };
+
   // Handler para limpar tudo
   const handleLimpar = () => {
     if (pecas.length > 0 && !confirm("Deseja limpar todas as peças?")) {
@@ -184,7 +189,7 @@ export default function Home() {
               chapaAltura={configChapa.altura}
               pecasPosicionadas={pecasPosicionadas}
             />
-            <ListaPecas pecas={pecas} />
+            <ListaPecas pecas={pecas} onRemover={handleRemoverPeca} />
           </div>
         </div>
       </div>
