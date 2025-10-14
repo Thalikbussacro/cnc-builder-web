@@ -4,13 +4,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import type { FormatoArquivo } from "@/types";
 
 type VisualizadorGCodeProps = {
@@ -27,7 +21,7 @@ export function VisualizadorGCode({
   onDownload,
 }: VisualizadorGCodeProps) {
   const [copiado, setCopiado] = useState(false);
-  const [formato, setFormato] = useState<FormatoArquivo>('nc');
+  const [formato, setFormato] = useState<FormatoArquivo>('tap');
 
   // Fecha com ESC
   useEffect(() => {
@@ -108,41 +102,40 @@ export function VisualizadorGCode({
           {/* Footer - Botões de ação */}
           <div className="p-4 sm:p-6 border-t border-border bg-card/50 backdrop-blur-sm space-y-3">
             {/* Seletor de formato */}
-            <div className="space-y-2">
-              <Label htmlFor="formato" className="text-xs font-medium">
+            <div className="space-y-3">
+              <Label className="text-xs font-medium">
                 Formato do Arquivo
               </Label>
-              <Select value={formato} onValueChange={(value) => setFormato(value as FormatoArquivo)}>
-                <SelectTrigger id="formato" className="h-10">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="nc">
-                    <div className="flex flex-col items-start">
-                      <span className="font-medium">.nc (Numerical Control)</span>
-                      <span className="text-xs text-muted-foreground">Padrão moderno - Recomendado</span>
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="tap">
-                    <div className="flex flex-col items-start">
-                      <span className="font-medium">.tap (Tape)</span>
-                      <span className="text-xs text-muted-foreground">Compatibilidade com máquinas antigas</span>
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="gcode">
-                    <div className="flex flex-col items-start">
-                      <span className="font-medium">.gcode</span>
-                      <span className="text-xs text-muted-foreground">Formato genérico (3D printers + CNC)</span>
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="cnc">
-                    <div className="flex flex-col items-start">
-                      <span className="font-medium">.cnc</span>
-                      <span className="text-xs text-muted-foreground">Variação alternativa</span>
-                    </div>
-                  </SelectItem>
-                </SelectContent>
-              </Select>
+              <RadioGroup
+                value={formato}
+                onValueChange={(value) => setFormato(value as FormatoArquivo)}
+                className="grid grid-cols-2 lg:grid-cols-4 gap-3"
+              >
+                <div className="flex items-center space-x-2 border border-border rounded-md p-3 hover:bg-accent/50 transition-colors cursor-pointer">
+                  <RadioGroupItem value="tap" id="tap" />
+                  <Label htmlFor="tap" className="flex-1 cursor-pointer text-xs sm:text-sm font-medium">
+                    .tap
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2 border border-border rounded-md p-3 hover:bg-accent/50 transition-colors cursor-pointer">
+                  <RadioGroupItem value="nc" id="nc" />
+                  <Label htmlFor="nc" className="flex-1 cursor-pointer text-xs sm:text-sm font-medium">
+                    .nc
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2 border border-border rounded-md p-3 hover:bg-accent/50 transition-colors cursor-pointer">
+                  <RadioGroupItem value="gcode" id="gcode" />
+                  <Label htmlFor="gcode" className="flex-1 cursor-pointer text-xs sm:text-sm font-medium">
+                    .gcode
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2 border border-border rounded-md p-3 hover:bg-accent/50 transition-colors cursor-pointer">
+                  <RadioGroupItem value="cnc" id="cnc" />
+                  <Label htmlFor="cnc" className="flex-1 cursor-pointer text-xs sm:text-sm font-medium">
+                    .cnc
+                  </Label>
+                </div>
+              </RadioGroup>
               <p className="text-xs text-muted-foreground">
                 ℹ️ Todos os formatos são idênticos (apenas extensão diferente)
               </p>

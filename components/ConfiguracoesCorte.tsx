@@ -26,7 +26,7 @@ export function ConfiguracoesCorte({ config, onChange }: ConfiguracoesCorteProps
       <CardContent className="space-y-2 sm:space-y-3">
         <div className="grid grid-cols-2 gap-2 sm:gap-3">
           <div className="space-y-1.5">
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1 min-h-[2.5rem]">
               <Label htmlFor="profundidade" className="text-xs sm:text-sm">
                 Profundidade (Depth)
               </Label>
@@ -46,7 +46,7 @@ export function ConfiguracoesCorte({ config, onChange }: ConfiguracoesCorteProps
             />
           </div>
           <div className="space-y-1.5">
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1 min-h-[2.5rem]">
               <Label htmlFor="profundidadePorPassada" className="text-xs sm:text-sm">
                 Prof./Passada (Depth/Pass)
               </Label>
