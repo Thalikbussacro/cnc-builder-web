@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { BookOpen, X } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { BookOpen, X, Search } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 type ComandoGCode = {
@@ -269,6 +270,57 @@ const PARAMETROS: ComandoGCode[] = [
 
 export function DicionarioGCode() {
   const [aberto, setAberto] = useState(false);
+  const [busca, setBusca] = useState("");
+
+  // Fecha com ESC e bloqueia scroll
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setAberto(false);
+      }
+    };
+
+    if (aberto) {
+      document.addEventListener("keydown", handleEsc);
+      document.body.style.overflow = "hidden";
+    }
+
+    return () => {
+      document.removeEventListener("keydown", handleEsc);
+      document.body.style.overflow = "unset";
+    };
+  }, [aberto]);
+
+  // Filtrar comandos com base na busca
+  const comandosFiltrados = useMemo(() => {
+    const termo = busca.toLowerCase().trim();
+
+    if (!termo) {
+      return {
+        comandosG: COMANDOS_G,
+        comandosM: COMANDOS_M,
+        parametros: PARAMETROS,
+      };
+    }
+
+    const filtrar = (comandos: ComandoGCode[]) =>
+      comandos.filter((cmd) => {
+        const codigoMatch = cmd.codigo.toLowerCase().includes(termo);
+        const nomeMatch = cmd.nome.toLowerCase().includes(termo);
+        return codigoMatch || nomeMatch;
+      });
+
+    return {
+      comandosG: filtrar(COMANDOS_G),
+      comandosM: filtrar(COMANDOS_M),
+      parametros: filtrar(PARAMETROS),
+    };
+  }, [busca]);
+
+  const totalResultados =
+    comandosFiltrados.comandosG.length +
+    comandosFiltrados.comandosM.length +
+    comandosFiltrados.parametros.length;
 
   if (!aberto) {
     return (
@@ -286,174 +338,221 @@ export function DicionarioGCode() {
   }
 
   return (
-    <div className="fixed inset-0 z-50 bg-[#1a1814] overflow-hidden flex flex-col">
-      {/* Header fixo */}
-      <div className="border-b border-amber-600/30 bg-[#292318] px-4 sm:px-6 py-3 sm:py-4 flex-shrink-0">
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <h2 className="text-xl sm:text-2xl font-bold flex items-center gap-2 text-amber-500">
-              <BookOpen className="h-5 w-5 sm:h-6 sm:w-6" />
-              Dicionário Completo de G-code
-            </h2>
-            <p className="text-sm text-muted-foreground mt-1">
-              Referência detalhada com exemplos práticos de todos os comandos
-            </p>
+    <>
+      {/* Overlay */}
+      <div
+        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] transition-opacity"
+        onClick={() => setAberto(false)}
+      />
+
+      {/* Painel Lateral Deslizante */}
+      <div
+        className={`fixed top-0 right-0 h-full w-full sm:w-[600px] bg-[#1a1814] border-l border-border z-[100] shadow-2xl transform transition-transform duration-300 ease-in-out ${
+          aberto ? "translate-x-0" : "translate-x-full"
+        }`}
+      >
+        <div className="flex flex-col h-full">
+          {/* Header Fixo */}
+          <div className="border-b border-amber-600/30 bg-[#292318] px-4 py-3 flex-shrink-0">
+            <div className="flex items-center justify-between gap-3 mb-3">
+              <div className="flex-1 min-w-0">
+                <h2 className="text-lg sm:text-xl font-bold flex items-center gap-2 text-amber-500">
+                  <BookOpen className="h-5 w-5 flex-shrink-0" />
+                  <span className="truncate">Dicionário G-code</span>
+                </h2>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Referência completa com exemplos práticos
+                </p>
+              </div>
+              <Button
+                onClick={() => setAberto(false)}
+                variant="ghost"
+                size="icon"
+                className="flex-shrink-0 h-8 w-8 hover:bg-red-600/20 hover:text-red-500"
+              >
+                <X className="h-5 w-5" />
+              </Button>
+            </div>
+
+            {/* Campo de Pesquisa */}
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                type="text"
+                placeholder="Pesquisar comandos... (ex: G0, movimento, feedrate)"
+                value={busca}
+                onChange={(e) => setBusca(e.target.value)}
+                className="pl-9 h-9 bg-background/50 border-border focus:border-amber-600/50"
+              />
+            </div>
+
+            {/* Contador de resultados */}
+            {busca && (
+              <p className="text-xs text-muted-foreground mt-2">
+                {totalResultados === 0
+                  ? "Nenhum resultado encontrado"
+                  : `${totalResultados} resultado${totalResultados !== 1 ? "s" : ""} encontrado${totalResultados !== 1 ? "s" : ""}`}
+              </p>
+            )}
           </div>
-          <Button
-            onClick={() => setAberto(false)}
-            variant="ghost"
-            size="icon"
-            className="flex-shrink-0 hover:bg-red-600/20 hover:text-red-500"
-          >
-            <X className="h-5 w-5" />
-          </Button>
+
+          {/* Conteúdo Scrollável */}
+          <ScrollArea className="flex-1">
+            <div className="px-4 py-4 space-y-6">
+              {/* Comandos G */}
+              {comandosFiltrados.comandosG.length > 0 && (
+                <section>
+                  <div className="bg-amber-600/10 border border-amber-600/30 rounded-md p-2 mb-3">
+                    <h3 className="text-sm font-bold text-amber-500">Comandos G - Movimento e Controle</h3>
+                  </div>
+                  <div className="space-y-2">
+                    {comandosFiltrados.comandosG.map((cmd) => (
+                      <div key={cmd.codigo} className="bg-secondary/40 border border-border rounded-md p-3 hover:border-amber-600/50 transition-colors">
+                        <div className="flex items-start gap-3">
+                          <code className="font-mono font-bold text-amber-400 text-sm bg-black/60 px-2 py-1 rounded min-w-[50px] text-center flex-shrink-0">
+                            {cmd.codigo}
+                          </code>
+                          <div className="flex-1 min-w-0 space-y-1.5">
+                            <div className="font-bold text-sm">{cmd.nome}</div>
+                            <div className="text-xs text-muted-foreground leading-relaxed">{cmd.descricao}</div>
+                            <div className="bg-black/40 rounded p-2 space-y-1">
+                              <div className="text-[10px] text-muted-foreground">Exemplo:</div>
+                              <code className="text-xs text-green-400 font-mono block">{cmd.exemplo}</code>
+                            </div>
+                            <div className="bg-blue-950/30 border border-blue-600/20 rounded p-2 space-y-0.5">
+                              <div className="text-[10px] font-semibold text-blue-400">💡 Quando usar:</div>
+                              <div className="text-xs text-blue-200/90 leading-relaxed">{cmd.usoReal}</div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              )}
+
+              {/* Comandos M */}
+              {comandosFiltrados.comandosM.length > 0 && (
+                <section>
+                  <div className="bg-blue-600/10 border border-blue-600/30 rounded-md p-2 mb-3">
+                    <h3 className="text-sm font-bold text-blue-400">Comandos M - Funções da Máquina</h3>
+                  </div>
+                  <div className="space-y-2">
+                    {comandosFiltrados.comandosM.map((cmd) => (
+                      <div key={cmd.codigo} className="bg-secondary/40 border border-border rounded-md p-3 hover:border-blue-600/50 transition-colors">
+                        <div className="flex items-start gap-3">
+                          <code className="font-mono font-bold text-blue-400 text-sm bg-black/60 px-2 py-1 rounded min-w-[50px] text-center flex-shrink-0">
+                            {cmd.codigo}
+                          </code>
+                          <div className="flex-1 min-w-0 space-y-1.5">
+                            <div className="font-bold text-sm">{cmd.nome}</div>
+                            <div className="text-xs text-muted-foreground leading-relaxed">{cmd.descricao}</div>
+                            <div className="bg-black/40 rounded p-2 space-y-1">
+                              <div className="text-[10px] text-muted-foreground">Exemplo:</div>
+                              <code className="text-xs text-green-400 font-mono block">{cmd.exemplo}</code>
+                            </div>
+                            <div className="bg-blue-950/30 border border-blue-600/20 rounded p-2 space-y-0.5">
+                              <div className="text-[10px] font-semibold text-blue-400">💡 Quando usar:</div>
+                              <div className="text-xs text-blue-200/90 leading-relaxed">{cmd.usoReal}</div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              )}
+
+              {/* Parâmetros */}
+              {comandosFiltrados.parametros.length > 0 && (
+                <section>
+                  <div className="bg-green-600/10 border border-green-600/30 rounded-md p-2 mb-3">
+                    <h3 className="text-sm font-bold text-green-400">Parâmetros - Eixos e Valores</h3>
+                  </div>
+                  <div className="space-y-2">
+                    {comandosFiltrados.parametros.map((param) => (
+                      <div key={param.codigo} className="bg-secondary/40 border border-border rounded-md p-3 hover:border-green-600/50 transition-colors">
+                        <div className="flex items-start gap-3">
+                          <code className="font-mono font-bold text-green-400 text-sm bg-black/60 px-2 py-1 rounded min-w-[50px] text-center flex-shrink-0">
+                            {param.codigo}
+                          </code>
+                          <div className="flex-1 min-w-0 space-y-1.5">
+                            <div className="font-bold text-sm">{param.nome}</div>
+                            <div className="text-xs text-muted-foreground leading-relaxed">{param.descricao}</div>
+                            <div className="bg-black/40 rounded p-2 space-y-1">
+                              <div className="text-[10px] text-muted-foreground">Exemplo:</div>
+                              <code className="text-xs text-green-400 font-mono block">{param.exemplo}</code>
+                            </div>
+                            <div className="bg-blue-950/30 border border-blue-600/20 rounded p-2 space-y-0.5">
+                              <div className="text-[10px] font-semibold text-blue-400">💡 Quando usar:</div>
+                              <div className="text-xs text-blue-200/90 leading-relaxed">{param.usoReal}</div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              )}
+
+              {/* Exemplo completo - sempre visível */}
+              {!busca && (
+                <>
+                  <section className="bg-amber-900/20 border-2 border-amber-600/40 rounded-md p-3">
+                    <h3 className="text-sm font-bold text-amber-500 mb-2">📋 Exemplo de G-code Completo</h3>
+                    <div className="bg-black/60 rounded-md p-2.5 space-y-0.5 font-mono text-[11px] overflow-x-auto">
+                      <div className="text-gray-400">; Programa para cortar retângulo 100x50mm em MDF 15mm</div>
+                      <div className="text-green-400">G21</div> <span className="text-gray-500">; Milímetros</span><br/>
+                      <div className="text-green-400">G90</div> <span className="text-gray-500">; Coordenadas absolutas</span><br/>
+                      <div className="text-green-400">G0 Z5</div> <span className="text-gray-500">; Sobe fresa para segurança</span><br/>
+                      <div className="text-blue-400">T1 M6</div> <span className="text-gray-500">; Troca para fresa T1 (6mm)</span><br/>
+                      <div className="text-blue-400">M3 S18000</div> <span className="text-gray-500">; Liga spindle a 18000 RPM</span><br/>
+                      <div className="text-green-400">G4 P2</div> <span className="text-gray-500">; Espera 2 segundos</span><br/>
+                      <div className="text-green-400">G0 X0 Y0</div> <span className="text-gray-500">; Vai rápido para início</span><br/>
+                      <div className="text-green-400">G41 D1</div> <span className="text-gray-500">; Ativa compensação esquerda (externo)</span><br/>
+                      <div className="text-green-400">G1 Z-5 F300</div> <span className="text-gray-500">; Desce 5mm com plunge rate 300</span><br/>
+                      <div className="text-green-400">G1 X100 Y0 F1500</div> <span className="text-gray-500">; Corta lado inferior</span><br/>
+                      <div className="text-green-400">G1 X100 Y50 F1500</div> <span className="text-gray-500">; Corta lado direito</span><br/>
+                      <div className="text-green-400">G1 X0 Y50 F1500</div> <span className="text-gray-500">; Corta lado superior</span><br/>
+                      <div className="text-green-400">G1 X0 Y0 F1500</div> <span className="text-gray-500">; Corta lado esquerdo</span><br/>
+                      <div className="text-green-400">G1 Z5 F300</div> <span className="text-gray-500">; Sobe fresa</span><br/>
+                      <div className="text-green-400">G40</div> <span className="text-gray-500">; Cancela compensação</span><br/>
+                      <div className="text-blue-400">M5</div> <span className="text-gray-500">; Desliga spindle</span><br/>
+                      <div className="text-green-400">G28</div> <span className="text-gray-500">; Volta para home</span><br/>
+                      <div className="text-blue-400">M30</div> <span className="text-gray-500">; Fim do programa</span>
+                    </div>
+                  </section>
+
+                  {/* Dicas finais */}
+                  <section className="bg-red-900/20 border border-red-600/30 rounded-md p-3 mb-4">
+                    <h3 className="text-sm font-bold text-red-400 mb-2">⚠️ Erros Comuns para EVITAR</h3>
+                    <ul className="space-y-1.5 text-xs">
+                      <li className="flex gap-2"><span className="text-red-400 flex-shrink-0">✗</span> <span>Esquecer G21 no início → máquina pode interpretar como polegadas</span></li>
+                      <li className="flex gap-2"><span className="text-red-400 flex-shrink-0">✗</span> <span>Usar G41 e esquecer G40 depois → próxima peça sai com offset errado</span></li>
+                      <li className="flex gap-2"><span className="text-red-400 flex-shrink-0">✗</span> <span>M3 sem G4 depois → começa a cortar com spindle ainda acelerando</span></li>
+                      <li className="flex gap-2"><span className="text-red-400 flex-shrink-0">✗</span> <span>Descer Z muito rápido (usar feedrate ao invés de plunge rate)</span></li>
+                      <li className="flex gap-2"><span className="text-red-400 flex-shrink-0">✗</span> <span>Confundir G41 com G42 → fresa corta no lado errado</span></li>
+                      <li className="flex gap-2"><span className="text-red-400 flex-shrink-0">✗</span> <span>Esquecer M5 no final → spindle fica ligado queimando!</span></li>
+                    </ul>
+                  </section>
+                </>
+              )}
+
+              {/* Mensagem quando não há resultados */}
+              {busca && totalResultados === 0 && (
+                <div className="text-center py-12">
+                  <p className="text-muted-foreground text-sm">
+                    Nenhum comando encontrado para &quot;{busca}&quot;
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Tente pesquisar por código (G0, M3) ou nome (movimento, spindle)
+                  </p>
+                </div>
+              )}
+            </div>
+          </ScrollArea>
         </div>
       </div>
-
-      {/* Conteúdo scrollável */}
-      <ScrollArea className="flex-1">
-        <div className="px-4 sm:px-6 py-4 sm:py-6 max-w-6xl mx-auto">
-          <div className="space-y-8">
-            {/* Comandos G */}
-            <section>
-              <div className="bg-amber-600/10 border border-amber-600/30 rounded-lg p-3 mb-4">
-                <h3 className="text-lg sm:text-xl font-bold text-amber-500">Comandos G - Movimento e Controle</h3>
-                <p className="text-xs sm:text-sm text-muted-foreground mt-1">
-                  Comandos que controlam COMO a máquina se move e corta
-                </p>
-              </div>
-              <div className="grid gap-4">
-                {COMANDOS_G.map((cmd) => (
-                  <div key={cmd.codigo} className="bg-secondary/40 border border-border rounded-lg p-4 hover:border-amber-600/50 transition-colors">
-                    <div className="flex items-start gap-4">
-                      <code className="font-mono font-bold text-amber-400 text-base sm:text-lg bg-black/60 px-3 py-2 rounded-md min-w-[70px] text-center flex-shrink-0">
-                        {cmd.codigo}
-                      </code>
-                      <div className="flex-1 min-w-0 space-y-2">
-                        <div className="font-bold text-base sm:text-lg">{cmd.nome}</div>
-                        <div className="text-sm text-muted-foreground leading-relaxed">{cmd.descricao}</div>
-                        <div className="bg-black/40 rounded p-2 sm:p-3 space-y-1.5">
-                          <div className="text-xs text-muted-foreground">Exemplo:</div>
-                          <code className="text-sm text-green-400 font-mono block">{cmd.exemplo}</code>
-                        </div>
-                        <div className="bg-blue-950/30 border border-blue-600/20 rounded p-2 sm:p-3 space-y-1">
-                          <div className="text-xs font-semibold text-blue-400">💡 Quando usar na prática:</div>
-                          <div className="text-xs sm:text-sm text-blue-200/90 leading-relaxed">{cmd.usoReal}</div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </section>
-
-            {/* Comandos M */}
-            <section>
-              <div className="bg-blue-600/10 border border-blue-600/30 rounded-lg p-3 mb-4">
-                <h3 className="text-lg sm:text-xl font-bold text-blue-400">Comandos M - Funções da Máquina</h3>
-                <p className="text-xs sm:text-sm text-muted-foreground mt-1">
-                  Comandos que controlam spindle, refrigeração e ciclo do programa
-                </p>
-              </div>
-              <div className="grid gap-4">
-                {COMANDOS_M.map((cmd) => (
-                  <div key={cmd.codigo} className="bg-secondary/40 border border-border rounded-lg p-4 hover:border-blue-600/50 transition-colors">
-                    <div className="flex items-start gap-4">
-                      <code className="font-mono font-bold text-blue-400 text-base sm:text-lg bg-black/60 px-3 py-2 rounded-md min-w-[70px] text-center flex-shrink-0">
-                        {cmd.codigo}
-                      </code>
-                      <div className="flex-1 min-w-0 space-y-2">
-                        <div className="font-bold text-base sm:text-lg">{cmd.nome}</div>
-                        <div className="text-sm text-muted-foreground leading-relaxed">{cmd.descricao}</div>
-                        <div className="bg-black/40 rounded p-2 sm:p-3 space-y-1.5">
-                          <div className="text-xs text-muted-foreground">Exemplo:</div>
-                          <code className="text-sm text-green-400 font-mono block">{cmd.exemplo}</code>
-                        </div>
-                        <div className="bg-blue-950/30 border border-blue-600/20 rounded p-2 sm:p-3 space-y-1">
-                          <div className="text-xs font-semibold text-blue-400">💡 Quando usar na prática:</div>
-                          <div className="text-xs sm:text-sm text-blue-200/90 leading-relaxed">{cmd.usoReal}</div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </section>
-
-            {/* Parâmetros */}
-            <section>
-              <div className="bg-green-600/10 border border-green-600/30 rounded-lg p-3 mb-4">
-                <h3 className="text-lg sm:text-xl font-bold text-green-400">Parâmetros - Eixos e Valores</h3>
-                <p className="text-xs sm:text-sm text-muted-foreground mt-1">
-                  Letras que acompanham os comandos G e M com valores numéricos
-                </p>
-              </div>
-              <div className="grid gap-4">
-                {PARAMETROS.map((param) => (
-                  <div key={param.codigo} className="bg-secondary/40 border border-border rounded-lg p-4 hover:border-green-600/50 transition-colors">
-                    <div className="flex items-start gap-4">
-                      <code className="font-mono font-bold text-green-400 text-base sm:text-lg bg-black/60 px-3 py-2 rounded-md min-w-[70px] text-center flex-shrink-0">
-                        {param.codigo}
-                      </code>
-                      <div className="flex-1 min-w-0 space-y-2">
-                        <div className="font-bold text-base sm:text-lg">{param.nome}</div>
-                        <div className="text-sm text-muted-foreground leading-relaxed">{param.descricao}</div>
-                        <div className="bg-black/40 rounded p-2 sm:p-3 space-y-1.5">
-                          <div className="text-xs text-muted-foreground">Exemplo:</div>
-                          <code className="text-sm text-green-400 font-mono block">{param.exemplo}</code>
-                        </div>
-                        <div className="bg-blue-950/30 border border-blue-600/20 rounded p-2 sm:p-3 space-y-1">
-                          <div className="text-xs font-semibold text-blue-400">💡 Quando usar na prática:</div>
-                          <div className="text-xs sm:text-sm text-blue-200/90 leading-relaxed">{param.usoReal}</div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </section>
-
-            {/* Exemplo completo */}
-            <section className="bg-amber-900/20 border-2 border-amber-600/40 rounded-lg p-4 sm:p-6">
-              <h3 className="text-lg sm:text-xl font-bold text-amber-500 mb-3 sm:mb-4">📋 Exemplo de G-code Completo</h3>
-              <div className="bg-black/60 rounded-lg p-3 sm:p-4 space-y-1 font-mono text-xs sm:text-sm overflow-x-auto">
-                <div className="text-gray-400">; Programa para cortar retângulo 100x50mm em MDF 15mm</div>
-                <div className="text-green-400">G21</div> <span className="text-gray-500">; Milímetros</span><br/>
-                <div className="text-green-400">G90</div> <span className="text-gray-500">; Coordenadas absolutas</span><br/>
-                <div className="text-green-400">G0 Z5</div> <span className="text-gray-500">; Sobe fresa para segurança</span><br/>
-                <div className="text-blue-400">T1 M6</div> <span className="text-gray-500">; Troca para fresa T1 (6mm)</span><br/>
-                <div className="text-blue-400">M3 S18000</div> <span className="text-gray-500">; Liga spindle a 18000 RPM</span><br/>
-                <div className="text-green-400">G4 P2</div> <span className="text-gray-500">; Espera 2 segundos</span><br/>
-                <div className="text-green-400">G0 X0 Y0</div> <span className="text-gray-500">; Vai rápido para início</span><br/>
-                <div className="text-green-400">G41 D1</div> <span className="text-gray-500">; Ativa compensação esquerda (externo)</span><br/>
-                <div className="text-green-400">G1 Z-5 F300</div> <span className="text-gray-500">; Desce 5mm com plunge rate 300</span><br/>
-                <div className="text-green-400">G1 X100 Y0 F1500</div> <span className="text-gray-500">; Corta lado inferior</span><br/>
-                <div className="text-green-400">G1 X100 Y50 F1500</div> <span className="text-gray-500">; Corta lado direito</span><br/>
-                <div className="text-green-400">G1 X0 Y50 F1500</div> <span className="text-gray-500">; Corta lado superior</span><br/>
-                <div className="text-green-400">G1 X0 Y0 F1500</div> <span className="text-gray-500">; Corta lado esquerdo</span><br/>
-                <div className="text-green-400">G1 Z5 F300</div> <span className="text-gray-500">; Sobe fresa</span><br/>
-                <div className="text-green-400">G40</div> <span className="text-gray-500">; Cancela compensação</span><br/>
-                <div className="text-blue-400">M5</div> <span className="text-gray-500">; Desliga spindle</span><br/>
-                <div className="text-green-400">G28</div> <span className="text-gray-500">; Volta para home</span><br/>
-                <div className="text-blue-400">M30</div> <span className="text-gray-500">; Fim do programa</span>
-              </div>
-            </section>
-
-            {/* Dicas finais */}
-            <section className="bg-red-900/20 border border-red-600/30 rounded-lg p-4 sm:p-6">
-              <h3 className="text-lg sm:text-xl font-bold text-red-400 mb-3">⚠️ Erros Comuns para EVITAR</h3>
-              <ul className="space-y-2 text-sm">
-                <li className="flex gap-2"><span className="text-red-400 flex-shrink-0">✗</span> <span>Esquecer G21 no início → máquina pode interpretar como polegadas</span></li>
-                <li className="flex gap-2"><span className="text-red-400 flex-shrink-0">✗</span> <span>Usar G41 e esquecer G40 depois → próxima peça sai com offset errado</span></li>
-                <li className="flex gap-2"><span className="text-red-400 flex-shrink-0">✗</span> <span>M3 sem G4 depois → começa a cortar com spindle ainda acelerando</span></li>
-                <li className="flex gap-2"><span className="text-red-400 flex-shrink-0">✗</span> <span>Descer Z muito rápido (usar feedrate ao invés de plunge rate)</span></li>
-                <li className="flex gap-2"><span className="text-red-400 flex-shrink-0">✗</span> <span>Confundir G41 com G42 → fresa corta no lado errado</span></li>
-                <li className="flex gap-2"><span className="text-red-400 flex-shrink-0">✗</span> <span>Esquecer M5 no final → spindle fica ligado queimando!</span></li>
-              </ul>
-            </section>
-          </div>
-        </div>
-      </ScrollArea>
-    </div>
+    </>
   );
 }
