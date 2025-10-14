@@ -1,9 +1,15 @@
 /**
+ * Tipo de corte: como a fresa deve cortar em relação à marcação
+ */
+export type TipoCorte = 'externo' | 'interno' | 'na-linha';
+
+/**
  * Representa uma peça retangular a ser cortada
  */
 export type Peca = {
   largura: number;
   altura: number;
+  tipoCorte: TipoCorte;
   id: string; // UUID para React keys
 };
 
@@ -15,6 +21,7 @@ export type PecaPosicionada = {
   y: number;
   largura: number;
   altura: number;
+  tipoCorte: TipoCorte;
   id: string;
 };
 
@@ -45,18 +52,12 @@ export type ConfiguracoesCorte = {
 export type FormatoArquivo = 'nc' | 'tap' | 'gcode' | 'cnc';
 
 /**
- * Tipo de corte: como a fresa deve cortar em relação à marcação
- */
-export type TipoCorte = 'externo' | 'interno' | 'na-linha';
-
-/**
  * Configurações da ferramenta (fresa)
  * Apenas os parâmetros que realmente afetam o G-code gerado
  */
 export type ConfiguracoesFerramenta = {
   diametro: number;           // mm - Diâmetro da fresa (usado para compensação G41/G42)
   numeroFerramenta: number;   // T1, T2, etc. - Usado no comando de troca de ferramenta
-  tipoCorte: TipoCorte;       // Corte interno/externo/na-linha (G41/G42/G40)
 };
 
 /**

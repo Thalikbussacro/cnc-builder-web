@@ -5,7 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import type { Peca, ConfiguracoesChapa } from "@/types";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import type { Peca, ConfiguracoesChapa, TipoCorte } from "@/types";
 import { posicionarPecas, type MetodoNesting } from "@/lib/nesting-algorithm";
 
 type CadastroPecaProps = {
@@ -25,6 +26,7 @@ export function CadastroPeca({
 }: CadastroPecaProps) {
   const [largura, setLargura] = useState<string>("500");
   const [altura, setAltura] = useState<string>("500");
+  const [tipoCorte, setTipoCorte] = useState<TipoCorte>("externo");
   const [erro, setErro] = useState<string>("");
 
   const handleAdicionar = () => {
@@ -54,6 +56,7 @@ export function CadastroPeca({
     const novaPeca: Peca = {
       largura: larguraNum,
       altura: alturaNum,
+      tipoCorte: tipoCorte,
       id: crypto.randomUUID(),
     };
 
@@ -126,6 +129,22 @@ export function CadastroPeca({
               className="h-9 sm:h-10"
             />
           </div>
+        </div>
+
+        <div className="space-y-1.5">
+          <Label htmlFor="tipoCorte" className="text-xs sm:text-sm">
+            Tipo de Corte
+          </Label>
+          <Select value={tipoCorte} onValueChange={(value: TipoCorte) => setTipoCorte(value)}>
+            <SelectTrigger id="tipoCorte" className="h-9 sm:h-10">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="externo">Externo (G41)</SelectItem>
+              <SelectItem value="interno">Interno (G42)</SelectItem>
+              <SelectItem value="na-linha">Na Linha (G40)</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
         {erro && (

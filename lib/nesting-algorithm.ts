@@ -57,6 +57,7 @@ export function posicionarPecasGreedy(
         y: cand.y,
         largura: peca.largura,
         altura: peca.altura,
+        tipoCorte: peca.tipoCorte,
         id: peca.id,
       };
 
@@ -212,6 +213,7 @@ export function posicionarPecasGreedy(
         y: cand.y,
         largura: peca.largura,
         altura: peca.altura,
+        tipoCorte: peca.tipoCorte,
         id: peca.id,
       };
 
@@ -296,6 +298,7 @@ export function posicionarPecasShelf(
           y: yPosicao,
           largura: peca.largura,
           altura: peca.altura,
+          tipoCorte: peca.tipoCorte,
           id: peca.id,
         });
 
@@ -323,6 +326,7 @@ export function posicionarPecasShelf(
           y: novaShelfY,
           largura: peca.largura,
           altura: peca.altura,
+          tipoCorte: peca.tipoCorte,
           id: peca.id,
         });
 
@@ -405,6 +409,7 @@ export function posicionarPecasGuillotine(
         y: ret.y,
         largura: peca.largura,
         altura: peca.altura,
+        tipoCorte: peca.tipoCorte,
         id: peca.id,
       });
 
