@@ -3,6 +3,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { InfoTooltip } from "@/components/InfoTooltip";
+import { parametrosInfo } from "@/lib/parametros-info";
 import type { ConfiguracoesFerramenta } from "@/types";
 
 type ConfiguracoesFerramentaProps = {
@@ -23,9 +25,15 @@ export function ConfiguracoesFerramenta({ config, onChange }: ConfiguracoesFerra
       <CardContent className="space-y-2 sm:space-y-3">
         <div className="grid grid-cols-2 gap-2 sm:gap-3">
           <div className="space-y-1.5">
-            <Label htmlFor="diametro" className="text-xs sm:text-sm">
-              Diâmetro (mm)
-            </Label>
+            <div className="flex items-center gap-1">
+              <Label htmlFor="diametro" className="text-xs sm:text-sm">
+                Diâmetro (Diameter)
+              </Label>
+              <InfoTooltip
+                title={parametrosInfo.ferramentaDiametro.title}
+                content={parametrosInfo.ferramentaDiametro.content}
+              />
+            </div>
             <Input
               id="diametro"
               type="number"
@@ -37,9 +45,15 @@ export function ConfiguracoesFerramenta({ config, onChange }: ConfiguracoesFerra
             />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="numeroFerramenta" className="text-xs sm:text-sm">
-              Número (T)
-            </Label>
+            <div className="flex items-center gap-1">
+              <Label htmlFor="numeroFerramenta" className="text-xs sm:text-sm">
+                Número (Tool Number)
+              </Label>
+              <InfoTooltip
+                title={parametrosInfo.ferramentaNumero.title}
+                content={parametrosInfo.ferramentaNumero.content}
+              />
+            </div>
             <Input
               id="numeroFerramenta"
               type="number"

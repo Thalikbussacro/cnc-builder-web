@@ -6,6 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { InfoTooltip } from "@/components/InfoTooltip";
+import { parametrosInfo } from "@/lib/parametros-info";
 import type { Peca, ConfiguracoesChapa, TipoCorte } from "@/types";
 import { posicionarPecas, type MetodoNesting } from "@/lib/nesting-algorithm";
 
@@ -132,17 +134,23 @@ export function CadastroPeca({
         </div>
 
         <div className="space-y-1.5">
-          <Label htmlFor="tipoCorte" className="text-xs sm:text-sm">
-            Tipo de Corte
-          </Label>
+          <div className="flex items-center gap-1">
+            <Label htmlFor="tipoCorte" className="text-xs sm:text-sm">
+              Tipo de Corte (Cut Type)
+            </Label>
+            <InfoTooltip
+              title={parametrosInfo.tipoCorte.title}
+              content={parametrosInfo.tipoCorte.content}
+            />
+          </div>
           <Select value={tipoCorte} onValueChange={(value: TipoCorte) => setTipoCorte(value)}>
             <SelectTrigger id="tipoCorte" className="h-9 sm:h-10">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="externo">Externo (G41)</SelectItem>
-              <SelectItem value="interno">Interno (G42)</SelectItem>
-              <SelectItem value="na-linha">Na Linha (G40)</SelectItem>
+              <SelectItem value="externo">🔵 Externo (G41)</SelectItem>
+              <SelectItem value="interno">🔴 Interno (G42)</SelectItem>
+              <SelectItem value="na-linha">⚪ Na Linha (G40)</SelectItem>
             </SelectContent>
           </Select>
         </div>

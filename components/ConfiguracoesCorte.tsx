@@ -3,6 +3,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { InfoTooltip } from "@/components/InfoTooltip";
+import { parametrosInfo } from "@/lib/parametros-info";
 import type { ConfiguracoesCorte } from "@/types";
 
 type ConfiguracoesCorteProps = {
@@ -24,9 +26,15 @@ export function ConfiguracoesCorte({ config, onChange }: ConfiguracoesCorteProps
       <CardContent className="space-y-2 sm:space-y-3">
         <div className="grid grid-cols-2 gap-2 sm:gap-3">
           <div className="space-y-1.5">
-            <Label htmlFor="profundidade" className="text-xs sm:text-sm">
-              Profundidade Total (mm)
-            </Label>
+            <div className="flex items-center gap-1">
+              <Label htmlFor="profundidade" className="text-xs sm:text-sm">
+                Profundidade (Depth)
+              </Label>
+              <InfoTooltip
+                title={parametrosInfo.profundidade.title}
+                content={parametrosInfo.profundidade.content}
+              />
+            </div>
             <Input
               id="profundidade"
               type="number"
@@ -38,9 +46,15 @@ export function ConfiguracoesCorte({ config, onChange }: ConfiguracoesCorteProps
             />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="profundidadePorPassada" className="text-xs sm:text-sm">
-              Prof. por Passada (mm)
-            </Label>
+            <div className="flex items-center gap-1">
+              <Label htmlFor="profundidadePorPassada" className="text-xs sm:text-sm">
+                Prof./Passada (Depth/Pass)
+              </Label>
+              <InfoTooltip
+                title={parametrosInfo.profundidadePorPassada.title}
+                content={parametrosInfo.profundidadePorPassada.content}
+              />
+            </div>
             <Input
               id="profundidadePorPassada"
               type="number"
@@ -54,9 +68,15 @@ export function ConfiguracoesCorte({ config, onChange }: ConfiguracoesCorteProps
         </div>
 
         <div className="space-y-1.5">
-          <Label htmlFor="espacamento" className="text-xs sm:text-sm">
-            Espaçamento entre Peças (mm)
-          </Label>
+          <div className="flex items-center gap-1">
+            <Label htmlFor="espacamento" className="text-xs sm:text-sm">
+              Espaçamento (Spacing)
+            </Label>
+            <InfoTooltip
+              title={parametrosInfo.espacamento.title}
+              content={parametrosInfo.espacamento.content}
+            />
+          </div>
           <Input
             id="espacamento"
             type="number"
@@ -73,9 +93,15 @@ export function ConfiguracoesCorte({ config, onChange }: ConfiguracoesCorteProps
 
           <div className="grid grid-cols-2 gap-2 sm:gap-3">
             <div className="space-y-1.5">
-              <Label htmlFor="feedrate" className="text-xs">
-                Feedrate (mm/min)
-              </Label>
+              <div className="flex items-center gap-1">
+                <Label htmlFor="feedrate" className="text-xs">
+                  Vel. Avanço (Feedrate)
+                </Label>
+                <InfoTooltip
+                  title={parametrosInfo.feedrate.title}
+                  content={parametrosInfo.feedrate.content}
+                />
+              </div>
               <Input
                 id="feedrate"
                 type="number"
@@ -88,9 +114,15 @@ export function ConfiguracoesCorte({ config, onChange }: ConfiguracoesCorteProps
               />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="plungeRate" className="text-xs">
-                Plunge Rate (mm/min)
-              </Label>
+              <div className="flex items-center gap-1">
+                <Label htmlFor="plungeRate" className="text-xs">
+                  Vel. Mergulho (Plunge)
+                </Label>
+                <InfoTooltip
+                  title={parametrosInfo.plungeRate.title}
+                  content={parametrosInfo.plungeRate.content}
+                />
+              </div>
               <Input
                 id="plungeRate"
                 type="number"
@@ -105,9 +137,15 @@ export function ConfiguracoesCorte({ config, onChange }: ConfiguracoesCorteProps
           </div>
 
           <div className="space-y-1.5 mt-2">
-            <Label htmlFor="spindleSpeed" className="text-xs">
-              Spindle Speed (RPM)
-            </Label>
+            <div className="flex items-center gap-1">
+              <Label htmlFor="spindleSpeed" className="text-xs">
+                Rotação (Spindle Speed)
+              </Label>
+              <InfoTooltip
+                title={parametrosInfo.spindleSpeed.title}
+                content={parametrosInfo.spindleSpeed.content}
+              />
+            </div>
             <Input
               id="spindleSpeed"
               type="number"

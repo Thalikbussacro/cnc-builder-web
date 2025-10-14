@@ -7,21 +7,23 @@ import { useState, useEffect } from 'react';
  * @returns [value, setValue] - Estado e função para atualizar
  */
 export function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T) => void] {
-  // Estado para armazenar nosso valor
-  const [storedValue, setStoredValue] = useState<T>(() => {
-    if (typeof window === 'undefined') {
-      return initialValue;
-    }
+  // Sempre começa com initialValue para evitar mismatch de hidratação
+  const [storedValue, setStoredValue] = useState<T>(initialValue);
+  const [isHydrated, setIsHydrated] = useState(false);
+
+  // Carrega do localStorage apenas no cliente após hidratação
+  useEffect(() => {
+    setIsHydrated(true);
 
     try {
-      // Tenta buscar do localStorage
       const item = window.localStorage.getItem(key);
-      return item ? JSON.parse(item) : initialValue;
+      if (item) {
+        setStoredValue(JSON.parse(item));
+      }
     } catch (error) {
       console.warn(`Erro ao carregar ${key} do localStorage:`, error);
-      return initialValue;
     }
-  });
+  }, [key]);
 
   // Função para atualizar o valor
   const setValue = (value: T) => {
@@ -30,7 +32,7 @@ export function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T)
       setStoredValue(value);
 
       // Salva no localStorage
-      if (typeof window !== 'undefined') {
+      if (isHydrated) {
         window.localStorage.setItem(key, JSON.stringify(value));
       }
     } catch (error) {
