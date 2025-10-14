@@ -83,7 +83,7 @@ export const parametrosInfo = {
           <strong>Regra prática:</strong> Use 50-100% do diâmetro da fresa como profundidade por passada.
         </div>
         <div>
-          <strong>Quando aumentar:</strong> Materiais macios, fresas grandes (>6mm), cortes rápidos (qualidade não crítica).
+          <strong>Quando aumentar:</strong> Materiais macios, fresas grandes ({'>'}6mm), cortes rápidos (qualidade não crítica).
         </div>
         <div>
           <strong>Quando diminuir:</strong> Materiais duros/quebradiços, fresas pequenas, acabamento fino, máquina com pouca rigidez.
