@@ -2,6 +2,9 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Maximize2 } from "lucide-react";
+import { PreviewFullscreen } from "@/components/PreviewFullscreen";
 import type { PecaPosicionada } from "@/types";
 
 type PreviewCanvasProps = {
@@ -12,12 +15,12 @@ type PreviewCanvasProps = {
 
 // Cores para peças - tons industriais/metálicos
 const CORES = [
-  { hex: "#e67e22", nome: "Laranja" },  // Laranja industrial
-  { hex: "#3498db", nome: "Azul" },     // Azul metálico
-  { hex: "#95a5a6", nome: "Cinza" },    // Cinza aço
-  { hex: "#e74c3c", nome: "Vermelho" }, // Vermelho
-  { hex: "#16a085", nome: "Verde" },    // Verde petróleo
-  { hex: "#f39c12", nome: "Amarelo" },  // Amarelo industrial
+  { hex: "#e67e22", nome: "Laranja" },
+  { hex: "#3498db", nome: "Azul" },
+  { hex: "#95a5a6", nome: "Cinza" },
+  { hex: "#e74c3c", nome: "Vermelho" },
+  { hex: "#16a085", nome: "Verde" },
+  { hex: "#f39c12", nome: "Amarelo" },
 ];
 
 export function PreviewCanvas({
@@ -27,7 +30,8 @@ export function PreviewCanvas({
 }: PreviewCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const [canvasSize, setCanvasSize] = useState({ width: 800, height: 600 });
+  const [canvasSize, setCanvasSize] = useState({ width: 500, height: 380 });
+  const [fullscreenOpen, setFullscreenOpen] = useState(false);
 
   // Calcula taxa de aproveitamento
   const areaTotalChapa = chapaLargura * chapaAltura;
@@ -37,16 +41,16 @@ export function PreviewCanvas({
   );
   const taxaAproveitamento = areaTotalChapa > 0 ? (areaPecas / areaTotalChapa) * 100 : 0;
 
-  // Ajusta tamanho do canvas baseado no container
+  // Ajusta tamanho do canvas baseado no container (reduzido)
   useEffect(() => {
     const updateCanvasSize = () => {
       if (containerRef.current) {
-        const containerWidth = containerRef.current.clientWidth - 16; // padding reduzido
-        // Altura ainda MENOR para interface compacta
-        const containerHeight = Math.min(280, window.innerHeight - 400);
+        const containerWidth = containerRef.current.clientWidth - 16;
+        // Altura reduzida para preview compacto
+        const containerHeight = Math.min(320, window.innerHeight - 380);
         setCanvasSize({
-          width: Math.max(300, containerWidth),
-          height: Math.max(220, containerHeight),
+          width: Math.max(280, Math.min(500, containerWidth)), // Largura máxima de 500px
+          height: Math.max(200, containerHeight),
         });
       }
     };
@@ -106,9 +110,9 @@ export function PreviewCanvas({
     ctx.setLineDash([]);
 
     // Desenha chapa (madeira clara)
-    ctx.fillStyle = "#d4a574"; // Tom de madeira clara
+    ctx.fillStyle = "#d4a574";
     ctx.fillRect(offsetX, offsetY, chapaLargura * escala, chapaAltura * escala);
-    ctx.strokeStyle = "#c89858"; // Borda madeira mais escura
+    ctx.strokeStyle = "#c89858";
     ctx.lineWidth = 3;
     ctx.strokeRect(offsetX, offsetY, chapaLargura * escala, chapaAltura * escala);
 
@@ -176,11 +180,22 @@ export function PreviewCanvas({
   }, [chapaLargura, chapaAltura, pecasPosicionadas, canvasSize]);
 
   return (
-    <Card ref={containerRef}>
-      <CardHeader className="pb-2">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-          <CardTitle className="text-base sm:text-lg">Pré-visualização</CardTitle>
-          <div className="flex flex-wrap items-center gap-2 text-xs">
+    <>
+      <Card ref={containerRef}>
+        <CardHeader className="pb-2">
+          <div className="flex items-center justify-between gap-2">
+            <CardTitle className="text-base sm:text-lg">Pré-visualização</CardTitle>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setFullscreenOpen(true)}
+              className="h-8 w-8 p-0"
+              title="Visualizar em tela cheia"
+            >
+              <Maximize2 className="h-4 w-4" />
+            </Button>
+          </div>
+          <div className="flex flex-wrap items-center gap-2 text-xs mt-2">
             <div className="flex items-center gap-1.5">
               <span className="text-muted-foreground">Chapa:</span>
               <span className="font-semibold">{chapaLargura.toFixed(0)}×{chapaAltura.toFixed(0)}mm</span>
@@ -207,19 +222,27 @@ export function PreviewCanvas({
               </span>
             </div>
           </div>
-        </div>
-      </CardHeader>
-      <CardContent className="p-2 pb-3">
-        <div className="flex items-center justify-center bg-black/20 rounded-lg p-1.5 overflow-auto">
-          <canvas
-            ref={canvasRef}
-            width={canvasSize.width}
-            height={canvasSize.height}
-            className="border border-border max-w-full"
-            style={{ backgroundColor: "#1a1613" }}
-          />
-        </div>
-      </CardContent>
-    </Card>
+        </CardHeader>
+        <CardContent className="p-2 pb-3">
+          <div className="flex items-center justify-center bg-black/20 rounded-lg p-1.5">
+            <canvas
+              ref={canvasRef}
+              width={canvasSize.width}
+              height={canvasSize.height}
+              className="border border-border"
+              style={{ backgroundColor: "#1a1613" }}
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      <PreviewFullscreen
+        open={fullscreenOpen}
+        onOpenChange={setFullscreenOpen}
+        chapaLargura={chapaLargura}
+        chapaAltura={chapaAltura}
+        pecasPosicionadas={pecasPosicionadas}
+      />
+    </>
   );
 }

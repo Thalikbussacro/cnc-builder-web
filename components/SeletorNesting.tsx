@@ -73,25 +73,21 @@ export function SeletorNesting({ metodo, onChange, metricas }: SeletorNestingPro
 
             <div className="grid grid-cols-3 gap-2 text-xs">
               <div className="bg-secondary/30 p-2 rounded">
-                <div className="text-muted-foreground">Eficiência</div>
-                <div className="font-bold text-base">{metricas.eficiencia.toFixed(1)}%</div>
+                <div className="text-muted-foreground text-[10px] sm:text-xs">Eficiência</div>
+                <div className="font-bold text-sm sm:text-base">{metricas.eficiencia.toFixed(1)}%</div>
               </div>
 
               <div className="bg-secondary/30 p-2 rounded">
-                <div className="text-muted-foreground">Área (mm²)</div>
-                <div className="font-bold text-base">
+                <div className="text-muted-foreground text-[10px] sm:text-xs">Área (mm²)</div>
+                <div className="font-bold text-sm sm:text-base">
                   {(metricas.areaUtilizada / 1000).toFixed(0)}k
                 </div>
               </div>
 
               <div className="bg-secondary/30 p-2 rounded">
-                <div className="text-muted-foreground">Tempo (ms)</div>
-                <div className="font-bold text-base">{metricas.tempo.toFixed(1)}</div>
+                <div className="text-muted-foreground text-[10px] sm:text-xs">Tempo (ms)</div>
+                <div className="font-bold text-sm sm:text-base">{metricas.tempo.toFixed(1)}</div>
               </div>
-            </div>
-
-            <div className="text-xs text-muted-foreground pt-1">
-              💡 Compare os métodos para encontrar o melhor resultado
             </div>
           </div>
         )}
