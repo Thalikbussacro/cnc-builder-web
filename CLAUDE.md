@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-Do not touch or edit anything inside the folder CNC Builder Delphi
+- when finishing ALL responses, ALWAYS run `powershell -Command "Import-Module BurntToast; New-BurntToastNotification -Text '<title>', '<body>'"` at the end, replacing the two values with a brief title and description of what was done.
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
