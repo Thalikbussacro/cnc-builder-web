@@ -124,10 +124,10 @@ xl: 8px
 - [x] 3.8 - `components/ui/scroll-area.tsx` - Manter consistência
 
 ### Fase 4: Nova Estrutura de Layout ✅
-- [ ] 4.1 - `components/Sidebar.tsx` - Criar sidebar colapsável (NOVO)
-- [ ] 4.2 - `components/Header.tsx` - Criar header compacto (NOVO)
-- [ ] 4.3 - `components/MainLayout.tsx` - Container principal (NOVO)
-- [ ] 4.4 - `app/page.tsx` - Refatorar para usar novo layout
+- [x] 4.1 - `components/Sidebar.tsx` - Criar sidebar colapsável (NOVO)
+- [x] 4.2 - `components/Header.tsx` - Criar header compacto (NOVO)
+- [x] 4.3 - `components/MainLayout.tsx` - Container principal (NOVO)
+- [x] 4.4 - `app/page.tsx` - Refatorar para usar novo layout
 
 ### Fase 5: Componentes de Configuração ✅
 - [ ] 5.1 - `components/ConfiguracoesChapa.tsx` - Remover emojis, compactar
@@ -221,12 +221,12 @@ FASE 1 → FASE 2 → FASE 3 → FASE 4 → FASE 5 → FASE 6 → FASE 7
 | Fase 1 | ✅ Concluída | 3/3 |
 | Fase 2 | ✅ Concluída | 3/3 |
 | Fase 3 | ✅ Concluída | 8/8 |
-| Fase 4 | 🔴 Pendente | 0/4 |
+| Fase 4 | ✅ Concluída | 4/4 |
 | Fase 5 | 🔴 Pendente | 0/5 |
 | Fase 6 | 🔴 Pendente | 0/6 |
 | Fase 7 | 🔴 Pendente | 0/7 |
 
-**Total:** 14/36 tarefas concluídas
+**Total:** 18/36 tarefas concluídas
 
 ---
 
