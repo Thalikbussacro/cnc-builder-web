@@ -77,7 +77,12 @@ export function gerarGCode(
       const z = -Math.min(j * profundidadePorPassada, profundidade);
 
       gcode += '\n';
-      gcode += `; Peca ${cortadas} (${formatarNumero(peca.largura, 0)}x${formatarNumero(peca.altura, 0)}) - Tipo: ${peca.tipoCorte} - passada ${j}\n`;
+      // Adiciona nome customizado da peça se disponível
+      if (peca.nome) {
+        gcode += `; ${peca.nome} - Peca ${cortadas} (${formatarNumero(peca.largura, 0)}x${formatarNumero(peca.altura, 0)}) - Tipo: ${peca.tipoCorte} - passada ${j}\n`;
+      } else {
+        gcode += `; Peca ${cortadas} (${formatarNumero(peca.largura, 0)}x${formatarNumero(peca.altura, 0)}) - Tipo: ${peca.tipoCorte} - passada ${j}\n`;
+      }
       gcode += 'G0 Z5 ; Levanta fresa antes de posicionar\n';
       gcode += `G0 X${formatarNumero(peca.x)} Y${formatarNumero(peca.y)} ; Posiciona no início da peça\n`;
       gcode += `G1 Z${formatarNumero(z)} F${plungeRate} ; Desce a fresa com plunge rate\n`;
