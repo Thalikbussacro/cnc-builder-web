@@ -4,50 +4,50 @@
 
 @layer base {
   :root {
-    /* Tema CLARO - Padrão (VSCode Light + Industrial) */
-    --background: 0 0% 98%;           /* Cinza muito claro */
-    --foreground: 0 0% 15%;           /* Cinza escuro para texto */
+    /* Tema CLARO - Inspirado na imagem (tons quentes) */
+    --background: 40 20% 97%;         /* Off-white quente */
+    --foreground: 30 15% 15%;         /* Marrom escuro para texto */
     --card: 0 0% 100%;                /* Branco puro para cards */
-    --card-foreground: 0 0% 15%;
+    --card-foreground: 30 15% 15%;
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 15%;
-    --primary: 211 85% 45%;           /* Azul industrial forte */
-    --primary-foreground: 0 0% 100%;
-    --secondary: 210 12% 92%;         /* Cinza claro suave */
-    --secondary-foreground: 0 0% 15%;
-    --muted: 210 10% 94%;
-    --muted-foreground: 0 0% 45%;
-    --accent: 28 85% 55%;             /* Laranja CNC */
+    --popover-foreground: 30 15% 15%;
+    --primary: 35 90% 55%;            /* Amarelo-laranja da imagem */
+    --primary-foreground: 30 15% 15%;
+    --secondary: 38 45% 88%;          /* Bege claro */
+    --secondary-foreground: 30 15% 15%;
+    --muted: 40 25% 92%;              /* Bege muito claro */
+    --muted-foreground: 30 25% 40%;   /* Marrom médio */
+    --accent: 28 88% 58%;             /* Laranja vibrante */
     --accent-foreground: 0 0% 100%;
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
-    --border: 0 0% 88%;               /* Bordas suaves */
+    --border: 38 20% 85%;             /* Bege para bordas */
     --input: 0 0% 100%;               /* Input branco */
-    --ring: 211 85% 45%;
-    --radius: 0.375rem;               /* Cantos mais quadrados */
+    --ring: 35 90% 55%;
+    --radius: 0.75rem;                /* Mais orgânico */
   }
 
   .dark {
-    /* Tema ESCURO (VSCode Dark + Industrial) */
-    --background: 220 15% 12%;        /* Azul-cinza escuro */
-    --foreground: 0 0% 92%;           /* Texto claro */
-    --card: 220 13% 16%;              /* Cards levemente mais claros */
-    --card-foreground: 0 0% 92%;
-    --popover: 220 13% 16%;
-    --popover-foreground: 0 0% 92%;
-    --primary: 211 85% 55%;           /* Azul industrial (mais claro no dark) */
-    --primary-foreground: 0 0% 100%;
-    --secondary: 220 10% 22%;         /* Cinza escuro */
-    --secondary-foreground: 0 0% 92%;
-    --muted: 220 10% 20%;
-    --muted-foreground: 0 0% 60%;
-    --accent: 28 85% 60%;             /* Laranja CNC (ajustado) */
+    /* Tema ESCURO - Tons quentes escuros */
+    --background: 30 15% 12%;         /* Marrom muito escuro */
+    --foreground: 40 15% 92%;         /* Bege claro para texto */
+    --card: 30 12% 16%;               /* Marrom escuro para cards */
+    --card-foreground: 40 15% 92%;
+    --popover: 30 12% 16%;
+    --popover-foreground: 40 15% 92%;
+    --primary: 35 88% 58%;            /* Amarelo-laranja */
+    --primary-foreground: 30 15% 15%;
+    --secondary: 30 15% 22%;          /* Marrom médio */
+    --secondary-foreground: 40 15% 92%;
+    --muted: 30 10% 20%;
+    --muted-foreground: 40 15% 65%;
+    --accent: 28 88% 60%;             /* Laranja */
     --accent-foreground: 0 0% 100%;
     --destructive: 0 72% 55%;
     --destructive-foreground: 0 0% 100%;
-    --border: 220 10% 24%;
-    --input: 220 13% 18%;
-    --ring: 211 85% 55%;
+    --border: 30 15% 24%;
+    --input: 30 12% 18%;
+    --ring: 35 88% 58%;
   }
 
   * {
