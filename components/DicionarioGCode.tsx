@@ -347,13 +347,13 @@ export function DicionarioGCode() {
 
       {/* Painel Lateral Deslizante */}
       <div
-        className={`fixed top-0 right-0 h-full w-full sm:w-[600px] bg-[#1a1814] border-l border-border z-[100] shadow-2xl transform transition-transform duration-300 ease-in-out ${
+        className={`fixed top-0 right-0 h-full w-full sm:w-[600px] bg-background border-l-2 border-amber-600/20 z-[100] shadow-2xl transform transition-transform duration-300 ease-in-out ${
           aberto ? "translate-x-0" : "translate-x-full"
         }`}
       >
         <div className="flex flex-col h-full">
           {/* Header Fixo */}
-          <div className="border-b border-amber-600/30 bg-[#292318] px-4 py-3 flex-shrink-0">
+          <div className="border-b-2 border-amber-600/30 bg-amber-950/10 dark:bg-amber-950/30 px-4 py-3 flex-shrink-0">
             <div className="flex items-center justify-between gap-3 mb-3">
               <div className="flex-1 min-w-0">
                 <h2 className="text-lg sm:text-xl font-bold flex items-center gap-2 text-amber-500">
@@ -407,21 +407,21 @@ export function DicionarioGCode() {
                   </div>
                   <div className="space-y-2">
                     {comandosFiltrados.comandosG.map((cmd) => (
-                      <div key={cmd.codigo} className="bg-secondary/40 border border-border rounded-md p-3 hover:border-amber-600/50 transition-colors">
+                      <div key={cmd.codigo} className="bg-amber-50/50 dark:bg-secondary/40 border-2 border-amber-200/50 dark:border-border rounded-lg p-3 hover:border-amber-500/60 dark:hover:border-amber-600/50 transition-colors">
                         <div className="flex items-start gap-3">
-                          <code className="font-mono font-bold text-amber-400 text-sm bg-black/60 px-2 py-1 rounded min-w-[50px] text-center flex-shrink-0">
+                          <code className="font-mono font-bold text-amber-700 dark:text-amber-400 text-sm bg-amber-100 dark:bg-black/60 px-2 py-1 rounded min-w-[50px] text-center flex-shrink-0">
                             {cmd.codigo}
                           </code>
                           <div className="flex-1 min-w-0 space-y-1.5">
-                            <div className="font-bold text-sm">{cmd.nome}</div>
+                            <div className="font-bold text-sm text-foreground">{cmd.nome}</div>
                             <div className="text-xs text-muted-foreground leading-relaxed">{cmd.descricao}</div>
-                            <div className="bg-black/40 rounded p-2 space-y-1">
-                              <div className="text-[10px] text-muted-foreground">Exemplo:</div>
-                              <code className="text-xs text-amber-300 font-mono block">{cmd.exemplo}</code>
+                            <div className="bg-amber-100/50 dark:bg-black/40 rounded p-2 space-y-1">
+                              <div className="text-[10px] text-muted-foreground font-semibold">Exemplo:</div>
+                              <code className="text-xs text-amber-700 dark:text-amber-300 font-mono block font-semibold">{cmd.exemplo}</code>
                             </div>
-                            <div className="bg-amber-950/30 border border-amber-600/20 rounded p-2 space-y-0.5">
-                              <div className="text-[10px] font-semibold text-amber-400">Quando usar:</div>
-                              <div className="text-xs text-amber-200/90 leading-relaxed">{cmd.usoReal}</div>
+                            <div className="bg-amber-100 dark:bg-amber-950/30 border border-amber-300 dark:border-amber-600/20 rounded p-2 space-y-0.5">
+                              <div className="text-[10px] font-bold text-amber-700 dark:text-amber-400">Quando usar:</div>
+                              <div className="text-xs text-amber-900 dark:text-amber-200/90 leading-relaxed">{cmd.usoReal}</div>
                             </div>
                           </div>
                         </div>
@@ -439,21 +439,21 @@ export function DicionarioGCode() {
                   </div>
                   <div className="space-y-2">
                     {comandosFiltrados.comandosM.map((cmd) => (
-                      <div key={cmd.codigo} className="bg-secondary/40 border border-border rounded-md p-3 hover:border-orange-600/50 transition-colors">
+                      <div key={cmd.codigo} className="bg-orange-50/50 dark:bg-secondary/40 border-2 border-orange-200/50 dark:border-border rounded-lg p-3 hover:border-orange-500/60 dark:hover:border-orange-600/50 transition-colors">
                         <div className="flex items-start gap-3">
-                          <code className="font-mono font-bold text-orange-400 text-sm bg-black/60 px-2 py-1 rounded min-w-[50px] text-center flex-shrink-0">
+                          <code className="font-mono font-bold text-orange-700 dark:text-orange-400 text-sm bg-orange-100 dark:bg-black/60 px-2 py-1 rounded min-w-[50px] text-center flex-shrink-0">
                             {cmd.codigo}
                           </code>
                           <div className="flex-1 min-w-0 space-y-1.5">
-                            <div className="font-bold text-sm">{cmd.nome}</div>
+                            <div className="font-bold text-sm text-foreground">{cmd.nome}</div>
                             <div className="text-xs text-muted-foreground leading-relaxed">{cmd.descricao}</div>
-                            <div className="bg-black/40 rounded p-2 space-y-1">
-                              <div className="text-[10px] text-muted-foreground">Exemplo:</div>
-                              <code className="text-xs text-orange-300 font-mono block">{cmd.exemplo}</code>
+                            <div className="bg-orange-100/50 dark:bg-black/40 rounded p-2 space-y-1">
+                              <div className="text-[10px] text-muted-foreground font-semibold">Exemplo:</div>
+                              <code className="text-xs text-orange-700 dark:text-orange-300 font-mono block font-semibold">{cmd.exemplo}</code>
                             </div>
-                            <div className="bg-orange-950/30 border border-orange-600/20 rounded p-2 space-y-0.5">
-                              <div className="text-[10px] font-semibold text-orange-400">Quando usar:</div>
-                              <div className="text-xs text-orange-200/90 leading-relaxed">{cmd.usoReal}</div>
+                            <div className="bg-orange-100 dark:bg-orange-950/30 border border-orange-300 dark:border-orange-600/20 rounded p-2 space-y-0.5">
+                              <div className="text-[10px] font-bold text-orange-700 dark:text-orange-400">Quando usar:</div>
+                              <div className="text-xs text-orange-900 dark:text-orange-200/90 leading-relaxed">{cmd.usoReal}</div>
                             </div>
                           </div>
                         </div>
@@ -471,21 +471,21 @@ export function DicionarioGCode() {
                   </div>
                   <div className="space-y-2">
                     {comandosFiltrados.parametros.map((param) => (
-                      <div key={param.codigo} className="bg-secondary/40 border border-border rounded-md p-3 hover:border-yellow-600/50 transition-colors">
+                      <div key={param.codigo} className="bg-yellow-50/50 dark:bg-secondary/40 border-2 border-yellow-200/50 dark:border-border rounded-lg p-3 hover:border-yellow-500/60 dark:hover:border-yellow-600/50 transition-colors">
                         <div className="flex items-start gap-3">
-                          <code className="font-mono font-bold text-yellow-400 text-sm bg-black/60 px-2 py-1 rounded min-w-[50px] text-center flex-shrink-0">
+                          <code className="font-mono font-bold text-yellow-700 dark:text-yellow-400 text-sm bg-yellow-100 dark:bg-black/60 px-2 py-1 rounded min-w-[50px] text-center flex-shrink-0">
                             {param.codigo}
                           </code>
                           <div className="flex-1 min-w-0 space-y-1.5">
-                            <div className="font-bold text-sm">{param.nome}</div>
+                            <div className="font-bold text-sm text-foreground">{param.nome}</div>
                             <div className="text-xs text-muted-foreground leading-relaxed">{param.descricao}</div>
-                            <div className="bg-black/40 rounded p-2 space-y-1">
-                              <div className="text-[10px] text-muted-foreground">Exemplo:</div>
-                              <code className="text-xs text-yellow-300 font-mono block">{param.exemplo}</code>
+                            <div className="bg-yellow-100/50 dark:bg-black/40 rounded p-2 space-y-1">
+                              <div className="text-[10px] text-muted-foreground font-semibold">Exemplo:</div>
+                              <code className="text-xs text-yellow-700 dark:text-yellow-300 font-mono block font-semibold">{param.exemplo}</code>
                             </div>
-                            <div className="bg-yellow-950/30 border border-yellow-600/20 rounded p-2 space-y-0.5">
-                              <div className="text-[10px] font-semibold text-yellow-400">Quando usar:</div>
-                              <div className="text-xs text-yellow-200/90 leading-relaxed">{param.usoReal}</div>
+                            <div className="bg-yellow-100 dark:bg-yellow-950/30 border border-yellow-300 dark:border-yellow-600/20 rounded p-2 space-y-0.5">
+                              <div className="text-[10px] font-bold text-yellow-700 dark:text-yellow-400">Quando usar:</div>
+                              <div className="text-xs text-yellow-900 dark:text-yellow-200/90 leading-relaxed">{param.usoReal}</div>
                             </div>
                           </div>
                         </div>
@@ -498,9 +498,9 @@ export function DicionarioGCode() {
               {/* Exemplo completo - sempre visível */}
               {!busca && (
                 <>
-                  <section className="bg-amber-900/20 border-2 border-amber-600/40 rounded-md p-3">
-                    <h3 className="text-sm font-bold text-amber-500 mb-2">Exemplo de G-code Completo</h3>
-                    <div className="bg-black/60 rounded-md p-2.5 space-y-0.5 font-mono text-[11px] overflow-x-auto">
+                  <section className="bg-amber-100/80 dark:bg-amber-900/20 border-2 border-amber-400/50 dark:border-amber-600/40 rounded-lg p-3">
+                    <h3 className="text-sm font-bold text-amber-700 dark:text-amber-500 mb-2">Exemplo de G-code Completo</h3>
+                    <div className="bg-slate-800 dark:bg-black/60 rounded-md p-2.5 space-y-0.5 font-mono text-[11px] overflow-x-auto">
                       <div className="text-gray-400">; Programa para cortar retângulo 100x50mm em madeira MDF 15mm</div>
                       <div className="text-amber-400">G21</div> <span className="text-gray-500">; Milímetros</span><br/>
                       <div className="text-amber-400">G90</div> <span className="text-gray-500">; Coordenadas absolutas</span><br/>
@@ -524,15 +524,15 @@ export function DicionarioGCode() {
                   </section>
 
                   {/* Dicas finais */}
-                  <section className="bg-red-900/20 border border-red-600/30 rounded-md p-3 mb-4">
-                    <h3 className="text-sm font-bold text-red-400 mb-2">ATENÇÃO - Erros Comuns para EVITAR</h3>
+                  <section className="bg-red-100/80 dark:bg-red-900/20 border-2 border-red-400/50 dark:border-red-600/30 rounded-lg p-3 mb-4">
+                    <h3 className="text-sm font-bold text-red-700 dark:text-red-400 mb-2">ATENÇÃO - Erros Comuns para EVITAR</h3>
                     <ul className="space-y-1.5 text-xs">
-                      <li className="flex gap-2"><span className="text-red-400 flex-shrink-0 font-bold">X</span> <span>Esquecer G21 no início - máquina pode interpretar como polegadas</span></li>
-                      <li className="flex gap-2"><span className="text-red-400 flex-shrink-0 font-bold">X</span> <span>Usar G41 e esquecer G40 depois - próxima peça sai com offset errado</span></li>
-                      <li className="flex gap-2"><span className="text-red-400 flex-shrink-0 font-bold">X</span> <span>M3 sem G4 depois - começa a cortar com spindle ainda acelerando</span></li>
-                      <li className="flex gap-2"><span className="text-red-400 flex-shrink-0 font-bold">X</span> <span>Descer Z muito rápido (usar feedrate ao invés de plunge rate)</span></li>
-                      <li className="flex gap-2"><span className="text-red-400 flex-shrink-0 font-bold">X</span> <span>Confundir G41 com G42 - fresa corta no lado errado da madeira</span></li>
-                      <li className="flex gap-2"><span className="text-red-400 flex-shrink-0 font-bold">X</span> <span>Esquecer M5 no final - spindle fica ligado queimando o motor</span></li>
+                      <li className="flex gap-2"><span className="text-red-600 dark:text-red-400 flex-shrink-0 font-bold">X</span> <span className="text-red-900 dark:text-red-200">Esquecer G21 no início - máquina pode interpretar como polegadas</span></li>
+                      <li className="flex gap-2"><span className="text-red-600 dark:text-red-400 flex-shrink-0 font-bold">X</span> <span className="text-red-900 dark:text-red-200">Usar G41 e esquecer G40 depois - próxima peça sai com offset errado</span></li>
+                      <li className="flex gap-2"><span className="text-red-600 dark:text-red-400 flex-shrink-0 font-bold">X</span> <span className="text-red-900 dark:text-red-200">M3 sem G4 depois - começa a cortar com spindle ainda acelerando</span></li>
+                      <li className="flex gap-2"><span className="text-red-600 dark:text-red-400 flex-shrink-0 font-bold">X</span> <span className="text-red-900 dark:text-red-200">Descer Z muito rápido (usar feedrate ao invés de plunge rate)</span></li>
+                      <li className="flex gap-2"><span className="text-red-600 dark:text-red-400 flex-shrink-0 font-bold">X</span> <span className="text-red-900 dark:text-red-200">Confundir G41 com G42 - fresa corta no lado errado da madeira</span></li>
+                      <li className="flex gap-2"><span className="text-red-600 dark:text-red-400 flex-shrink-0 font-bold">X</span> <span className="text-red-900 dark:text-red-200">Esquecer M5 no final - spindle fica ligado queimando o motor</span></li>
                     </ul>
                   </section>
                 </>
