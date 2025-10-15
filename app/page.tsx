@@ -129,7 +129,7 @@ export default function Home() {
         </div>
 
         {/* Main Content Grid */}
-        <div className="grid grid-cols-1 xl:grid-cols-[380px,1fr] gap-3 flex-1 overflow-hidden">
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-3 flex-1 overflow-hidden">
           {/* Left Column - Configurations */}
           <div className="flex flex-col gap-3 overflow-auto">
             <Tabs value={abaAtiva} onValueChange={setAbaAtiva} className="w-full">
