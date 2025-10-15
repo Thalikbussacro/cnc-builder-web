@@ -46,6 +46,8 @@ export type ConfiguracoesCorte = {
   feedrate: number;                 // mm/min - Velocidade de avanço durante corte
   plungeRate: number;               // mm/min - Velocidade de descida (mergulho) no eixo Z
   spindleSpeed: number;             // RPM - Rotação da fresa
+  usarRampa: boolean;               // Ativar rampa de entrada ao invés de mergulho vertical
+  anguloRampa: number;              // graus - Ângulo da rampa de entrada (2° a 5°)
 };
 
 /**

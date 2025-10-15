@@ -172,6 +172,87 @@ export const parametrosInfo = {
     ),
   },
 
+  usarRampa: {
+    title: "Rampa de Entrada (Entry Ramp)",
+    content: (
+      <>
+        <div>
+          <strong>O que é:</strong> Técnica onde a fresa desce em ângulo enquanto avança horizontalmente, ao invés de mergulhar verticalmente no material.
+        </div>
+        <div className="space-y-2 mt-3">
+          <div className="p-3 bg-red-50 dark:bg-red-950/30 rounded border border-red-200 dark:border-red-800">
+            <strong className="text-red-700 dark:text-red-400">❌ Mergulho Vertical (sem rampa):</strong>
+            <ul className="list-disc ml-5 mt-2 space-y-1 text-sm">
+              <li>Fresa mergulha direto verticalmente no material</li>
+              <li>Todo impacto de uma vez na ponta da ferramenta</li>
+              <li>Maior desgaste e risco de quebra</li>
+              <li>Vibração excessiva e acabamento ruim</li>
+              <li>Sobrecarga do motor</li>
+            </ul>
+          </div>
+
+          <div className="p-3 bg-green-50 dark:bg-green-950/30 rounded border border-green-200 dark:border-green-800">
+            <strong className="text-green-700 dark:text-green-400">✅ Rampa de Entrada (recomendado):</strong>
+            <ul className="list-disc ml-5 mt-2 space-y-1 text-sm">
+              <li>Fresa desce gradualmente enquanto avança</li>
+              <li>Força de corte distribuída ao longo do movimento</li>
+              <li>Vida útil da ferramenta aumenta 2-3x</li>
+              <li>Menos vibração = melhor acabamento</li>
+              <li>Motor trabalha mais suave</li>
+              <li>Reduz drasticamente risco de quebra</li>
+            </ul>
+          </div>
+        </div>
+        <div className="bg-amber-50 dark:bg-amber-950/30 p-2 rounded border border-amber-200 dark:border-amber-800 mt-3">
+          <strong className="text-amber-700 dark:text-amber-400">Quando usar rampa:</strong>
+          <ul className="list-disc ml-5 mt-1 space-y-1 text-sm">
+            <li>✅ Sempre em materiais duros (MDF, compensado, acrílico)</li>
+            <li>✅ Com fresas pequenas (até 8mm)</li>
+            <li>✅ Em cortes profundos (acima de 5mm)</li>
+            <li>⚠️ Menos crítico apenas em materiais muito macios (espuma, isopor)</li>
+          </ul>
+        </div>
+        <div className="text-green-600 dark:text-green-400 mt-2">
+          <strong>💡 Recomendação:</strong> SEMPRE use rampa de entrada para preservar suas ferramentas e obter melhor qualidade de corte!
+        </div>
+      </>
+    ),
+  },
+
+  anguloRampa: {
+    title: "Ângulo da Rampa (Ramp Angle)",
+    content: (
+      <>
+        <div>
+          <strong>O que é:</strong> Inclinação da rampa de entrada em graus. Define quão suave será a descida da fresa no material.
+        </div>
+        <div>
+          <strong>Valores recomendados:</strong>
+          <ul className="list-disc ml-5 mt-2 space-y-1">
+            <li><strong>2° (rampa suave):</strong> Melhor para a ferramenta, ocupa mais espaço horizontal</li>
+            <li><strong>3° (recomendado):</strong> Equilíbrio ideal entre proteção e eficiência</li>
+            <li><strong>4° (rampa média):</strong> Bom compromisso, ainda protege bem a fresa</li>
+            <li><strong>5° (rampa agressiva):</strong> Economiza tempo, ainda muito melhor que mergulho vertical</li>
+          </ul>
+        </div>
+        <div className="bg-amber-50 dark:bg-amber-950/30 p-2 rounded border border-amber-200 dark:border-amber-800 mt-3">
+          <strong className="text-amber-700 dark:text-amber-400">Exemplo prático:</strong>
+          <ul className="list-disc ml-5 mt-1 space-y-1 text-sm">
+            <li>Para descer 8mm com 2°: precisa ~230mm de avanço horizontal</li>
+            <li>Para descer 8mm com 3°: precisa ~150mm de avanço horizontal</li>
+            <li>Para descer 8mm com 5°: precisa ~90mm de avanço horizontal</li>
+          </ul>
+        </div>
+        <div className="text-amber-600 dark:text-amber-500 mt-2">
+          <strong>⚠️ Atenção:</strong> O sistema verifica automaticamente se há espaço suficiente na chapa para a rampa. Se não houver, faz mergulho vertical e emite aviso.
+        </div>
+        <div className="bg-green-50 dark:bg-green-950/30 p-2 rounded border border-green-200 dark:border-green-800 mt-2">
+          <strong className="text-green-700 dark:text-green-400">💡 Dica:</strong> Com peças de 500×500mm você tem espaço de sobra. Use 3° para máxima proteção da ferramenta!
+        </div>
+      </>
+    ),
+  },
+
   // Configurações da Chapa
   chapaLargura: {
     title: "Largura da Chapa (Width)",
