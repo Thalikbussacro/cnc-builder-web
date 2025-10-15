@@ -10,10 +10,11 @@ import { ListaPecas } from "@/components/ListaPecas";
 import { PreviewCanvas } from "@/components/PreviewCanvas";
 import { VisualizadorGCode } from "@/components/VisualizadorGCode";
 import { SeletorNesting } from "@/components/SeletorNesting";
+import { SeletorVersaoGCode } from "@/components/SeletorVersaoGCode";
 import { DicionarioGCode } from "@/components/DicionarioGCode";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import type { Peca, PecaPosicionada, ConfiguracoesChapa as TConfigChapa, ConfiguracoesCorte as TConfigCorte, ConfiguracoesFerramenta as TConfigFerramenta, FormatoArquivo } from "@/types";
+import type { Peca, PecaPosicionada, ConfiguracoesChapa as TConfigChapa, ConfiguracoesCorte as TConfigCorte, ConfiguracoesFerramenta as TConfigFerramenta, FormatoArquivo, VersaoGerador } from "@/types";
 import { posicionarPecas, type MetodoNesting } from "@/lib/nesting-algorithm";
 import { gerarGCode, downloadGCode } from "@/lib/gcode-generator";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
@@ -43,6 +44,8 @@ export default function Home() {
   });
 
   const [metodoNesting, setMetodoNesting] = useLocalStorage<MetodoNesting>('cnc-metodo-nesting', 'greedy');
+
+  const [versaoGerador, setVersaoGerador] = useLocalStorage<VersaoGerador>('cnc-versao-gerador', 'v2');
 
   // Estados sem localStorage (temporários)
   const [pecas, setPecas] = useState<Peca[]>([]);
@@ -90,7 +93,7 @@ export default function Home() {
       return;
     }
 
-    const gcode = gerarGCode(pecasPosicionadas, configChapa, configCorte, configFerramenta);
+    const gcode = gerarGCode(pecasPosicionadas, configChapa, configCorte, configFerramenta, versaoGerador);
     setGcodeGerado(gcode);
     setVisualizadorAberto(true);
   };
@@ -135,11 +138,12 @@ export default function Home() {
           {/* Left Column - Configurations */}
           <div className="flex flex-col gap-3 overflow-auto">
             <Tabs value={abaAtiva} onValueChange={setAbaAtiva} className="w-full">
-              <TabsList className="grid w-full grid-cols-4">
+              <TabsList className="grid w-full grid-cols-5">
                 <TabsTrigger value="chapa">Chapa</TabsTrigger>
                 <TabsTrigger value="corte">Corte</TabsTrigger>
                 <TabsTrigger value="ferramenta">Fresa</TabsTrigger>
                 <TabsTrigger value="nesting">Nesting</TabsTrigger>
+                <TabsTrigger value="gerador">G-code</TabsTrigger>
               </TabsList>
 
               <div className="space-y-3 mt-3">
@@ -160,6 +164,13 @@ export default function Home() {
                     metodo={metodoNesting}
                     onChange={setMetodoNesting}
                     metricas={metricas}
+                  />
+                </TabsContent>
+
+                <TabsContent value="gerador" className="mt-0">
+                  <SeletorVersaoGCode
+                    versaoSelecionada={versaoGerador}
+                    onChange={setVersaoGerador}
                   />
                 </TabsContent>
               </div>

@@ -56,6 +56,22 @@ export type ConfiguracoesCorte = {
 export type FormatoArquivo = 'nc' | 'tap' | 'gcode' | 'cnc';
 
 /**
+ * Versões do gerador de G-code
+ */
+export type VersaoGerador = 'v1' | 'v2';
+
+/**
+ * Informações sobre cada versão do gerador
+ */
+export type InfoVersaoGerador = {
+  versao: VersaoGerador;
+  nome: string;
+  descricao: string;
+  recursos: string[];
+  recomendado?: boolean;
+};
+
+/**
  * Configurações da ferramenta (fresa)
  * Apenas os parâmetros que realmente afetam o G-code gerado
  */
