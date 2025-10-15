@@ -41,16 +41,16 @@ export function PreviewCanvas({
   );
   const taxaAproveitamento = areaTotalChapa > 0 ? (areaPecas / areaTotalChapa) * 100 : 0;
 
-  // Ajusta tamanho do canvas baseado no container (reduzido em 50%)
+  // Ajusta tamanho do canvas baseado no container (reduzido pela metade)
   useEffect(() => {
     const updateCanvasSize = () => {
       if (containerRef.current) {
         const containerWidth = containerRef.current.clientWidth - 16;
         // Altura reduzida para preview compacto
-        const containerHeight = Math.min(320, window.innerHeight - 380);
+        const containerHeight = Math.min(280, window.innerHeight - 400);
         setCanvasSize({
-          width: Math.max(200, Math.min(350, containerWidth * 0.85)), // Reduzido: largura máxima de 350px
-          height: Math.max(180, containerHeight * 0.85),
+          width: Math.max(180, Math.min(320, containerWidth * 0.9)), // Reduzido pela metade: max 320px
+          height: Math.max(160, containerHeight * 0.8),
         });
       }
     };
