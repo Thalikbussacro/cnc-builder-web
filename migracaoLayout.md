@@ -109,9 +109,9 @@ xl: 8px
 - [x] 1.3 - `app/layout.tsx` - Adicionar fontes Google e theme provider
 
 ### Fase 2: Sistema de Tema ✅
-- [ ] 2.1 - `components/ThemeProvider.tsx` - Criar provider de tema (NOVO)
-- [ ] 2.2 - `components/ThemeToggle.tsx` - Criar botão toggle tema (NOVO)
-- [ ] 2.3 - `hooks/useTheme.ts` - Hook para gerenciar tema (NOVO)
+- [x] 2.1 - `components/ThemeProvider.tsx` - Criar provider de tema (NOVO)
+- [x] 2.2 - `components/ThemeToggle.tsx` - Criar botão toggle tema (NOVO)
+- [x] 2.3 - `hooks/useTheme.ts` - Hook para gerenciar tema (NOVO)
 
 ### Fase 3: Componentes Base (shadcn/ui) ✅
 - [ ] 3.1 - `components/ui/button.tsx` - Ajustar tamanhos e espaçamentos
@@ -219,14 +219,14 @@ FASE 1 → FASE 2 → FASE 3 → FASE 4 → FASE 5 → FASE 6 → FASE 7
 | Fase | Status | Progresso |
 |------|--------|-----------|
 | Fase 1 | ✅ Concluída | 3/3 |
-| Fase 2 | 🔴 Pendente | 0/3 |
+| Fase 2 | ✅ Concluída | 3/3 |
 | Fase 3 | 🔴 Pendente | 0/8 |
 | Fase 4 | 🔴 Pendente | 0/4 |
 | Fase 5 | 🔴 Pendente | 0/5 |
 | Fase 6 | 🔴 Pendente | 0/6 |
 | Fase 7 | 🔴 Pendente | 0/7 |
 
-**Total:** 3/36 tarefas concluídas
+**Total:** 6/36 tarefas concluídas
 
 ---
 
