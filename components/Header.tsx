@@ -1,6 +1,11 @@
 "use client";
 
-import { ThemeToggle } from "./ThemeToggle";
+import dynamic from "next/dynamic";
+
+const ThemeToggle = dynamic(() => import("./ThemeToggle").then(mod => ({ default: mod.ThemeToggle })), {
+  ssr: false,
+  loading: () => <div className="h-8 w-8" />
+});
 
 export function Header() {
   return (
