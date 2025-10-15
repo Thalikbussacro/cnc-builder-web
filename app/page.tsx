@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { MainLayout } from "@/components/MainLayout";
 import { ConfiguracoesChapa } from "@/components/ConfiguracoesChapa";
 import { ConfiguracoesCorte } from "@/components/ConfiguracoesCorte";
 import { ConfiguracoesFerramenta } from "@/components/ConfiguracoesFerramenta";
@@ -100,90 +101,79 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen">
-      {/* Header */}
-      <div className="border-b sticky top-0 z-50 bg-[#292318] shadow-lg">
-        <div className="container mx-auto px-3 sm:px-6 lg:px-8 py-2 sm:py-3">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-            <div className="flex-1 min-w-0">
-              <h1 className="text-lg sm:text-xl lg:text-2xl font-bold truncate">Gerador de G-code CNC</h1>
-              <p className="text-xs text-muted-foreground mt-0.5 hidden sm:block">
-                Configure, adicione peças e gere o código automaticamente
-              </p>
-            </div>
-            <div className="flex items-center gap-2 flex-shrink-0">
-              <DicionarioGCode />
-              <Button
-                onClick={handleVisualizarGCode}
-                variant="default"
-                size="sm"
-                disabled={pecas.length === 0}
-                className="text-xs font-semibold !border-2 !border-primary/50 shadow-md hover:shadow-lg transition-all whitespace-nowrap"
-              >
-                📝 <span className="hidden sm:inline">Baixar/Copiar </span>G-code
-              </Button>
-              <Button
-                onClick={handleLimpar}
-                variant="destructive"
-                size="sm"
-                disabled={pecas.length === 0}
-                className="text-xs font-semibold !border-2 !border-destructive/50 shadow-md hover:shadow-lg transition-all"
-              >
-                🗑️ <span className="hidden sm:inline">Limpar</span>
-              </Button>
-            </div>
+    <MainLayout>
+      <div className="flex flex-col gap-3 h-full">
+        {/* Top Actions Bar */}
+        <div className="flex items-center justify-between gap-2 flex-shrink-0">
+          <div className="flex items-center gap-2">
+            <DicionarioGCode />
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              onClick={handleVisualizarGCode}
+              variant="default"
+              size="sm"
+              disabled={pecas.length === 0}
+            >
+              <span className="hidden sm:inline">Baixar/Copiar </span>G-code
+            </Button>
+            <Button
+              onClick={handleLimpar}
+              variant="destructive"
+              size="sm"
+              disabled={pecas.length === 0}
+            >
+              <span className="hidden sm:inline">Limpar</span>
+            </Button>
           </div>
         </div>
-      </div>
 
-      {/* Main Content */}
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
-        <div className="grid grid-cols-1 xl:grid-cols-[420px,1fr] gap-4 lg:gap-6">
-          {/* Coluna Esquerda - Configurações com Abas */}
-          <div className="order-1 xl:order-1">
+        {/* Main Content Grid */}
+        <div className="grid grid-cols-1 xl:grid-cols-[380px,1fr] gap-3 flex-1 overflow-hidden">
+          {/* Left Column - Configurations */}
+          <div className="flex flex-col gap-3 overflow-auto">
             <Tabs value={abaAtiva} onValueChange={setAbaAtiva} className="w-full">
-              <TabsList className="grid w-full grid-cols-4 mb-3">
-                <TabsTrigger value="chapa" className="text-xs sm:text-sm">Chapa</TabsTrigger>
-                <TabsTrigger value="corte" className="text-xs sm:text-sm">Corte</TabsTrigger>
-                <TabsTrigger value="ferramenta" className="text-xs sm:text-sm">Fresa</TabsTrigger>
-                <TabsTrigger value="nesting" className="text-xs sm:text-sm">Nesting</TabsTrigger>
+              <TabsList className="grid w-full grid-cols-4">
+                <TabsTrigger value="chapa">Chapa</TabsTrigger>
+                <TabsTrigger value="corte">Corte</TabsTrigger>
+                <TabsTrigger value="ferramenta">Fresa</TabsTrigger>
+                <TabsTrigger value="nesting">Nesting</TabsTrigger>
               </TabsList>
 
-              <div className="space-y-3">
-                <TabsContent value="chapa" className="mt-0 space-y-3">
+              <div className="space-y-3 mt-3">
+                <TabsContent value="chapa" className="mt-0">
                   <ConfiguracoesChapa config={configChapa} onChange={setConfigChapa} />
                 </TabsContent>
 
-                <TabsContent value="corte" className="mt-0 space-y-3">
+                <TabsContent value="corte" className="mt-0">
                   <ConfiguracoesCorte config={configCorte} onChange={setConfigCorte} />
                 </TabsContent>
 
-                <TabsContent value="ferramenta" className="mt-0 space-y-3">
+                <TabsContent value="ferramenta" className="mt-0">
                   <ConfiguracoesFerramenta config={configFerramenta} onChange={setConfigFerramenta} />
                 </TabsContent>
 
-                <TabsContent value="nesting" className="mt-0 space-y-3">
+                <TabsContent value="nesting" className="mt-0">
                   <SeletorNesting
                     metodo={metodoNesting}
                     onChange={setMetodoNesting}
                     metricas={metricas}
                   />
                 </TabsContent>
-
-                {/* Cadastro de Peças sempre visível */}
-                <CadastroPeca
-                  onAdicionar={handleAdicionarPeca}
-                  configChapa={configChapa}
-                  espacamento={configCorte.espacamento}
-                  pecasExistentes={pecas}
-                  metodoNesting={metodoNesting}
-                />
               </div>
             </Tabs>
+
+            <CadastroPeca
+              onAdicionar={handleAdicionarPeca}
+              configChapa={configChapa}
+              espacamento={configCorte.espacamento}
+              pecasExistentes={pecas}
+              metodoNesting={metodoNesting}
+            />
           </div>
 
-          {/* Coluna Direita - Preview e Lista */}
-          <div className="order-2 xl:order-2 space-y-3">
+          {/* Right Column - Preview and List */}
+          <div className="flex flex-col gap-3 overflow-auto">
             <PreviewCanvas
               chapaLargura={configChapa.largura}
               chapaAltura={configChapa.altura}
@@ -194,13 +184,13 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Visualizador G-Code (Painel Lateral) */}
+      {/* G-Code Viewer */}
       <VisualizadorGCode
         isOpen={visualizadorAberto}
         onClose={() => setVisualizadorAberto(false)}
         gcode={gcodeGerado}
         onDownload={handleBaixarGCode}
       />
-    </main>
+    </MainLayout>
   );
 }
