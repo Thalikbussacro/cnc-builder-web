@@ -161,17 +161,17 @@ export function PreviewFullscreen({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[96vw] max-h-[96vh] p-2 sm:p-4 bg-background">
-        <DialogHeader>
+      <DialogContent className="max-w-[98vw] h-[98vh] p-3 sm:p-6 bg-background flex flex-col">
+        <DialogHeader className="flex-shrink-0">
           <VisuallyHidden>
             <DialogTitle>Pré-visualização em tela cheia</DialogTitle>
           </VisuallyHidden>
         </DialogHeader>
-        <div className="flex items-center justify-center w-full overflow-auto rounded-lg bg-slate-900 dark:bg-black p-2">
+        <div className="flex-1 flex items-center justify-center overflow-auto rounded-lg bg-slate-900 dark:bg-black p-3">
           <canvas
             ref={canvasRef}
-            className="border-2 border-amber-600/30 rounded"
-            style={{ backgroundColor: "#1a1613", maxWidth: "100%", height: "auto" }}
+            className="border-2 border-amber-600/30 rounded shadow-2xl"
+            style={{ backgroundColor: "#1a1613" }}
           />
         </div>
       </DialogContent>
