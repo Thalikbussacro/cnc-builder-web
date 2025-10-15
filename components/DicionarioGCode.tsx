@@ -347,7 +347,7 @@ export function DicionarioGCode() {
 
       {/* Painel Lateral Deslizante */}
       <div
-        className={`fixed top-0 right-0 h-full w-full sm:w-[600px] bg-background border-l-2 border-amber-600/20 z-[100] shadow-2xl transform transition-transform duration-300 ease-in-out ${
+        className={`fixed top-0 right-0 h-full w-full md:w-1/2 bg-background border-l-2 border-amber-600/20 z-[100] shadow-2xl transform transition-transform duration-300 ease-in-out ${
           aberto ? "translate-x-0" : "translate-x-full"
         }`}
       >

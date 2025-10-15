@@ -65,15 +65,15 @@ export function VisualizadorGCode({
 
       {/* Painel Lateral Deslizante */}
       <div
-        className={`fixed top-0 right-0 h-full w-full sm:w-[600px] bg-[#292318] border-l border-border z-[100] shadow-2xl transform transition-transform duration-300 ease-in-out ${
+        className={`fixed top-0 right-0 h-full w-full md:w-1/2 bg-background border-l-2 border-amber-600/20 z-[100] shadow-2xl transform transition-transform duration-300 ease-in-out ${
           isOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
         <div className="flex flex-col h-full">
           {/* Header */}
-          <div className="flex items-center justify-between p-4 sm:p-6 border-b border-border">
+          <div className="flex items-center justify-between p-4 sm:p-6 border-b-2 border-amber-600/30 bg-amber-950/10 dark:bg-amber-950/30">
             <div>
-              <h2 className="text-xl sm:text-2xl font-bold">
+              <h2 className="text-xl sm:text-2xl font-bold text-amber-600 dark:text-amber-500">
                 Visualizador G-Code
               </h2>
               <p className="text-xs sm:text-sm text-muted-foreground mt-1">
@@ -84,7 +84,7 @@ export function VisualizadorGCode({
               variant="ghost"
               size="icon"
               onClick={onClose}
-              className="h-8 w-8 sm:h-10 sm:w-10"
+              className="h-8 w-8 sm:h-10 sm:w-10 hover:bg-red-600/20 hover:text-red-500"
             >
               ✕
             </Button>
@@ -92,15 +92,15 @@ export function VisualizadorGCode({
 
           {/* Conteúdo - Área de código */}
           <div className="flex-1 overflow-hidden p-4 sm:p-6">
-            <Card className="h-full bg-black/40 border-border">
+            <Card className="h-full bg-slate-800 dark:bg-black/60 border-2 border-amber-600/20">
               <pre className="h-full overflow-auto p-4 text-xs sm:text-sm font-mono leading-relaxed">
-                <code className="text-green-400">{gcode}</code>
+                <code className="text-amber-300 dark:text-amber-400">{gcode}</code>
               </pre>
             </Card>
           </div>
 
           {/* Footer - Botões de ação */}
-          <div className="p-4 sm:p-6 border-t border-border bg-card/50 backdrop-blur-sm space-y-3">
+          <div className="p-4 sm:p-6 border-t-2 border-amber-600/20 bg-amber-950/5 dark:bg-amber-950/20 backdrop-blur-sm space-y-3">
             {/* Seletor de formato */}
             <div className="space-y-3">
               <Label className="text-xs font-medium">
