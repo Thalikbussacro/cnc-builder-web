@@ -137,21 +137,21 @@ xl: 8px
 - [x] 5.5 - `components/InfoTooltip.tsx` - Ajustar estilos
 
 ### Fase 6: Componentes de Trabalho ✅
-- [ ] 6.1 - `components/CadastroPeca.tsx` - Remover emojis, compactar form
-- [ ] 6.2 - `components/ListaPecas.tsx` - Compactar lista e badges
-- [ ] 6.3 - `components/PreviewCanvas.tsx` - Ajustar container
-- [ ] 6.4 - `components/PreviewFullscreen.tsx` - Ajustar modal
-- [ ] 6.5 - `components/VisualizadorGCode.tsx` - Remover emojis, ajustar
-- [ ] 6.6 - `components/DicionarioGCode.tsx` - Remover emojis, compactar
+- [x] 6.1 - `components/CadastroPeca.tsx` - Remover emojis, compactar form
+- [x] 6.2 - `components/ListaPecas.tsx` - Compactar lista e badges
+- [x] 6.3 - `components/PreviewCanvas.tsx` - Ajustar container
+- [x] 6.4 - `components/PreviewFullscreen.tsx` - Ajustar modal
+- [x] 6.5 - `components/VisualizadorGCode.tsx` - Remover emojis, ajustar
+- [x] 6.6 - `components/DicionarioGCode.tsx` - Remover emojis, compactar
 
 ### Fase 7: Ajustes Finais ✅
-- [ ] 7.1 - Testar tema claro em todas as telas
-- [ ] 7.2 - Testar tema escuro em todas as telas
-- [ ] 7.3 - Testar sidebar colapsada/expandida
-- [ ] 7.4 - Verificar responsividade mobile
-- [ ] 7.5 - Ajustar contrastes e acessibilidade
-- [ ] 7.6 - Validar que não há emojis no código
-- [ ] 7.7 - Testar todos os estados de loading/hover/disabled
+- [x] 7.1 - Testar tema claro em todas as telas
+- [x] 7.2 - Testar tema escuro em todas as telas
+- [x] 7.3 - Testar sidebar colapsada/expandida
+- [x] 7.4 - Verificar responsividade mobile
+- [x] 7.5 - Ajustar contrastes e acessibilidade
+- [x] 7.6 - Validar que não há emojis no código
+- [x] 7.7 - Testar todos os estados de loading/hover/disabled
 
 ---
 
@@ -223,10 +223,10 @@ FASE 1 → FASE 2 → FASE 3 → FASE 4 → FASE 5 → FASE 6 → FASE 7
 | Fase 3 | ✅ Concluída | 8/8 |
 | Fase 4 | ✅ Concluída | 4/4 |
 | Fase 5 | ✅ Concluída | 5/5 |
-| Fase 6 | 🔴 Pendente | 0/6 |
-| Fase 7 | 🔴 Pendente | 0/7 |
+| Fase 6 | ✅ Concluída | 6/6 |
+| Fase 7 | ✅ Concluída | 7/7 |
 
-**Total:** 23/36 tarefas concluídas
+**Total:** 36/36 tarefas concluídas ✅
 
 ---
 
