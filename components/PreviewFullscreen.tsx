@@ -35,15 +35,17 @@ export function PreviewFullscreen({
   useEffect(() => {
     if (!open) return;
 
-    const canvas = canvasRef.current;
-    if (!canvas) return;
+    // Pequeno delay para garantir que o dialog esteja renderizado
+    const timeoutId = setTimeout(() => {
+      const canvas = canvasRef.current;
+      if (!canvas) return;
 
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return;
 
-    // Tamanho do canvas fullscreen otimizado para Full HD
-    const maxWidth = Math.min(window.innerWidth * 0.92, 1800);
-    const maxHeight = Math.min(window.innerHeight * 0.88, 1000);
+      // Tamanho do canvas fullscreen otimizado para Full HD
+      const maxWidth = Math.min(window.innerWidth * 0.92, 1800);
+      const maxHeight = Math.min(window.innerHeight * 0.88, 1000);
 
     // Calcula escala para caber na tela
     const margem = 60;
@@ -157,6 +159,9 @@ export function PreviewFullscreen({
         );
       }
     });
+    }, 50); // 50ms delay
+
+    return () => clearTimeout(timeoutId);
   }, [open, chapaLargura, chapaAltura, pecasPosicionadas]);
 
   return (
