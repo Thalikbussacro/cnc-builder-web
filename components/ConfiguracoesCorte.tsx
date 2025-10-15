@@ -3,6 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { InfoTooltip } from "@/components/InfoTooltip";
 import { parametrosInfo } from "@/lib/parametros-info";
 import type { ConfiguracoesCorte } from "@/types";
@@ -16,6 +17,10 @@ export function ConfiguracoesCorte({ config, onChange }: ConfiguracoesCorteProps
   const handleChange = (campo: keyof ConfiguracoesCorte, valor: string) => {
     const numero = parseFloat(valor) || 0;
     onChange({ ...config, [campo]: numero });
+  };
+
+  const handleCheckboxChange = (campo: keyof ConfiguracoesCorte, valor: boolean) => {
+    onChange({ ...config, [campo]: valor });
   };
 
   return (
@@ -142,6 +147,54 @@ export function ConfiguracoesCorte({ config, onChange }: ConfiguracoesCorteProps
 
           <div className="text-xs text-muted-foreground mt-2 p-2 bg-muted rounded">
             Plunge rate geralmente é 30-50% do feedrate
+          </div>
+        </div>
+
+        <div className="pt-2 border-t">
+          <h3 className="text-xs font-semibold mb-2">Rampa de Entrada</h3>
+
+          <div className="space-y-2">
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="usarRampa"
+                checked={config.usarRampa}
+                onCheckedChange={(checked) => handleCheckboxChange("usarRampa", checked as boolean)}
+              />
+              <Label
+                htmlFor="usarRampa"
+                className="text-sm font-normal cursor-pointer"
+              >
+                Usar rampa de entrada
+              </Label>
+              <InfoTooltip
+                title={parametrosInfo.usarRampa.title}
+                content={parametrosInfo.usarRampa.content}
+              />
+            </div>
+
+            {config.usarRampa && (
+              <div className="space-y-1 ml-6">
+                <div className="flex items-center gap-1">
+                  <Label htmlFor="anguloRampa">Ângulo da Rampa (°)</Label>
+                  <InfoTooltip
+                    title={parametrosInfo.anguloRampa.title}
+                    content={parametrosInfo.anguloRampa.content}
+                  />
+                </div>
+                <Input
+                  id="anguloRampa"
+                  type="number"
+                  value={config.anguloRampa}
+                  onChange={(e) => handleChange("anguloRampa", e.target.value)}
+                  min="2"
+                  max="5"
+                  step="0.5"
+                />
+                <div className="text-xs text-muted-foreground mt-1 p-2 bg-muted rounded">
+                  Recomendado: 3° (equilíbrio ideal). Mínimo: 2° (mais suave). Máximo: 5° (mais rápido)
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </CardContent>

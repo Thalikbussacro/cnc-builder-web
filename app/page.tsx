@@ -33,6 +33,8 @@ export default function Home() {
     feedrate: 1500,
     plungeRate: 500,
     spindleSpeed: 18000,
+    usarRampa: false,
+    anguloRampa: 3,
   });
 
   const [configFerramenta, setConfigFerramenta] = useLocalStorage<TConfigFerramenta>('cnc-config-ferramenta', {
