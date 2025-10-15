@@ -13,14 +13,14 @@ type PreviewFullscreenProps = {
   pecasPosicionadas: PecaPosicionada[];
 };
 
-// Mesmas cores do PreviewCanvas
+// Cores temáticas quentes (mesmas do PreviewCanvas)
 const CORES = [
-  { hex: "#e67e22", nome: "Laranja" },
-  { hex: "#3498db", nome: "Azul" },
-  { hex: "#95a5a6", nome: "Cinza" },
-  { hex: "#e74c3c", nome: "Vermelho" },
-  { hex: "#16a085", nome: "Verde" },
-  { hex: "#f39c12", nome: "Amarelo" },
+  { hex: "#F5B642", nome: "Amarelo" },
+  { hex: "#E67E22", nome: "Laranja" },
+  { hex: "#D35400", nome: "Laranja Escuro" },
+  { hex: "#F39C12", nome: "Dourado" },
+  { hex: "#E59866", nome: "Pêssego" },
+  { hex: "#DC7633", nome: "Terracota" },
 ];
 
 export function PreviewFullscreen({
@@ -41,23 +41,24 @@ export function PreviewFullscreen({
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    // Tamanho do canvas fullscreen (90% da janela)
-    const maxWidth = window.innerWidth * 0.9;
-    const maxHeight = window.innerHeight * 0.85;
+    // Tamanho do canvas fullscreen otimizado para Full HD
+    const maxWidth = Math.min(window.innerWidth * 0.92, 1800);
+    const maxHeight = Math.min(window.innerHeight * 0.88, 1000);
 
     // Calcula escala para caber na tela
-    const escalaX = (maxWidth - 80) / chapaLargura;
-    const escalaY = (maxHeight - 80) / chapaAltura;
+    const margem = 60;
+    const escalaX = (maxWidth - margem * 2) / chapaLargura;
+    const escalaY = (maxHeight - margem * 2) / chapaAltura;
     const escala = Math.min(escalaX, escalaY);
 
-    const canvasWidth = chapaLargura * escala + 80;
-    const canvasHeight = chapaAltura * escala + 80;
+    const canvasWidth = chapaLargura * escala + margem * 2;
+    const canvasHeight = chapaAltura * escala + margem * 2;
 
     canvas.width = canvasWidth;
     canvas.height = canvasHeight;
 
-    const offsetX = 40;
-    const offsetY = 40;
+    const offsetX = margem;
+    const offsetY = margem;
 
     // Limpa canvas
     ctx.fillStyle = "#1a1613";
@@ -137,19 +138,22 @@ export function PreviewFullscreen({
       const centerX = x + w / 2;
       const centerY = y + h / 2;
 
-      // Número
-      const fontSize = Math.max(16, Math.min(24, w / 8, h / 8));
-      ctx.font = `bold ${fontSize}px sans-serif`;
-      ctx.fillText(`#${index + 1}`, centerX, centerY - fontSize / 2);
+      // Tamanho de fonte adaptativo
+      const fontSize = Math.max(18, Math.min(28, w / 8, h / 8));
 
-      // Dimensões
-      if (w > 80 && h > 50) {
-        ctx.font = `${fontSize * 0.75}px sans-serif`;
+      // Nome ou número da peça
+      ctx.font = `bold ${fontSize}px sans-serif`;
+      const nomePeca = peca.nome || `#${index + 1}`;
+      ctx.fillText(nomePeca, centerX, centerY - fontSize / 2);
+
+      // Dimensões (se houver espaço)
+      if (w > 100 && h > 60) {
+        ctx.font = `${fontSize * 0.7}px sans-serif`;
         ctx.fillStyle = cor + "dd";
         ctx.fillText(
           `${peca.largura.toFixed(0)}×${peca.altura.toFixed(0)}mm`,
           centerX,
-          centerY + fontSize / 2 + 3
+          centerY + fontSize / 2 + 4
         );
       }
     });
@@ -157,17 +161,17 @@ export function PreviewFullscreen({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[95vw] max-h-[95vh] p-4">
+      <DialogContent className="max-w-[96vw] max-h-[96vh] p-2 sm:p-4 bg-background">
         <DialogHeader>
           <VisuallyHidden>
             <DialogTitle>Pré-visualização em tela cheia</DialogTitle>
           </VisuallyHidden>
         </DialogHeader>
-        <div className="flex items-center justify-center w-full h-full overflow-auto">
+        <div className="flex items-center justify-center w-full overflow-auto rounded-lg bg-slate-900 dark:bg-black p-2">
           <canvas
             ref={canvasRef}
-            className="border border-border"
-            style={{ backgroundColor: "#1a1613" }}
+            className="border-2 border-amber-600/30 rounded"
+            style={{ backgroundColor: "#1a1613", maxWidth: "100%", height: "auto" }}
           />
         </div>
       </DialogContent>
