@@ -1,4 +1,36 @@
-import type { PecaPosicionada, ConfiguracoesChapa, ConfiguracoesCorte, FormatoArquivo, ConfiguracoesFerramenta } from "@/types";
+import type { PecaPosicionada, ConfiguracoesChapa, ConfiguracoesCorte, FormatoArquivo, ConfiguracoesFerramenta, VersaoGerador, InfoVersaoGerador } from "@/types";
+import { gerarGCodeV2 } from "./gcode-generator-v2";
+
+/**
+ * Informações sobre as versões disponíveis do gerador
+ */
+export const VERSOES_GERADOR: InfoVersaoGerador[] = [
+  {
+    versao: 'v1',
+    nome: 'V1 - Clássico',
+    descricao: 'Versão original com comentários detalhados',
+    recursos: [
+      'Comentários explicativos completos',
+      'Estrutura tradicional clara',
+      'Compatível com qualquer controlador'
+    ]
+  },
+  {
+    versao: 'v2',
+    nome: 'V2 - Otimizado',
+    descricao: 'Versão otimizada com melhorias de performance',
+    recursos: [
+      'Remove movimentos Z redundantes',
+      'Sem parâmetro F em comandos G0',
+      'G41/G42 mantido durante todas passadas',
+      'Elimina reposicionamentos XY desnecessários',
+      'Controle modal de feedrate',
+      'Comentários simplificados',
+      'Código ~30% menor e mais rápido'
+    ],
+    recomendado: true
+  }
+];
 
 /**
  * Formata número para G-code garantindo ponto como separador decimal
@@ -55,7 +87,7 @@ function determinarDirecaoRampa(
 }
 
 /**
- * Gera código G-code completo para cortar todas as peças posicionadas
+ * Gera código G-code V1 (versão clássica)
  * Baseado na função GerarGCodePecas do código Delphi (linhas 329-448)
  *
  * @param pecasPos - Array de peças já posicionadas na chapa
@@ -64,7 +96,7 @@ function determinarDirecaoRampa(
  * @param ferramenta - Configurações da ferramenta (opcional)
  * @returns String com código G-code completo
  */
-export function gerarGCode(
+export function gerarGCodeV1(
   pecasPos: PecaPosicionada[],
   config: ConfiguracoesChapa,
   corte: ConfiguracoesCorte,
@@ -211,6 +243,34 @@ export function gerarGCode(
   gcode += 'M30 ; Fim do programa\n';
 
   return gcode;
+}
+
+/**
+ * Gera código G-code na versão especificada
+ *
+ * @param pecasPos - Array de peças já posicionadas na chapa
+ * @param config - Configurações da chapa
+ * @param corte - Configurações do corte
+ * @param ferramenta - Configurações da ferramenta (opcional)
+ * @param versao - Versão do gerador a usar (padrão: 'v2')
+ * @returns String com código G-code completo
+ */
+export function gerarGCode(
+  pecasPos: PecaPosicionada[],
+  config: ConfiguracoesChapa,
+  corte: ConfiguracoesCorte,
+  ferramenta?: ConfiguracoesFerramenta,
+  versao: VersaoGerador = 'v2'
+): string {
+  switch (versao) {
+    case 'v1':
+      return gerarGCodeV1(pecasPos, config, corte, ferramenta);
+    case 'v2':
+      return gerarGCodeV2(pecasPos, config, corte, ferramenta);
+    default:
+      // Fallback para V2 se versão desconhecida
+      return gerarGCodeV2(pecasPos, config, corte, ferramenta);
+  }
 }
 
 /**
