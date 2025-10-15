@@ -20,16 +20,14 @@ export function ConfiguracoesChapa({ config, onChange }: ConfiguracoesChapaProps
 
   return (
     <Card>
-      <CardHeader className="pb-2">
-        <CardTitle className="text-base sm:text-lg">Configurações Gerais</CardTitle>
+      <CardHeader>
+        <CardTitle>Configurações Gerais</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-2 sm:space-y-3">
-        <div className="grid grid-cols-2 gap-2 sm:gap-3">
-          <div className="space-y-1.5">
+      <CardContent className="space-y-2.5">
+        <div className="grid grid-cols-2 gap-2.5">
+          <div className="space-y-1">
             <div className="flex items-center gap-1">
-              <Label htmlFor="chapaLargura" className="text-xs sm:text-sm">
-                Largura (Width)
-              </Label>
+              <Label htmlFor="chapaLargura">Largura</Label>
               <InfoTooltip
                 title={parametrosInfo.chapaLargura.title}
                 content={parametrosInfo.chapaLargura.content}
@@ -42,14 +40,11 @@ export function ConfiguracoesChapa({ config, onChange }: ConfiguracoesChapaProps
               onChange={(e) => handleChange("largura", e.target.value)}
               min="0"
               step="10"
-              className="h-9 sm:h-10"
             />
           </div>
-          <div className="space-y-1.5">
+          <div className="space-y-1">
             <div className="flex items-center gap-1">
-              <Label htmlFor="chapaAltura" className="text-xs sm:text-sm">
-                Altura (Height)
-              </Label>
+              <Label htmlFor="chapaAltura">Altura</Label>
               <InfoTooltip
                 title={parametrosInfo.chapaAltura.title}
                 content={parametrosInfo.chapaAltura.content}
@@ -62,15 +57,12 @@ export function ConfiguracoesChapa({ config, onChange }: ConfiguracoesChapaProps
               onChange={(e) => handleChange("altura", e.target.value)}
               min="0"
               step="10"
-              className="h-9 sm:h-10"
             />
           </div>
         </div>
-        <div className="space-y-1.5">
+        <div className="space-y-1">
           <div className="flex items-center gap-1">
-            <Label htmlFor="chapaEspessura" className="text-xs sm:text-sm">
-              Espessura (Thickness)
-            </Label>
+            <Label htmlFor="chapaEspessura">Espessura</Label>
             <InfoTooltip
               title={parametrosInfo.chapaEspessura.title}
               content={parametrosInfo.chapaEspessura.content}
@@ -83,7 +75,6 @@ export function ConfiguracoesChapa({ config, onChange }: ConfiguracoesChapaProps
             onChange={(e) => handleChange("espessura", e.target.value)}
             min="0"
             step="1"
-            className="h-9 sm:h-10"
           />
         </div>
       </CardContent>

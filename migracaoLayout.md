@@ -130,11 +130,11 @@ xl: 8px
 - [x] 4.4 - `app/page.tsx` - Refatorar para usar novo layout
 
 ### Fase 5: Componentes de Configuração ✅
-- [ ] 5.1 - `components/ConfiguracoesChapa.tsx` - Remover emojis, compactar
-- [ ] 5.2 - `components/ConfiguracoesCorte.tsx` - Remover emojis, compactar
-- [ ] 5.3 - `components/ConfiguracoesFerramenta.tsx` - Remover emojis, compactar
-- [ ] 5.4 - `components/SeletorNesting.tsx` - Remover emojis, compactar
-- [ ] 5.5 - `components/InfoTooltip.tsx` - Ajustar estilos
+- [x] 5.1 - `components/ConfiguracoesChapa.tsx` - Remover emojis, compactar
+- [x] 5.2 - `components/ConfiguracoesCorte.tsx` - Remover emojis, compactar
+- [x] 5.3 - `components/ConfiguracoesFerramenta.tsx` - Remover emojis, compactar
+- [x] 5.4 - `components/SeletorNesting.tsx` - Remover emojis, compactar
+- [x] 5.5 - `components/InfoTooltip.tsx` - Ajustar estilos
 
 ### Fase 6: Componentes de Trabalho ✅
 - [ ] 6.1 - `components/CadastroPeca.tsx` - Remover emojis, compactar form
@@ -222,11 +222,11 @@ FASE 1 → FASE 2 → FASE 3 → FASE 4 → FASE 5 → FASE 6 → FASE 7
 | Fase 2 | ✅ Concluída | 3/3 |
 | Fase 3 | ✅ Concluída | 8/8 |
 | Fase 4 | ✅ Concluída | 4/4 |
-| Fase 5 | 🔴 Pendente | 0/5 |
+| Fase 5 | ✅ Concluída | 5/5 |
 | Fase 6 | 🔴 Pendente | 0/6 |
 | Fase 7 | 🔴 Pendente | 0/7 |
 
-**Total:** 18/36 tarefas concluídas
+**Total:** 23/36 tarefas concluídas
 
 ---
 

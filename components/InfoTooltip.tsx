@@ -25,21 +25,21 @@ export function InfoTooltip({ title, content }: InfoTooltipProps) {
         type="button"
         variant="ghost"
         size="sm"
-        className="h-5 w-5 p-0 rounded-full hover:bg-primary/10"
+        className="h-4 w-4 p-0 rounded-full hover:bg-accent"
         onClick={() => setOpen(true)}
       >
-        <HelpCircle className="h-4 w-4 text-muted-foreground hover:text-primary" />
+        <HelpCircle className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground transition-colors duration-200" />
       </Button>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto bg-[#1a1510] border-2 border-border shadow-2xl">
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="text-xl text-foreground">{title}</DialogTitle>
+            <DialogTitle>{title}</DialogTitle>
             <DialogDescription className="sr-only">
               Informações detalhadas sobre o parâmetro
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4 text-sm text-foreground/90">
+          <div className="space-y-3 text-sm text-foreground">
             {content}
           </div>
         </DialogContent>

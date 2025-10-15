@@ -19,16 +19,14 @@ export function ConfiguracoesFerramenta({ config, onChange }: ConfiguracoesFerra
 
   return (
     <Card>
-      <CardHeader className="pb-2">
-        <CardTitle className="text-base sm:text-lg">Configurações da Ferramenta</CardTitle>
+      <CardHeader>
+        <CardTitle>Configurações da Ferramenta</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-2 sm:space-y-3">
-        <div className="grid grid-cols-2 gap-2 sm:gap-3">
-          <div className="space-y-1.5">
+      <CardContent className="space-y-2.5">
+        <div className="grid grid-cols-2 gap-2.5">
+          <div className="space-y-1">
             <div className="flex items-center gap-1">
-              <Label htmlFor="diametro" className="text-xs sm:text-sm">
-                Diâmetro (Diameter)
-              </Label>
+              <Label htmlFor="diametro">Diâmetro</Label>
               <InfoTooltip
                 title={parametrosInfo.ferramentaDiametro.title}
                 content={parametrosInfo.ferramentaDiametro.content}
@@ -41,14 +39,11 @@ export function ConfiguracoesFerramenta({ config, onChange }: ConfiguracoesFerra
               onChange={(e) => handleChange("diametro", parseFloat(e.target.value) || 0)}
               min="0.1"
               step="0.5"
-              className="h-9 sm:h-10"
             />
           </div>
-          <div className="space-y-1.5">
+          <div className="space-y-1">
             <div className="flex items-center gap-1">
-              <Label htmlFor="numeroFerramenta" className="text-xs sm:text-sm">
-                Número (Tool Number)
-              </Label>
+              <Label htmlFor="numeroFerramenta">Número</Label>
               <InfoTooltip
                 title={parametrosInfo.ferramentaNumero.title}
                 content={parametrosInfo.ferramentaNumero.content}
@@ -62,7 +57,6 @@ export function ConfiguracoesFerramenta({ config, onChange }: ConfiguracoesFerra
               min="1"
               max="99"
               step="1"
-              className="h-9 sm:h-10"
             />
           </div>
         </div>
