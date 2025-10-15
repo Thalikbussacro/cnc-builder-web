@@ -11,6 +11,7 @@ export type Peca = {
   altura: number;
   tipoCorte: TipoCorte;
   id: string; // UUID para React keys
+  nome?: string; // Nome customizável da peça
 };
 
 /**
@@ -23,6 +24,7 @@ export type PecaPosicionada = {
   altura: number;
   tipoCorte: TipoCorte;
   id: string;
+  nome?: string; // Nome customizável da peça
 };
 
 /**

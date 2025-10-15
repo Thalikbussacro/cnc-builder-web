@@ -417,11 +417,11 @@ export function DicionarioGCode() {
                             <div className="text-xs text-muted-foreground leading-relaxed">{cmd.descricao}</div>
                             <div className="bg-black/40 rounded p-2 space-y-1">
                               <div className="text-[10px] text-muted-foreground">Exemplo:</div>
-                              <code className="text-xs text-green-400 font-mono block">{cmd.exemplo}</code>
+                              <code className="text-xs text-amber-300 font-mono block">{cmd.exemplo}</code>
                             </div>
-                            <div className="bg-blue-950/30 border border-blue-600/20 rounded p-2 space-y-0.5">
-                              <div className="text-[10px] font-semibold text-blue-400">💡 Quando usar:</div>
-                              <div className="text-xs text-blue-200/90 leading-relaxed">{cmd.usoReal}</div>
+                            <div className="bg-amber-950/30 border border-amber-600/20 rounded p-2 space-y-0.5">
+                              <div className="text-[10px] font-semibold text-amber-400">Quando usar:</div>
+                              <div className="text-xs text-amber-200/90 leading-relaxed">{cmd.usoReal}</div>
                             </div>
                           </div>
                         </div>
@@ -434,14 +434,14 @@ export function DicionarioGCode() {
               {/* Comandos M */}
               {comandosFiltrados.comandosM.length > 0 && (
                 <section>
-                  <div className="bg-blue-600/10 border border-blue-600/30 rounded-md p-2 mb-3">
-                    <h3 className="text-sm font-bold text-blue-400">Comandos M - Funções da Máquina</h3>
+                  <div className="bg-orange-600/10 border border-orange-600/30 rounded-md p-2 mb-3">
+                    <h3 className="text-sm font-bold text-orange-500">Comandos M - Funções da Máquina</h3>
                   </div>
                   <div className="space-y-2">
                     {comandosFiltrados.comandosM.map((cmd) => (
-                      <div key={cmd.codigo} className="bg-secondary/40 border border-border rounded-md p-3 hover:border-blue-600/50 transition-colors">
+                      <div key={cmd.codigo} className="bg-secondary/40 border border-border rounded-md p-3 hover:border-orange-600/50 transition-colors">
                         <div className="flex items-start gap-3">
-                          <code className="font-mono font-bold text-blue-400 text-sm bg-black/60 px-2 py-1 rounded min-w-[50px] text-center flex-shrink-0">
+                          <code className="font-mono font-bold text-orange-400 text-sm bg-black/60 px-2 py-1 rounded min-w-[50px] text-center flex-shrink-0">
                             {cmd.codigo}
                           </code>
                           <div className="flex-1 min-w-0 space-y-1.5">
@@ -449,11 +449,11 @@ export function DicionarioGCode() {
                             <div className="text-xs text-muted-foreground leading-relaxed">{cmd.descricao}</div>
                             <div className="bg-black/40 rounded p-2 space-y-1">
                               <div className="text-[10px] text-muted-foreground">Exemplo:</div>
-                              <code className="text-xs text-green-400 font-mono block">{cmd.exemplo}</code>
+                              <code className="text-xs text-orange-300 font-mono block">{cmd.exemplo}</code>
                             </div>
-                            <div className="bg-blue-950/30 border border-blue-600/20 rounded p-2 space-y-0.5">
-                              <div className="text-[10px] font-semibold text-blue-400">💡 Quando usar:</div>
-                              <div className="text-xs text-blue-200/90 leading-relaxed">{cmd.usoReal}</div>
+                            <div className="bg-orange-950/30 border border-orange-600/20 rounded p-2 space-y-0.5">
+                              <div className="text-[10px] font-semibold text-orange-400">Quando usar:</div>
+                              <div className="text-xs text-orange-200/90 leading-relaxed">{cmd.usoReal}</div>
                             </div>
                           </div>
                         </div>
@@ -466,14 +466,14 @@ export function DicionarioGCode() {
               {/* Parâmetros */}
               {comandosFiltrados.parametros.length > 0 && (
                 <section>
-                  <div className="bg-green-600/10 border border-green-600/30 rounded-md p-2 mb-3">
-                    <h3 className="text-sm font-bold text-green-400">Parâmetros - Eixos e Valores</h3>
+                  <div className="bg-yellow-600/10 border border-yellow-600/30 rounded-md p-2 mb-3">
+                    <h3 className="text-sm font-bold text-yellow-500">Parâmetros - Eixos e Valores</h3>
                   </div>
                   <div className="space-y-2">
                     {comandosFiltrados.parametros.map((param) => (
-                      <div key={param.codigo} className="bg-secondary/40 border border-border rounded-md p-3 hover:border-green-600/50 transition-colors">
+                      <div key={param.codigo} className="bg-secondary/40 border border-border rounded-md p-3 hover:border-yellow-600/50 transition-colors">
                         <div className="flex items-start gap-3">
-                          <code className="font-mono font-bold text-green-400 text-sm bg-black/60 px-2 py-1 rounded min-w-[50px] text-center flex-shrink-0">
+                          <code className="font-mono font-bold text-yellow-400 text-sm bg-black/60 px-2 py-1 rounded min-w-[50px] text-center flex-shrink-0">
                             {param.codigo}
                           </code>
                           <div className="flex-1 min-w-0 space-y-1.5">
@@ -481,11 +481,11 @@ export function DicionarioGCode() {
                             <div className="text-xs text-muted-foreground leading-relaxed">{param.descricao}</div>
                             <div className="bg-black/40 rounded p-2 space-y-1">
                               <div className="text-[10px] text-muted-foreground">Exemplo:</div>
-                              <code className="text-xs text-green-400 font-mono block">{param.exemplo}</code>
+                              <code className="text-xs text-yellow-300 font-mono block">{param.exemplo}</code>
                             </div>
-                            <div className="bg-blue-950/30 border border-blue-600/20 rounded p-2 space-y-0.5">
-                              <div className="text-[10px] font-semibold text-blue-400">💡 Quando usar:</div>
-                              <div className="text-xs text-blue-200/90 leading-relaxed">{param.usoReal}</div>
+                            <div className="bg-yellow-950/30 border border-yellow-600/20 rounded p-2 space-y-0.5">
+                              <div className="text-[10px] font-semibold text-yellow-400">Quando usar:</div>
+                              <div className="text-xs text-yellow-200/90 leading-relaxed">{param.usoReal}</div>
                             </div>
                           </div>
                         </div>
@@ -499,40 +499,40 @@ export function DicionarioGCode() {
               {!busca && (
                 <>
                   <section className="bg-amber-900/20 border-2 border-amber-600/40 rounded-md p-3">
-                    <h3 className="text-sm font-bold text-amber-500 mb-2">📋 Exemplo de G-code Completo</h3>
+                    <h3 className="text-sm font-bold text-amber-500 mb-2">Exemplo de G-code Completo</h3>
                     <div className="bg-black/60 rounded-md p-2.5 space-y-0.5 font-mono text-[11px] overflow-x-auto">
-                      <div className="text-gray-400">; Programa para cortar retângulo 100x50mm em MDF 15mm</div>
-                      <div className="text-green-400">G21</div> <span className="text-gray-500">; Milímetros</span><br/>
-                      <div className="text-green-400">G90</div> <span className="text-gray-500">; Coordenadas absolutas</span><br/>
-                      <div className="text-green-400">G0 Z5</div> <span className="text-gray-500">; Sobe fresa para segurança</span><br/>
-                      <div className="text-blue-400">T1 M6</div> <span className="text-gray-500">; Troca para fresa T1 (6mm)</span><br/>
-                      <div className="text-blue-400">M3 S18000</div> <span className="text-gray-500">; Liga spindle a 18000 RPM</span><br/>
-                      <div className="text-green-400">G4 P2</div> <span className="text-gray-500">; Espera 2 segundos</span><br/>
-                      <div className="text-green-400">G0 X0 Y0</div> <span className="text-gray-500">; Vai rápido para início</span><br/>
-                      <div className="text-green-400">G41 D1</div> <span className="text-gray-500">; Ativa compensação esquerda (externo)</span><br/>
-                      <div className="text-green-400">G1 Z-5 F300</div> <span className="text-gray-500">; Desce 5mm com plunge rate 300</span><br/>
-                      <div className="text-green-400">G1 X100 Y0 F1500</div> <span className="text-gray-500">; Corta lado inferior</span><br/>
-                      <div className="text-green-400">G1 X100 Y50 F1500</div> <span className="text-gray-500">; Corta lado direito</span><br/>
-                      <div className="text-green-400">G1 X0 Y50 F1500</div> <span className="text-gray-500">; Corta lado superior</span><br/>
-                      <div className="text-green-400">G1 X0 Y0 F1500</div> <span className="text-gray-500">; Corta lado esquerdo</span><br/>
-                      <div className="text-green-400">G1 Z5 F300</div> <span className="text-gray-500">; Sobe fresa</span><br/>
-                      <div className="text-green-400">G40</div> <span className="text-gray-500">; Cancela compensação</span><br/>
-                      <div className="text-blue-400">M5</div> <span className="text-gray-500">; Desliga spindle</span><br/>
-                      <div className="text-green-400">G28</div> <span className="text-gray-500">; Volta para home</span><br/>
-                      <div className="text-blue-400">M30</div> <span className="text-gray-500">; Fim do programa</span>
+                      <div className="text-gray-400">; Programa para cortar retângulo 100x50mm em madeira MDF 15mm</div>
+                      <div className="text-amber-400">G21</div> <span className="text-gray-500">; Milímetros</span><br/>
+                      <div className="text-amber-400">G90</div> <span className="text-gray-500">; Coordenadas absolutas</span><br/>
+                      <div className="text-amber-400">G0 Z5</div> <span className="text-gray-500">; Sobe fresa para segurança</span><br/>
+                      <div className="text-orange-400">T1 M6</div> <span className="text-gray-500">; Troca para fresa T1 (6mm)</span><br/>
+                      <div className="text-orange-400">M3 S18000</div> <span className="text-gray-500">; Liga spindle a 18000 RPM</span><br/>
+                      <div className="text-amber-400">G4 P2</div> <span className="text-gray-500">; Espera 2 segundos</span><br/>
+                      <div className="text-amber-400">G0 X0 Y0</div> <span className="text-gray-500">; Vai rápido para início</span><br/>
+                      <div className="text-amber-400">G41 D1</div> <span className="text-gray-500">; Ativa compensação esquerda (externo)</span><br/>
+                      <div className="text-amber-400">G1 Z-5 F300</div> <span className="text-gray-500">; Desce 5mm com plunge rate 300</span><br/>
+                      <div className="text-amber-400">G1 X100 Y0 F1500</div> <span className="text-gray-500">; Corta lado inferior</span><br/>
+                      <div className="text-amber-400">G1 X100 Y50 F1500</div> <span className="text-gray-500">; Corta lado direito</span><br/>
+                      <div className="text-amber-400">G1 X0 Y50 F1500</div> <span className="text-gray-500">; Corta lado superior</span><br/>
+                      <div className="text-amber-400">G1 X0 Y0 F1500</div> <span className="text-gray-500">; Corta lado esquerdo</span><br/>
+                      <div className="text-amber-400">G1 Z5 F300</div> <span className="text-gray-500">; Sobe fresa</span><br/>
+                      <div className="text-amber-400">G40</div> <span className="text-gray-500">; Cancela compensação</span><br/>
+                      <div className="text-orange-400">M5</div> <span className="text-gray-500">; Desliga spindle</span><br/>
+                      <div className="text-amber-400">G28</div> <span className="text-gray-500">; Volta para home</span><br/>
+                      <div className="text-orange-400">M30</div> <span className="text-gray-500">; Fim do programa</span>
                     </div>
                   </section>
 
                   {/* Dicas finais */}
                   <section className="bg-red-900/20 border border-red-600/30 rounded-md p-3 mb-4">
-                    <h3 className="text-sm font-bold text-red-400 mb-2">⚠️ Erros Comuns para EVITAR</h3>
+                    <h3 className="text-sm font-bold text-red-400 mb-2">ATENÇÃO - Erros Comuns para EVITAR</h3>
                     <ul className="space-y-1.5 text-xs">
-                      <li className="flex gap-2"><span className="text-red-400 flex-shrink-0">✗</span> <span>Esquecer G21 no início → máquina pode interpretar como polegadas</span></li>
-                      <li className="flex gap-2"><span className="text-red-400 flex-shrink-0">✗</span> <span>Usar G41 e esquecer G40 depois → próxima peça sai com offset errado</span></li>
-                      <li className="flex gap-2"><span className="text-red-400 flex-shrink-0">✗</span> <span>M3 sem G4 depois → começa a cortar com spindle ainda acelerando</span></li>
-                      <li className="flex gap-2"><span className="text-red-400 flex-shrink-0">✗</span> <span>Descer Z muito rápido (usar feedrate ao invés de plunge rate)</span></li>
-                      <li className="flex gap-2"><span className="text-red-400 flex-shrink-0">✗</span> <span>Confundir G41 com G42 → fresa corta no lado errado</span></li>
-                      <li className="flex gap-2"><span className="text-red-400 flex-shrink-0">✗</span> <span>Esquecer M5 no final → spindle fica ligado queimando!</span></li>
+                      <li className="flex gap-2"><span className="text-red-400 flex-shrink-0 font-bold">X</span> <span>Esquecer G21 no início - máquina pode interpretar como polegadas</span></li>
+                      <li className="flex gap-2"><span className="text-red-400 flex-shrink-0 font-bold">X</span> <span>Usar G41 e esquecer G40 depois - próxima peça sai com offset errado</span></li>
+                      <li className="flex gap-2"><span className="text-red-400 flex-shrink-0 font-bold">X</span> <span>M3 sem G4 depois - começa a cortar com spindle ainda acelerando</span></li>
+                      <li className="flex gap-2"><span className="text-red-400 flex-shrink-0 font-bold">X</span> <span>Descer Z muito rápido (usar feedrate ao invés de plunge rate)</span></li>
+                      <li className="flex gap-2"><span className="text-red-400 flex-shrink-0 font-bold">X</span> <span>Confundir G41 com G42 - fresa corta no lado errado da madeira</span></li>
+                      <li className="flex gap-2"><span className="text-red-400 flex-shrink-0 font-bold">X</span> <span>Esquecer M5 no final - spindle fica ligado queimando o motor</span></li>
                     </ul>
                   </section>
                 </>

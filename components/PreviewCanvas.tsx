@@ -13,14 +13,14 @@ type PreviewCanvasProps = {
   pecasPosicionadas: PecaPosicionada[];
 };
 
-// Cores para peças - tons industriais/metálicos
+// Cores para peças - paleta quente temática
 const CORES = [
-  { hex: "#e67e22", nome: "Laranja" },
-  { hex: "#3498db", nome: "Azul" },
-  { hex: "#95a5a6", nome: "Cinza" },
-  { hex: "#e74c3c", nome: "Vermelho" },
-  { hex: "#16a085", nome: "Verde" },
-  { hex: "#f39c12", nome: "Amarelo" },
+  { hex: "#F5B642", nome: "Amarelo" },
+  { hex: "#E67E22", nome: "Laranja" },
+  { hex: "#D35400", nome: "Laranja Escuro" },
+  { hex: "#F39C12", nome: "Dourado" },
+  { hex: "#E59866", nome: "Pêssego" },
+  { hex: "#DC7633", nome: "Terracota" },
 ];
 
 export function PreviewCanvas({
@@ -41,7 +41,7 @@ export function PreviewCanvas({
   );
   const taxaAproveitamento = areaTotalChapa > 0 ? (areaPecas / areaTotalChapa) * 100 : 0;
 
-  // Ajusta tamanho do canvas baseado no container (reduzido)
+  // Ajusta tamanho do canvas baseado no container (reduzido em 50%)
   useEffect(() => {
     const updateCanvasSize = () => {
       if (containerRef.current) {
@@ -49,8 +49,8 @@ export function PreviewCanvas({
         // Altura reduzida para preview compacto
         const containerHeight = Math.min(320, window.innerHeight - 380);
         setCanvasSize({
-          width: Math.max(280, Math.min(500, containerWidth)), // Largura máxima de 500px
-          height: Math.max(200, containerHeight),
+          width: Math.max(200, Math.min(350, containerWidth * 0.85)), // Reduzido: largura máxima de 350px
+          height: Math.max(180, containerHeight * 0.85),
         });
       }
     };
@@ -214,9 +214,9 @@ export function PreviewCanvas({
             <div className="flex items-center gap-1.5">
               <span className="text-muted-foreground">Aproveitamento:</span>
               <span className={`font-semibold ${
-                taxaAproveitamento >= 70 ? 'text-green-500' :
-                taxaAproveitamento >= 50 ? 'text-amber-500' :
-                'text-red-500'
+                taxaAproveitamento >= 70 ? 'text-amber-600 dark:text-amber-500' :
+                taxaAproveitamento >= 50 ? 'text-orange-600 dark:text-orange-500' :
+                'text-red-600 dark:text-red-500'
               }`}>
                 {taxaAproveitamento.toFixed(1)}%
               </span>

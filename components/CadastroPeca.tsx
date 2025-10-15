@@ -29,6 +29,7 @@ export function CadastroPeca({
   const [largura, setLargura] = useState<string>("500");
   const [altura, setAltura] = useState<string>("500");
   const [tipoCorte, setTipoCorte] = useState<TipoCorte>("externo");
+  const [nome, setNome] = useState<string>("");
   const [erro, setErro] = useState<string>("");
 
   const handleAdicionar = () => {
@@ -60,6 +61,7 @@ export function CadastroPeca({
       altura: alturaNum,
       tipoCorte: tipoCorte,
       id: crypto.randomUUID(),
+      nome: nome.trim() || undefined, // Só adiciona nome se não estiver vazio
     };
 
     // Simula nesting com todas as peças (existentes + nova) para validar
@@ -83,9 +85,8 @@ export function CadastroPeca({
     // Adiciona a peça
     onAdicionar(novaPeca);
 
-    // Mantém os valores nos campos (não reseta mais)
-    // setLargura("500");
-    // setAltura("500");
+    // Reseta apenas o nome após adicionar
+    setNome("");
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -100,6 +101,21 @@ export function CadastroPeca({
         <CardTitle className="text-base sm:text-lg">Cadastro de Peças</CardTitle>
       </CardHeader>
       <CardContent className="space-y-2 sm:space-y-3">
+        <div className="space-y-1.5">
+          <Label htmlFor="pecaNome" className="text-xs sm:text-sm">
+            Nome da Peça (opcional)
+          </Label>
+          <Input
+            id="pecaNome"
+            type="text"
+            value={nome}
+            onChange={(e) => setNome(e.target.value)}
+            onKeyPress={handleKeyPress}
+            placeholder="Ex: Tampa lateral, Base, etc."
+            className="h-9 sm:h-10"
+          />
+        </div>
+
         <div className="grid grid-cols-2 gap-2 sm:gap-3">
           <div className="space-y-1.5">
             <Label htmlFor="pecaLargura" className="text-xs sm:text-sm">

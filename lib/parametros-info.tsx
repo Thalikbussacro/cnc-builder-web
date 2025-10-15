@@ -10,26 +10,22 @@ export const parametrosInfo = {
     content: (
       <>
         <div>
-          <strong>O que é:</strong> A profundidade total que a fresa irá penetrar no material.
+          <strong>O que é:</strong> A profundidade total que a fresa irá penetrar na madeira para cortá-la completamente.
         </div>
         <div>
-          <strong>Valores típicos:</strong>
+          <strong>Valores para madeira:</strong>
           <ul className="list-disc ml-5 mt-2 space-y-1">
-            <li>Madeira macia: 5-20mm</li>
-            <li>Madeira dura: 3-10mm</li>
-            <li>MDF: 5-18mm</li>
-            <li>Acrílico: 3-10mm</li>
-            <li>Alumínio: 1-5mm</li>
+            <li>MDF 6mm: cortar a 6-6.5mm</li>
+            <li>MDF 15mm: cortar a 15-15.5mm</li>
+            <li>Compensado 9mm: cortar a 9-9.5mm</li>
+            <li>Madeira maciça: espessura + 0.5mm para garantir corte completo</li>
           </ul>
         </div>
-        <div>
-          <strong>Quando aumentar:</strong> Materiais mais macios, fresas mais robustas, máquina mais potente.
-        </div>
-        <div>
-          <strong>Quando diminuir:</strong> Materiais duros/frágeis, fresas pequenas, máquina menos rígida, acabamento fino.
+        <div className="bg-amber-50 dark:bg-amber-950/30 p-2 rounded border border-amber-200 dark:border-amber-800">
+          <strong className="text-amber-700 dark:text-amber-400">Dica prática:</strong> Sempre adicione 0.5mm a mais que a espessura real da madeira para garantir que o corte seja completo e não deixe fibras conectadas.
         </div>
         <div className="text-amber-600 dark:text-amber-500">
-          <strong>⚠️ Atenção:</strong> Profundidade excessiva pode quebrar a fresa ou causar acabamento ruim.
+          <strong>⚠️ Atenção:</strong> Se cortar muito fundo (mais de 2mm além da espessura), pode danificar a mesa de sacrifício da CNC.
         </div>
       </>
     ),
@@ -68,28 +64,22 @@ export const parametrosInfo = {
     content: (
       <>
         <div>
-          <strong>O que é:</strong> Quanto a fresa desce em cada passada (múltiplas passadas até atingir profundidade total).
+          <strong>O que é:</strong> Quanto a fresa desce em cada passada ao cortar madeira (múltiplas passadas até atingir profundidade total).
         </div>
         <div>
-          <strong>Valores típicos:</strong>
+          <strong>Valores para madeira:</strong>
           <ul className="list-disc ml-5 mt-2 space-y-1">
-            <li>Madeira: 2-6mm por passada</li>
-            <li>MDF: 3-8mm por passada</li>
-            <li>Acrílico: 1-3mm por passada</li>
-            <li>Alumínio: 0.5-2mm por passada</li>
+            <li>MDF: 3-5mm por passada (fresa 6mm)</li>
+            <li>Compensado: 3-4mm por passada</li>
+            <li>Madeira macia: 4-6mm por passada</li>
+            <li>Madeira dura: 2-3mm por passada</li>
           </ul>
         </div>
-        <div>
-          <strong>Regra prática:</strong> Use 50-100% do diâmetro da fresa como profundidade por passada.
-        </div>
-        <div>
-          <strong>Quando aumentar:</strong> Materiais macios, fresas grandes ({'>'}6mm), cortes rápidos (qualidade não crítica).
-        </div>
-        <div>
-          <strong>Quando diminuir:</strong> Materiais duros/quebradiços, fresas pequenas, acabamento fino, máquina com pouca rigidez.
+        <div className="bg-amber-50 dark:bg-amber-950/30 p-2 rounded border border-amber-200 dark:border-amber-800">
+          <strong className="text-amber-700 dark:text-amber-400">Exemplo prático:</strong> Para cortar MDF 15mm com fresa 6mm usando 4mm por passada, a máquina fará 4 passadas (4mm + 4mm + 4mm + 3mm = 15mm total).
         </div>
         <div className="text-amber-600 dark:text-amber-500">
-          <strong>⚠️ Atenção:</strong> Passadas muito profundas aumentam carga na fresa e risco de quebra.
+          <strong>⚠️ Atenção:</strong> Passadas muito profundas (mais que o diâmetro da fresa) causam vibração excessiva e podem quebrar a fresa.
         </div>
       </>
     ),
@@ -100,26 +90,26 @@ export const parametrosInfo = {
     content: (
       <>
         <div>
-          <strong>O que é:</strong> Velocidade lateral da fresa durante o corte, medida em mm/min.
+          <strong>O que é:</strong> Velocidade lateral da fresa durante o corte de madeira, medida em mm/min.
         </div>
         <div>
-          <strong>Valores típicos:</strong>
+          <strong>Valores para madeira:</strong>
           <ul className="list-disc ml-5 mt-2 space-y-1">
-            <li>Madeira macia: 1500-3000 mm/min</li>
-            <li>Madeira dura: 1000-2000 mm/min</li>
+            <li>Pinus/madeira macia: 2000-3000 mm/min</li>
             <li>MDF: 1500-2500 mm/min</li>
-            <li>Acrílico: 800-1500 mm/min</li>
-            <li>Alumínio: 400-1000 mm/min</li>
+            <li>Compensado: 1500-2500 mm/min</li>
+            <li>Madeira dura (carvalho, ipê): 1000-1800 mm/min</li>
           </ul>
         </div>
-        <div>
-          <strong>Quando aumentar:</strong> Materiais macios, cortes de desbaste, fresas novas/afiadas, máquina potente.
-        </div>
-        <div>
-          <strong>Quando diminuir:</strong> Materiais duros, acabamento fino, fresas pequenas/gastas, curvas acentuadas.
+        <div className="bg-amber-50 dark:bg-amber-950/30 p-2 rounded border border-amber-200 dark:border-amber-800">
+          <strong className="text-amber-700 dark:text-amber-400">Sinais práticos:</strong>
+          <ul className="list-disc ml-5 mt-1 space-y-1 text-sm">
+            <li><strong>Aumentar feedrate:</strong> Motor do eixo XY soa com facilidade, acabamento bom, sem marcas de queimado</li>
+            <li><strong>Diminuir feedrate:</strong> Motor do XY forçando/travando, marcas de queimado na madeira, fresa muito quente</li>
+          </ul>
         </div>
         <div className="text-amber-600 dark:text-amber-500">
-          <strong>⚠️ Atenção:</strong> Feedrate muito alto causa acabamento ruim e quebra de fresa. Muito baixo queima o material.
+          <strong>⚠️ Atenção:</strong> Feedrate muito alto quebra a fresa. Muito baixo queima a madeira e desgasta a fresa.
         </div>
       </>
     ),
@@ -130,28 +120,22 @@ export const parametrosInfo = {
     content: (
       <>
         <div>
-          <strong>O que é:</strong> Velocidade de descida vertical (eixo Z) da fresa ao penetrar no material, em mm/min.
+          <strong>O que é:</strong> Velocidade de descida vertical (eixo Z) da fresa ao penetrar na madeira, em mm/min.
         </div>
         <div>
-          <strong>Valores típicos:</strong>
+          <strong>Valores para madeira:</strong>
           <ul className="list-disc ml-5 mt-2 space-y-1">
-            <li>Madeira: 300-800 mm/min</li>
-            <li>MDF: 400-700 mm/min</li>
-            <li>Acrílico: 200-500 mm/min</li>
-            <li>Alumínio: 100-300 mm/min</li>
+            <li>MDF: 400-600 mm/min</li>
+            <li>Compensado: 300-500 mm/min</li>
+            <li>Madeira macia: 500-800 mm/min</li>
+            <li>Madeira dura: 250-400 mm/min</li>
           </ul>
         </div>
-        <div>
-          <strong>Regra prática:</strong> Use 30-50% do feedrate como plunge rate.
-        </div>
-        <div>
-          <strong>Quando aumentar:</strong> Materiais macios, fresas com ponta apropriada para mergulho.
-        </div>
-        <div>
-          <strong>Quando diminuir:</strong> Materiais duros/quebradiços, fresas sem ponta de centro, furos profundos.
+        <div className="bg-amber-50 dark:bg-amber-950/30 p-2 rounded border border-amber-200 dark:border-amber-800">
+          <strong className="text-amber-700 dark:text-amber-400">Regra simples:</strong> Use cerca de 30% do feedrate. Exemplo: se feedrate é 1500mm/min, plunge rate deve ser ~500mm/min.
         </div>
         <div className="text-amber-600 dark:text-amber-500">
-          <strong>⚠️ Atenção:</strong> Mergulho muito rápido pode quebrar a fresa, especialmente em fresas sem ponta de centro.
+          <strong>⚠️ Atenção:</strong> Descer rápido demais na madeira pode quebrar a ponta da fresa ou causar lascas na entrada do corte.
         </div>
       </>
     ),
@@ -162,33 +146,27 @@ export const parametrosInfo = {
     content: (
       <>
         <div>
-          <strong>O que é:</strong> Velocidade de rotação da fresa, medida em RPM (rotações por minuto).
+          <strong>O que é:</strong> Velocidade de rotação da fresa ao cortar madeira, medida em RPM (rotações por minuto).
         </div>
         <div>
-          <strong>Valores típicos:</strong>
+          <strong>Valores para madeira:</strong>
           <ul className="list-disc ml-5 mt-2 space-y-1">
-            <li>Madeira: 18000-24000 RPM</li>
             <li>MDF: 16000-20000 RPM</li>
-            <li>Acrílico: 10000-18000 RPM (evitar derretimento)</li>
-            <li>Alumínio: 8000-15000 RPM</li>
+            <li>Compensado: 16000-20000 RPM</li>
+            <li>Madeira macia (pinus): 18000-22000 RPM</li>
+            <li>Madeira dura (carvalho, ipê): 14000-18000 RPM</li>
           </ul>
         </div>
-        <div>
-          <strong>Relação com diâmetro da fresa:</strong>
-          <ul className="list-disc ml-5 mt-2 space-y-1">
-            <li>Fresas pequenas (3-6mm): 18000-24000 RPM</li>
-            <li>Fresas médias (6-12mm): 12000-18000 RPM</li>
-            <li>Fresas grandes (12mm+): 8000-12000 RPM</li>
+        <div className="bg-amber-50 dark:bg-amber-950/30 p-2 rounded border border-amber-200 dark:border-amber-800">
+          <strong className="text-amber-700 dark:text-amber-400">Dica prática:</strong>
+          <ul className="list-disc ml-5 mt-1 space-y-1 text-sm">
+            <li>Fresa 3mm: 20000-24000 RPM (mais rápido para fresas pequenas)</li>
+            <li>Fresa 6mm: 16000-18000 RPM (padrão mais usado)</li>
+            <li>Fresa 12mm: 12000-14000 RPM (mais devagar para fresas grandes)</li>
           </ul>
-        </div>
-        <div>
-          <strong>Quando aumentar:</strong> Fresas pequenas, materiais macios, acabamento liso.
-        </div>
-        <div>
-          <strong>Quando diminuir:</strong> Fresas grandes, materiais que derretem (acrílico), metais.
         </div>
         <div className="text-amber-600 dark:text-amber-500">
-          <strong>⚠️ Atenção:</strong> RPM muito alto pode derreter plásticos. RPM muito baixo causa acabamento ruim e sobrecarga.
+          <strong>⚠️ Atenção:</strong> RPM muito baixo deixa acabamento áspero na madeira. RPM muito alto queima a madeira e desgasta a fresa rapidamente.
         </div>
       </>
     ),
@@ -200,18 +178,18 @@ export const parametrosInfo = {
     content: (
       <>
         <div>
-          <strong>O que é:</strong> Dimensão horizontal da chapa de material disponível para corte (eixo X).
+          <strong>O que é:</strong> Dimensão horizontal da chapa de madeira disponível para corte (eixo X da CNC).
         </div>
         <div>
-          <strong>Tamanhos padrões de chapas:</strong>
+          <strong>Tamanhos padrões de chapas de madeira:</strong>
           <ul className="list-disc ml-5 mt-2 space-y-1">
-            <li>MDF/Compensado: 2750x1830mm, 2440x1220mm</li>
-            <li>Acrílico: 2000x3000mm, 2050x3050mm</li>
-            <li>Alumínio: 2000x1000mm, 2500x1250mm</li>
+            <li>MDF/Compensado BR: 2750×1830mm (tamanho grande)</li>
+            <li>MDF/Compensado BR: 2200×1600mm (tamanho médio)</li>
+            <li>MDF/Compensado USA: 2440×1220mm (4×8 pés)</li>
           </ul>
         </div>
-        <div>
-          <strong>Dica:</strong> Considere a área útil da máquina CNC, que pode ser menor que a chapa.
+        <div className="bg-amber-50 dark:bg-amber-950/30 p-2 rounded border border-amber-200 dark:border-amber-800">
+          <strong className="text-amber-700 dark:text-amber-400">Importante:</strong> Use a área útil da sua CNC, não o tamanho da chapa completa. Exemplo: CNC com área de trabalho 2850×1500mm pode usar chapa de 2750×1400mm com folga.
         </div>
       </>
     ),
@@ -222,18 +200,18 @@ export const parametrosInfo = {
     content: (
       <>
         <div>
-          <strong>O que é:</strong> Dimensão vertical da chapa de material disponível para corte (eixo Y).
+          <strong>O que é:</strong> Dimensão vertical da chapa de madeira disponível para corte (eixo Y da CNC).
         </div>
         <div>
-          <strong>Tamanhos padrões de chapas:</strong>
+          <strong>Tamanhos padrões de chapas de madeira:</strong>
           <ul className="list-disc ml-5 mt-2 space-y-1">
-            <li>MDF/Compensado: 2750x1830mm, 2440x1220mm</li>
-            <li>Acrílico: 2000x3000mm, 2050x3050mm</li>
-            <li>Alumínio: 2000x1000mm, 2500x1250mm</li>
+            <li>MDF/Compensado BR: 2750×1830mm (tamanho grande)</li>
+            <li>MDF/Compensado BR: 2200×1600mm (tamanho médio)</li>
+            <li>MDF/Compensado USA: 2440×1220mm (4×8 pés)</li>
           </ul>
         </div>
-        <div>
-          <strong>Dica:</strong> Considere a área útil da máquina CNC, que pode ser menor que a chapa.
+        <div className="bg-amber-50 dark:bg-amber-950/30 p-2 rounded border border-amber-200 dark:border-amber-800">
+          <strong className="text-amber-700 dark:text-amber-400">Importante:</strong> Use a área útil da sua CNC, não o tamanho da chapa completa. Deixe margem de segurança nas bordas.
         </div>
       </>
     ),
@@ -244,19 +222,18 @@ export const parametrosInfo = {
     content: (
       <>
         <div>
-          <strong>O que é:</strong> Altura do material no eixo Z. Geralmente define a profundidade de corte total.
+          <strong>O que é:</strong> Espessura da madeira no eixo Z. Define quanto a fresa precisa descer para cortar completamente.
         </div>
         <div>
-          <strong>Espessuras comuns:</strong>
+          <strong>Espessuras comuns de madeira:</strong>
           <ul className="list-disc ml-5 mt-2 space-y-1">
             <li>MDF: 3mm, 6mm, 9mm, 12mm, 15mm, 18mm, 25mm</li>
             <li>Compensado: 4mm, 6mm, 9mm, 12mm, 15mm, 18mm</li>
-            <li>Acrílico: 2mm, 3mm, 5mm, 6mm, 8mm, 10mm</li>
-            <li>Alumínio: 1mm, 2mm, 3mm, 5mm, 6mm</li>
+            <li>Madeira maciça: variável, medir com paquímetro</li>
           </ul>
         </div>
-        <div>
-          <strong>Dica:</strong> A profundidade de corte deve ser igual ou ligeiramente maior que a espessura para garantir corte completo.
+        <div className="bg-amber-50 dark:bg-amber-950/30 p-2 rounded border border-amber-200 dark:border-amber-800">
+          <strong className="text-amber-700 dark:text-amber-400">Dica prática:</strong> Se sua madeira tem 15mm, configure profundidade de corte para 15.5mm para garantir que corte completo sem deixar fibras conectadas.
         </div>
       </>
     ),
@@ -318,40 +295,41 @@ export const parametrosInfo = {
     content: (
       <>
         <div>
-          <strong>O que é:</strong> Define como a fresa deve compensar em relação ao caminho marcado.
+          <strong>O que é:</strong> Define como a fresa deve compensar em relação ao caminho marcado ao cortar madeira.
         </div>
         <div className="space-y-3 mt-3">
-          <div className="p-3 bg-blue-50 dark:bg-blue-950 rounded">
-            <strong className="text-blue-700 dark:text-blue-300">🔵 Externo (G41 - Left Compensation)</strong>
-            <ul className="list-disc ml-5 mt-2 space-y-1">
-              <li>Fresa corta FORA da marcação</li>
-              <li>Peça final fica com dimensões exatas</li>
-              <li>Usado para recortar peças</li>
-              <li>Exemplo: Cortar retângulo de 100x50mm, peça sai com 100x50mm</li>
+          <div className="p-3 bg-orange-50 dark:bg-orange-950/30 rounded border border-orange-200 dark:border-orange-800">
+            <strong className="text-orange-700 dark:text-orange-400">EXTERNO (G41 - Left Compensation)</strong>
+            <ul className="list-disc ml-5 mt-2 space-y-1 text-sm">
+              <li>Fresa corta FORA da marcação (ao redor da peça)</li>
+              <li>Peça final fica com dimensões exatas programadas</li>
+              <li>Usado para recortar peças retangulares da chapa</li>
+              <li><strong>Exemplo:</strong> Programar retângulo 100×50mm → peça cortada sai com 100×50mm exatos</li>
             </ul>
           </div>
 
-          <div className="p-3 bg-red-50 dark:bg-red-950 rounded">
-            <strong className="text-red-700 dark:text-red-300">🔴 Interno (G42 - Right Compensation)</strong>
-            <ul className="list-disc ml-5 mt-2 space-y-1">
-              <li>Fresa corta DENTRO da marcação</li>
-              <li>Usado para fazer furos e recortes internos</li>
-              <li>Furo/recorte final fica com dimensões exatas</li>
-              <li>Exemplo: Fazer furo de 50mm, furo sai com 50mm</li>
+          <div className="p-3 bg-amber-50 dark:bg-amber-950/30 rounded border border-amber-200 dark:border-amber-800">
+            <strong className="text-amber-700 dark:text-amber-400">INTERNO (G42 - Right Compensation)</strong>
+            <ul className="list-disc ml-5 mt-2 space-y-1 text-sm">
+              <li>Fresa corta DENTRO da marcação (para fazer furos/rasgos)</li>
+              <li>Furo/recorte final fica com dimensões exatas programadas</li>
+              <li>Usado para fazer janelas, furos retangulares na madeira</li>
+              <li><strong>Exemplo:</strong> Programar furo 50×30mm → furo cortado sai com 50×30mm exatos</li>
             </ul>
           </div>
 
-          <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded">
-            <strong className="text-gray-700 dark:text-gray-300">⚪ Na Linha (G40 - No Compensation)</strong>
-            <ul className="list-disc ml-5 mt-2 space-y-1">
-              <li>Centro da fresa segue exatamente o caminho</li>
+          <div className="p-3 bg-yellow-50 dark:bg-yellow-950/30 rounded border border-yellow-200 dark:border-yellow-800">
+            <strong className="text-yellow-700 dark:text-yellow-400">NA LINHA (G40 - No Compensation)</strong>
+            <ul className="list-disc ml-5 mt-2 space-y-1 text-sm">
+              <li>Centro da fresa segue exatamente o caminho programado</li>
               <li>Peça fica maior/menor dependendo do diâmetro da fresa</li>
-              <li>Usado para gravações, sulcos, ou quando compensação é calculada no CAD</li>
+              <li>Usado para gravações, sulcos decorativos na madeira</li>
+              <li><strong>Exemplo:</strong> Gravar logo ou texto na superfície da madeira</li>
             </ul>
           </div>
         </div>
         <div className="text-amber-600 dark:text-amber-500 mt-3">
-          <strong>⚠️ Atenção:</strong> Escolha errada do tipo de corte resulta em peças com dimensões incorretas!
+          <strong>⚠️ Atenção:</strong> Escolher tipo errado faz a peça de madeira sair com tamanho incorreto (diferença = diâmetro da fresa)!
         </div>
       </>
     ),
