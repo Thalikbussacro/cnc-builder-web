@@ -16,8 +16,8 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Gerador de G-code CNC",
-  description: "Aplicação web para gerar código G-code para fresadoras CNC com algoritmo de nesting automático",
+  title: "G-Code Generator (GCG)",
+  description: "Aplicação web profissional para gerar código G-Code otimizado para fresadoras CNC com algoritmo de nesting automático e validações de segurança",
 };
 
 export default function RootLayout({
@@ -28,7 +28,7 @@ export default function RootLayout({
   return (
     <html lang="pt-BR" className={`${plusJakartaSans.variable} ${jetbrainsMono.variable}`} suppressHydrationWarning>
       <body className="font-sans antialiased">
-        <ThemeProvider defaultTheme="light" storageKey="cnc-builder-theme">
+        <ThemeProvider defaultTheme="light" storageKey="gcg-theme">
           {children}
         </ThemeProvider>
       </body>
