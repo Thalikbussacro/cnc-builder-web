@@ -13,6 +13,7 @@ import { VisualizadorGCode } from "@/components/VisualizadorGCode";
 import { SeletorNesting } from "@/components/SeletorNesting";
 import { DicionarioGCode } from "@/components/DicionarioGCode";
 import { Button } from "@/components/ui/button";
+import { Menu } from "lucide-react";
 import type { Peca, PecaPosicionada, ConfiguracoesChapa as TConfigChapa, ConfiguracoesCorte as TConfigCorte, ConfiguracoesFerramenta as TConfigFerramenta, FormatoArquivo, VersaoGerador, TempoEstimado } from "@/types";
 import { posicionarPecas, type MetodoNesting } from "@/lib/nesting-algorithm";
 import { gerarGCode, downloadGCode, calcularTempoEstimado } from "@/lib/gcode-generator";
@@ -57,6 +58,7 @@ export default function Home() {
   const [metricas, setMetricas] = useState<{ areaUtilizada: number; eficiencia: number; tempo: number } | undefined>();
   const [tempoEstimado, setTempoEstimado] = useState<TempoEstimado | undefined>();
   const [secaoAtiva, setSecaoAtiva] = useLocalStorage<SecaoSidebar>('cnc-secao-ativa', 'chapa');
+  const [sidebarMobileOpen, setSidebarMobileOpen] = useState(false);
 
   // Atualiza posicionamento sempre que algo mudar
   useEffect(() => {
@@ -143,31 +145,54 @@ export default function Home() {
     <MainLayout>
       <div className="flex h-full">
         {/* Sidebar */}
-        <Sidebar secaoAtiva={secaoAtiva} onSecaoChange={setSecaoAtiva} />
+        <Sidebar
+          secaoAtiva={secaoAtiva}
+          onSecaoChange={setSecaoAtiva}
+          mobileOpen={sidebarMobileOpen}
+          onMobileOpenChange={setSidebarMobileOpen}
+        />
 
         {/* Main Content */}
         <div className="flex-1 flex flex-col overflow-hidden">
           {/* Top Actions Bar */}
-          <div className="flex items-center justify-between gap-2 p-4 border-b flex-shrink-0 lg:pl-4 pl-20">
+          <div className="flex items-center justify-between gap-2 px-4 py-3 border-b flex-shrink-0 bg-card/50">
+            <div className="flex items-center gap-3">
+              {/* Menu Button (Mobile) */}
+              <Button
+                variant="ghost"
+                size="sm"
+                className="lg:hidden"
+                onClick={() => setSidebarMobileOpen(true)}
+              >
+                <Menu className="h-5 w-5" />
+              </Button>
+
+              {/* Logo/Title */}
+              <div className="flex items-center gap-2">
+                <h1 className="text-lg font-semibold hidden sm:block">G-Code Generator</h1>
+                <h1 className="text-lg font-semibold sm:hidden">GCG</h1>
+              </div>
+            </div>
+
             <div className="flex items-center gap-2">
               <DicionarioGCode />
-            </div>
-            <div className="flex items-center gap-2">
               <Button
                 onClick={handleVisualizarGCode}
                 variant="default"
                 size="sm"
                 disabled={pecas.length === 0}
               >
-                <span className="hidden sm:inline">Baixar/Copiar </span>G-code
+                <span className="hidden md:inline">Baixar/Copiar </span>G-code
               </Button>
               <Button
                 onClick={handleLimpar}
                 variant="destructive"
                 size="sm"
                 disabled={pecas.length === 0}
+                title="Limpar todas as peças"
               >
                 <span className="hidden sm:inline">Limpar</span>
+                <span className="sm:hidden">✕</span>
               </Button>
             </div>
           </div>

@@ -4,12 +4,20 @@ import { cn } from "@/lib/utils";
 import { Settings, Scissors, Wrench, Package, PlusCircle, Menu, X, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "./ui/button";
 import { useState } from "react";
+import dynamic from "next/dynamic";
+
+const ThemeToggle = dynamic(() => import("./ThemeToggle").then(mod => ({ default: mod.ThemeToggle })), {
+  ssr: false,
+  loading: () => <div className="h-8 w-8" />
+});
 
 export type SecaoSidebar = 'chapa' | 'corte' | 'ferramenta' | 'nesting' | 'adicionar-peca';
 
 interface SidebarProps {
   secaoAtiva: SecaoSidebar;
   onSecaoChange: (secao: SecaoSidebar) => void;
+  mobileOpen: boolean;
+  onMobileOpenChange: (open: boolean) => void;
 }
 
 const secaoAdicionar = {
@@ -46,13 +54,12 @@ const configuracoes = [
   }
 ];
 
-export function Sidebar({ secaoAtiva, onSecaoChange }: SidebarProps) {
-  const [mobileOpen, setMobileOpen] = useState(false);
+export function Sidebar({ secaoAtiva, onSecaoChange, mobileOpen, onMobileOpenChange }: SidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
 
   const handleSecaoClick = (secao: SecaoSidebar) => {
     onSecaoChange(secao);
-    setMobileOpen(false); // Fecha menu mobile após seleção
+    onMobileOpenChange(false); // Fecha menu mobile após seleção
   };
 
   const renderSecaoButton = (secao: typeof secaoAdicionar | typeof configuracoes[0]) => {
@@ -106,7 +113,7 @@ export function Sidebar({ secaoAtiva, onSecaoChange }: SidebarProps) {
             variant="ghost"
             size="sm"
             className="lg:hidden"
-            onClick={() => setMobileOpen(false)}
+            onClick={() => onMobileOpenChange(false)}
           >
             <X className="h-4 w-4" />
           </Button>
@@ -137,29 +144,21 @@ export function Sidebar({ secaoAtiva, onSecaoChange }: SidebarProps) {
       </nav>
 
       {/* Footer */}
-      {!collapsed && (
-        <div className="p-3 border-t">
-          <div className="text-xs text-muted-foreground text-center">
-            CNC Builder v2.0
-          </div>
+      <div className="p-3 border-t">
+        <div className="flex items-center justify-between gap-2">
+          {!collapsed && (
+            <div className="text-xs text-muted-foreground">
+              GCG v2.0
+            </div>
+          )}
+          <ThemeToggle />
         </div>
-      )}
+      </div>
     </div>
   );
 
   return (
     <>
-      {/* Mobile Toggle Button */}
-      <Button
-        variant="outline"
-        size="sm"
-        className="lg:hidden fixed top-4 left-4 z-50 shadow-lg"
-        onClick={() => setMobileOpen(true)}
-      >
-        <Menu className="h-4 w-4 mr-2" />
-        Menu
-      </Button>
-
       {/* Desktop Sidebar - largura dinâmica baseada em collapsed */}
       <aside className={cn(
         "hidden lg:flex border-r bg-card flex-col h-full transition-all duration-300",
@@ -174,7 +173,7 @@ export function Sidebar({ secaoAtiva, onSecaoChange }: SidebarProps) {
           {/* Backdrop */}
           <div
             className="lg:hidden fixed inset-0 bg-background/80 backdrop-blur-sm z-40"
-            onClick={() => setMobileOpen(false)}
+            onClick={() => onMobileOpenChange(false)}
           />
           {/* Drawer */}
           <aside className="lg:hidden fixed left-0 top-0 bottom-0 w-80 bg-card border-r z-50 shadow-lg animate-in slide-in-from-left duration-300">
