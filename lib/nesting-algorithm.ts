@@ -59,6 +59,7 @@ export function posicionarPecasGreedy(
         altura: peca.altura,
         tipoCorte: peca.tipoCorte,
         id: peca.id,
+        nome: peca.nome,
       };
 
       if (cabeNoEspaco(novaPos, posicionadas, chapaLargura, chapaAltura, espacamento)) {
@@ -215,6 +216,7 @@ export function posicionarPecasGreedy(
         altura: peca.altura,
         tipoCorte: peca.tipoCorte,
         id: peca.id,
+        nome: peca.nome,
       };
 
       if (cabeNoEspaco(novaPos, posicionadas, chapaLargura, chapaAltura, espacamento)) {
@@ -300,6 +302,7 @@ export function posicionarPecasShelf(
           altura: peca.altura,
           tipoCorte: peca.tipoCorte,
           id: peca.id,
+          nome: peca.nome,
         });
 
         shelfAtual.xAtual += peca.largura + espacamento;
@@ -328,6 +331,7 @@ export function posicionarPecasShelf(
           altura: peca.altura,
           tipoCorte: peca.tipoCorte,
           id: peca.id,
+          nome: peca.nome,
         });
 
         colocado = true;
@@ -411,6 +415,7 @@ export function posicionarPecasGuillotine(
         altura: peca.altura,
         tipoCorte: peca.tipoCorte,
         id: peca.id,
+        nome: peca.nome,
       });
 
       // Remove retângulo usado

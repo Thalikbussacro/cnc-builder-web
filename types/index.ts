@@ -45,6 +45,7 @@ export type ConfiguracoesCorte = {
   profundidadePorPassada: number;  // mm - Quanto desce em cada passada
   feedrate: number;                 // mm/min - Velocidade de avanço durante corte
   plungeRate: number;               // mm/min - Velocidade de descida (mergulho) no eixo Z
+  rapidsSpeed: number;              // mm/min - Velocidade de movimento rápido (G0)
   spindleSpeed: number;             // RPM - Rotação da fresa
   usarRampa: boolean;               // Ativar rampa de entrada ao invés de mergulho vertical
   anguloRampa: number;              // graus - Ângulo da rampa de entrada (2° a 5°)
@@ -95,4 +96,14 @@ export type Candidato = {
 export type ResultadoNesting = {
   posicionadas: PecaPosicionada[];
   naoCouberam: Peca[];
+};
+
+/**
+ * Tempo estimado de execução do G-code
+ */
+export type TempoEstimado = {
+  tempoCorte: number;          // segundos - movimentos G1 laterais (feedrate)
+  tempoMergulho: number;       // segundos - movimentos G1 verticais (plungeRate)
+  tempoPosicionamento: number; // segundos - movimentos G0 (rapidsSpeed)
+  tempoTotal: number;          // segundos - soma total
 };

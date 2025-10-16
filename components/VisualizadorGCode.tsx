@@ -4,14 +4,27 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import type { FormatoArquivo } from "@/types";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import type { FormatoArquivo, VersaoGerador } from "@/types";
+import { VERSOES_GERADOR } from "@/lib/gcode-generator";
 
 type VisualizadorGCodeProps = {
   isOpen: boolean;
   onClose: () => void;
   gcode: string;
   onDownload: (formato: FormatoArquivo) => void;
+  versaoGerador: VersaoGerador;
+  onVersaoChange: (versao: VersaoGerador) => void;
+  incluirComentarios: boolean;
+  onIncluirComentariosChange: (incluir: boolean) => void;
 };
 
 export function VisualizadorGCode({
@@ -19,6 +32,10 @@ export function VisualizadorGCode({
   onClose,
   gcode,
   onDownload,
+  versaoGerador,
+  onVersaoChange,
+  incluirComentarios,
+  onIncluirComentariosChange,
 }: VisualizadorGCodeProps) {
   const [copiado, setCopiado] = useState(false);
   const [formato, setFormato] = useState<FormatoArquivo>('tap');
@@ -93,14 +110,71 @@ export function VisualizadorGCode({
           {/* Conteúdo - Área de código */}
           <div className="flex-1 overflow-hidden p-4 sm:p-6">
             <Card className="h-full bg-slate-800 dark:bg-black/60 border-2 border-amber-600/20">
-              <pre className="h-full overflow-auto p-4 text-xs sm:text-sm font-mono leading-relaxed">
-                <code className="text-amber-300 dark:text-amber-400">{gcode}</code>
-              </pre>
+              <div className="h-full overflow-auto p-4 text-xs sm:text-sm font-mono leading-relaxed">
+                <table className="w-full border-collapse">
+                  <tbody>
+                    {gcode.split('\n').map((linha, index) => (
+                      <tr key={index} className="hover:bg-amber-600/10">
+                        <td className="text-muted-foreground text-right pr-4 select-none align-top" style={{ minWidth: '3em' }}>
+                          {index + 1}
+                        </td>
+                        <td className="text-amber-300 dark:text-amber-400 whitespace-pre">
+                          {linha || '\u00A0'}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </Card>
           </div>
 
           {/* Footer - Botões de ação */}
           <div className="p-4 sm:p-6 border-t-2 border-amber-600/20 bg-amber-950/5 dark:bg-amber-950/20 backdrop-blur-sm space-y-3">
+            {/* Seletor de versão do gerador */}
+            <div className="space-y-2">
+              <Label className="text-xs font-medium">
+                Versão do Gerador
+              </Label>
+              <Select value={versaoGerador} onValueChange={(value) => onVersaoChange(value as VersaoGerador)}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Selecione a versão" />
+                </SelectTrigger>
+                <SelectContent className="z-[150]">
+                  {VERSOES_GERADOR.map((versao) => (
+                    <SelectItem key={versao.versao} value={versao.versao}>
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium">{versao.nome}</span>
+                        {versao.recomendado && (
+                          <span className="text-xs bg-primary/20 text-primary px-1.5 py-0.5 rounded">
+                            Recomendado
+                          </span>
+                        )}
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">
+                {VERSOES_GERADOR.find(v => v.versao === versaoGerador)?.descricao}
+              </p>
+            </div>
+
+            {/* Checkbox Incluir Comentários */}
+            <div className="flex items-center space-x-2 p-3 border border-border rounded-md bg-background/50">
+              <Checkbox
+                id="incluir-comentarios"
+                checked={incluirComentarios}
+                onCheckedChange={(checked) => onIncluirComentariosChange(checked as boolean)}
+              />
+              <Label
+                htmlFor="incluir-comentarios"
+                className="text-sm font-medium cursor-pointer flex-1"
+              >
+                Incluir comentários no G-code
+              </Label>
+            </div>
+
             {/* Seletor de formato */}
             <div className="space-y-3">
               <Label className="text-xs font-medium">

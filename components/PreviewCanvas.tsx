@@ -5,12 +5,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Maximize2 } from "lucide-react";
 import { PreviewFullscreen } from "@/components/PreviewFullscreen";
-import type { PecaPosicionada } from "@/types";
+import type { PecaPosicionada, TempoEstimado } from "@/types";
+import { formatarTempo } from "@/lib/gcode-generator";
 
 type PreviewCanvasProps = {
   chapaLargura: number;
   chapaAltura: number;
   pecasPosicionadas: PecaPosicionada[];
+  tempoEstimado?: TempoEstimado;
 };
 
 // Cores para peças - paleta quente temática
@@ -27,6 +29,7 @@ export function PreviewCanvas({
   chapaLargura,
   chapaAltura,
   pecasPosicionadas,
+  tempoEstimado,
 }: PreviewCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -221,6 +224,17 @@ export function PreviewCanvas({
                 {taxaAproveitamento.toFixed(1)}%
               </span>
             </div>
+            {tempoEstimado && (
+              <>
+                <div className="w-px h-4 bg-border hidden sm:block" />
+                <div className="flex items-center gap-1.5">
+                  <span className="text-muted-foreground">Tempo:</span>
+                  <span className="font-semibold text-primary">
+                    {formatarTempo(tempoEstimado.tempoTotal)}
+                  </span>
+                </div>
+              </>
+            )}
           </div>
         </CardHeader>
         <CardContent className="p-2 pb-3">

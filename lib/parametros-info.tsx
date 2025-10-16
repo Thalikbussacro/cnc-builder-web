@@ -141,6 +141,31 @@ export const parametrosInfo = {
     ),
   },
 
+  rapidsSpeed: {
+    title: "Velocidade Rápida (Rapids Speed)",
+    content: (
+      <>
+        <div>
+          <strong>O que é:</strong> Velocidade máxima de movimentação da máquina durante posicionamentos rápidos (comandos G0), sem cortar material.
+        </div>
+        <div>
+          <strong>Valores típicos para CNCs de madeira:</strong>
+          <ul className="list-disc ml-5 mt-2 space-y-1">
+            <li>CNCs caseiras/hobby: 2000-4000 mm/min</li>
+            <li>CNCs profissionais médias: 4000-6000 mm/min</li>
+            <li>CNCs industriais: 6000-10000 mm/min</li>
+          </ul>
+        </div>
+        <div className="bg-amber-50 dark:bg-amber-950/30 p-2 rounded border border-amber-200 dark:border-amber-800">
+          <strong className="text-amber-700 dark:text-amber-400">Uso prático:</strong> Este valor é usado apenas para cálculo de tempo estimado. Quanto mais preciso for este valor (conforme sua máquina), melhor será a estimativa de tempo total de corte.
+        </div>
+        <div className="bg-green-50 dark:bg-green-950/30 p-2 rounded border border-green-200 dark:border-green-800">
+          <strong className="text-green-700 dark:text-green-400">Como descobrir:</strong> Consulte o manual da sua CNC ou execute um teste simples: mova a máquina 1000mm e meça o tempo. Velocidade = 1000mm ÷ tempo(min).
+        </div>
+      </>
+    ),
+  },
+
   spindleSpeed: {
     title: "Rotação do Spindle (Spindle Speed - RPM)",
     content: (

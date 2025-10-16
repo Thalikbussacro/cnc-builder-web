@@ -10,13 +10,12 @@ import { ListaPecas } from "@/components/ListaPecas";
 import { PreviewCanvas } from "@/components/PreviewCanvas";
 import { VisualizadorGCode } from "@/components/VisualizadorGCode";
 import { SeletorNesting } from "@/components/SeletorNesting";
-import { SeletorVersaoGCode } from "@/components/SeletorVersaoGCode";
 import { DicionarioGCode } from "@/components/DicionarioGCode";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import type { Peca, PecaPosicionada, ConfiguracoesChapa as TConfigChapa, ConfiguracoesCorte as TConfigCorte, ConfiguracoesFerramenta as TConfigFerramenta, FormatoArquivo, VersaoGerador } from "@/types";
+import type { Peca, PecaPosicionada, ConfiguracoesChapa as TConfigChapa, ConfiguracoesCorte as TConfigCorte, ConfiguracoesFerramenta as TConfigFerramenta, FormatoArquivo, VersaoGerador, TempoEstimado } from "@/types";
 import { posicionarPecas, type MetodoNesting } from "@/lib/nesting-algorithm";
-import { gerarGCode, downloadGCode } from "@/lib/gcode-generator";
+import { gerarGCode, downloadGCode, calcularTempoEstimado, removerComentarios } from "@/lib/gcode-generator";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 
 export default function Home() {
@@ -33,6 +32,7 @@ export default function Home() {
     profundidadePorPassada: 4,
     feedrate: 1500,
     plungeRate: 500,
+    rapidsSpeed: 4000,
     spindleSpeed: 18000,
     usarRampa: false,
     anguloRampa: 3,
@@ -47,12 +47,15 @@ export default function Home() {
 
   const [versaoGerador, setVersaoGerador] = useLocalStorage<VersaoGerador>('cnc-versao-gerador', 'v2');
 
+  const [incluirComentarios, setIncluirComentarios] = useLocalStorage<boolean>('cnc-incluir-comentarios', true);
+
   // Estados sem localStorage (temporários)
   const [pecas, setPecas] = useState<Peca[]>([]);
   const [pecasPosicionadas, setPecasPosicionadas] = useState<PecaPosicionada[]>([]);
   const [visualizadorAberto, setVisualizadorAberto] = useState(false);
   const [gcodeGerado, setGcodeGerado] = useState("");
   const [metricas, setMetricas] = useState<{ areaUtilizada: number; eficiencia: number; tempo: number } | undefined>();
+  const [tempoEstimado, setTempoEstimado] = useState<TempoEstimado | undefined>();
   const [abaAtiva, setAbaAtiva] = useLocalStorage<string>('cnc-aba-ativa', 'chapa');
 
   // Atualiza posicionamento sempre que algo mudar
@@ -67,6 +70,26 @@ export default function Home() {
     setPecasPosicionadas(resultado.posicionadas);
     setMetricas(resultado.metricas);
   }, [pecas, configChapa.largura, configChapa.altura, configCorte.espacamento, metodoNesting]);
+
+  // Calcula tempo estimado sempre que parâmetros mudarem
+  useEffect(() => {
+    if (pecasPosicionadas.length > 0) {
+      const tempo = calcularTempoEstimado(pecasPosicionadas, configChapa, configCorte);
+      setTempoEstimado(tempo);
+    } else {
+      setTempoEstimado(undefined);
+    }
+  }, [
+    pecasPosicionadas,
+    configChapa.espessura,
+    configCorte.profundidade,
+    configCorte.profundidadePorPassada,
+    configCorte.feedrate,
+    configCorte.plungeRate,
+    configCorte.rapidsSpeed,
+    configCorte.usarRampa,
+    configCorte.anguloRampa
+  ]);
 
   // Handler para adicionar peça
   const handleAdicionarPeca = (peca: Peca) => {
@@ -93,10 +116,21 @@ export default function Home() {
       return;
     }
 
-    const gcode = gerarGCode(pecasPosicionadas, configChapa, configCorte, configFerramenta, versaoGerador);
-    setGcodeGerado(gcode);
     setVisualizadorAberto(true);
   };
+
+  // Handler para mudança de versão do gerador
+  const handleVersaoChange = (novaVersao: VersaoGerador) => {
+    setVersaoGerador(novaVersao);
+  };
+
+  // Atualiza G-code quando versão mudar ou visualizador abrir
+  useEffect(() => {
+    if (visualizadorAberto && pecasPosicionadas.length > 0) {
+      const gcode = gerarGCode(pecasPosicionadas, configChapa, configCorte, configFerramenta, versaoGerador, incluirComentarios);
+      setGcodeGerado(gcode);
+    }
+  }, [visualizadorAberto, versaoGerador, incluirComentarios, pecasPosicionadas, configChapa, configCorte, configFerramenta]);
 
   // Handler para baixar G-code
   const handleBaixarGCode = (formato: FormatoArquivo) => {
@@ -138,12 +172,11 @@ export default function Home() {
           {/* Left Column - Configurations */}
           <div className="flex flex-col gap-3 overflow-auto">
             <Tabs value={abaAtiva} onValueChange={setAbaAtiva} className="w-full">
-              <TabsList className="grid w-full grid-cols-5">
+              <TabsList className="grid w-full grid-cols-4">
                 <TabsTrigger value="chapa">Chapa</TabsTrigger>
                 <TabsTrigger value="corte">Corte</TabsTrigger>
                 <TabsTrigger value="ferramenta">Fresa</TabsTrigger>
                 <TabsTrigger value="nesting">Nesting</TabsTrigger>
-                <TabsTrigger value="gerador">G-code</TabsTrigger>
               </TabsList>
 
               <div className="space-y-3 mt-3">
@@ -164,13 +197,7 @@ export default function Home() {
                     metodo={metodoNesting}
                     onChange={setMetodoNesting}
                     metricas={metricas}
-                  />
-                </TabsContent>
-
-                <TabsContent value="gerador" className="mt-0">
-                  <SeletorVersaoGCode
-                    versaoSelecionada={versaoGerador}
-                    onChange={setVersaoGerador}
+                    tempoEstimado={tempoEstimado}
                   />
                 </TabsContent>
               </div>
@@ -191,6 +218,7 @@ export default function Home() {
               chapaLargura={configChapa.largura}
               chapaAltura={configChapa.altura}
               pecasPosicionadas={pecasPosicionadas}
+              tempoEstimado={tempoEstimado}
             />
             <ListaPecas pecas={pecas} onRemover={handleRemoverPeca} />
           </div>
@@ -203,6 +231,10 @@ export default function Home() {
         onClose={() => setVisualizadorAberto(false)}
         gcode={gcodeGerado}
         onDownload={handleBaixarGCode}
+        versaoGerador={versaoGerador}
+        onVersaoChange={handleVersaoChange}
+        incluirComentarios={incluirComentarios}
+        onIncluirComentariosChange={setIncluirComentarios}
       />
     </MainLayout>
   );

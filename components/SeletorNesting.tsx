@@ -10,6 +10,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import type { MetodoNesting } from "@/lib/nesting-algorithm";
+import type { TempoEstimado } from "@/types";
+import { formatarTempo } from "@/lib/gcode-generator";
 
 type SeletorNestingProps = {
   metodo: MetodoNesting;
@@ -19,9 +21,10 @@ type SeletorNestingProps = {
     eficiencia: number;
     tempo: number;
   };
+  tempoEstimado?: TempoEstimado;
 };
 
-export function SeletorNesting({ metodo, onChange, metricas }: SeletorNestingProps) {
+export function SeletorNesting({ metodo, onChange, metricas, tempoEstimado }: SeletorNestingProps) {
   return (
     <Card>
       <div className="p-3.5 space-y-2.5">
@@ -84,6 +87,34 @@ export function SeletorNesting({ metodo, onChange, metricas }: SeletorNestingPro
               <div className="bg-muted p-1.5 rounded">
                 <div className="text-muted-foreground text-[10px]">Tempo</div>
                 <div className="font-bold text-sm">{metricas.tempo.toFixed(1)}ms</div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {tempoEstimado && (
+          <div className="pt-2 border-t space-y-1.5">
+            <h3 className="text-xs font-semibold">Tempo Estimado de Corte</h3>
+
+            <div className="bg-primary/5 border border-primary/20 p-2.5 rounded">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs text-muted-foreground">Tempo Total</span>
+                <span className="text-lg font-bold text-primary">{formatarTempo(tempoEstimado.tempoTotal)}</span>
+              </div>
+
+              <div className="grid grid-cols-3 gap-1.5 text-[10px]">
+                <div className="bg-background/50 p-1 rounded text-center">
+                  <div className="text-muted-foreground">Corte</div>
+                  <div className="font-semibold">{formatarTempo(tempoEstimado.tempoCorte)}</div>
+                </div>
+                <div className="bg-background/50 p-1 rounded text-center">
+                  <div className="text-muted-foreground">Mergulho</div>
+                  <div className="font-semibold">{formatarTempo(tempoEstimado.tempoMergulho)}</div>
+                </div>
+                <div className="bg-background/50 p-1 rounded text-center">
+                  <div className="text-muted-foreground">Posic.</div>
+                  <div className="font-semibold">{formatarTempo(tempoEstimado.tempoPosicionamento)}</div>
+                </div>
               </div>
             </div>
           </div>

@@ -126,6 +126,25 @@ export function ConfiguracoesCorte({ config, onChange }: ConfiguracoesCorteProps
             </div>
           </div>
 
+          <div className="space-y-1 mt-2.5">
+            <div className="flex items-center gap-1">
+              <Label htmlFor="rapidsSpeed">Vel. Rápida</Label>
+              <InfoTooltip
+                title={parametrosInfo.rapidsSpeed.title}
+                content={parametrosInfo.rapidsSpeed.content}
+              />
+            </div>
+            <Input
+              id="rapidsSpeed"
+              type="number"
+              value={config.rapidsSpeed}
+              onChange={(e) => handleChange("rapidsSpeed", e.target.value)}
+              min="500"
+              max="10000"
+              step="100"
+            />
+          </div>
+
           <div className="space-y-1 mt-2">
             <div className="flex items-center gap-1">
               <Label htmlFor="spindleSpeed">Rotação</Label>
