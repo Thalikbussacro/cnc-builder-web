@@ -259,12 +259,17 @@ export function calcularTempoEstimado(
   const tempoMergulho = (distanciaMergulho / plungeRate) * 60;
   const tempoPosicionamento = (distanciaPosicionamento / rapidsSpeedSafe) * 60;
   const tempoTotal = tempoCorte + tempoMergulho + tempoPosicionamento;
+  const distanciaTotal = distanciaCorte + distanciaMergulho + distanciaPosicionamento;
 
   return {
     tempoCorte,
     tempoMergulho,
     tempoPosicionamento,
-    tempoTotal
+    tempoTotal,
+    distanciaCorte,
+    distanciaMergulho,
+    distanciaPosicionamento,
+    distanciaTotal
   };
 }
 
