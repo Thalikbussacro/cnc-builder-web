@@ -106,4 +106,8 @@ export type TempoEstimado = {
   tempoMergulho: number;       // segundos - movimentos G1 verticais (plungeRate)
   tempoPosicionamento: number; // segundos - movimentos G0 (rapidsSpeed)
   tempoTotal: number;          // segundos - soma total
+  distanciaCorte?: number;        // mm - distância total de corte
+  distanciaMergulho?: number;     // mm - distância total de mergulho
+  distanciaPosicionamento?: number; // mm - distância total de posicionamento
+  distanciaTotal?: number;        // mm - distância total percorrida
 };
