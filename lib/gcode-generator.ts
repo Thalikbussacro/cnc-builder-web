@@ -1,4 +1,4 @@
-import type { PecaPosicionada, ConfiguracoesChapa, ConfiguracoesCorte, FormatoArquivo, ConfiguracoesFerramenta, VersaoGerador, InfoVersaoGerador } from "@/types";
+import type { PecaPosicionada, ConfiguracoesChapa, ConfiguracoesCorte, FormatoArquivo, ConfiguracoesFerramenta, VersaoGerador, InfoVersaoGerador, TempoEstimado } from "@/types";
 import { gerarGCodeV2 } from "./gcode-generator-v2";
 
 /**
@@ -87,6 +87,188 @@ function determinarDirecaoRampa(
 }
 
 /**
+ * Remove comentários de um código G-code
+ * @param gcode - String com código G-code
+ * @returns String com G-code sem comentários
+ */
+export function removerComentarios(gcode: string): string {
+  return gcode
+    .split('\n')
+    .map(linha => {
+      // Remove comentários entre parênteses: (comentário)
+      linha = linha.replace(/\([^)]*\)/g, '');
+      // Remove comentários após ponto e vírgula: ; comentário
+      linha = linha.replace(/;.*$/, '');
+      // Remove espaços extras
+      return linha.trim();
+    })
+    .filter(linha => linha.length > 0) // Remove linhas vazias
+    .join('\n');
+}
+
+/**
+ * Formata tempo em segundos para string legível (HH:MM:SS ou MM:SS)
+ */
+export function formatarTempo(segundos: number): string {
+  // Validação: retorna "N/A" se o tempo for inválido
+  if (!isFinite(segundos) || isNaN(segundos) || segundos < 0) {
+    return 'N/A';
+  }
+
+  const horas = Math.floor(segundos / 3600);
+  const minutos = Math.floor((segundos % 3600) / 60);
+  const segs = Math.floor(segundos % 60);
+
+  if (horas > 0) {
+    return `${horas}h ${minutos.toString().padStart(2, '0')}min ${segs.toString().padStart(2, '0')}s`;
+  } else if (minutos > 0) {
+    return `${minutos}min ${segs.toString().padStart(2, '0')}s`;
+  } else {
+    return `${segs}s`;
+  }
+}
+
+/**
+ * Calcula o tempo estimado de execução do G-code
+ *
+ * @param pecasPos - Array de peças posicionadas
+ * @param config - Configurações da chapa
+ * @param corte - Configurações do corte
+ * @returns Objeto com tempo estimado detalhado em segundos
+ */
+export function calcularTempoEstimado(
+  pecasPos: PecaPosicionada[],
+  config: ConfiguracoesChapa,
+  corte: ConfiguracoesCorte
+): TempoEstimado {
+  const { profundidade, profundidadePorPassada, feedrate, plungeRate, rapidsSpeed, usarRampa, anguloRampa } = corte;
+  const { largura: chapaL, altura: chapaA } = config;
+
+  // Validação: rapidsSpeed pode ser undefined em localStorage antigo
+  const rapidsSpeedSafe = rapidsSpeed || 4000; // Valor padrão se não existir
+
+  const numPassadas = Math.ceil(profundidade / profundidadePorPassada);
+
+  let distanciaCorte = 0;        // mm - movimentos G1 laterais (XY)
+  let distanciaMergulho = 0;     // mm - movimentos G1 verticais (Z)
+  let distanciaPosicionamento = 0; // mm - movimentos G0
+
+  // Posição atual simulada
+  let posX = 0;
+  let posY = 0;
+  let posZ = 5;
+
+  // Para cada peça
+  for (const peca of pecasPos) {
+    // Para cada passada
+    for (let j = 1; j <= numPassadas; j++) {
+      const z = -Math.min(j * profundidadePorPassada, profundidade);
+      const profundidadePassada = Math.abs(z);
+
+      // 1. Movimento G0 para posição inicial (se necessário)
+      if (posX !== peca.x || posY !== peca.y) {
+        // Se não está em Z seguro, sobe primeiro
+        if (posZ < 5) {
+          distanciaPosicionamento += Math.abs(5 - posZ); // Sobe Z
+          posZ = 5;
+        }
+        // Move XY
+        const dx = peca.x - posX;
+        const dy = peca.y - posY;
+        distanciaPosicionamento += Math.sqrt(dx * dx + dy * dy);
+        posX = peca.x;
+        posY = peca.y;
+      }
+
+      // 2. Entrada (rampa ou mergulho vertical)
+      if (usarRampa) {
+        const distanciaRampa = calcularDistanciaRampa(profundidadePassada, anguloRampa);
+        const direcao = determinarDirecaoRampa(peca, chapaL, chapaA);
+        const temEspaco = direcao.deltaX !== 0 || direcao.deltaY !== 0;
+
+        if (temEspaco) {
+          const xInicio = peca.x + (direcao.deltaX * distanciaRampa);
+          const yInicio = peca.y + (direcao.deltaY * distanciaRampa);
+
+          // Move para início da rampa se necessário
+          if (posX !== xInicio || posY !== yInicio) {
+            if (posZ < 5) {
+              distanciaPosicionamento += Math.abs(5 - posZ);
+              posZ = 5;
+            }
+            const dx = xInicio - posX;
+            const dy = yInicio - posY;
+            distanciaPosicionamento += Math.sqrt(dx * dx + dy * dy);
+            posX = xInicio;
+            posY = yInicio;
+          }
+
+          // Desce até superfície (Z=0)
+          if (posZ !== 0) {
+            distanciaMergulho += Math.abs(posZ);
+            posZ = 0;
+          }
+
+          // Rampa de entrada (movimento 3D)
+          const dx = peca.x - xInicio;
+          const dy = peca.y - yInicio;
+          const dz = z - posZ;
+          distanciaMergulho += Math.sqrt(dx * dx + dy * dy + dz * dz);
+          posX = peca.x;
+          posY = peca.y;
+          posZ = z;
+        } else {
+          // Sem espaço: mergulho vertical
+          if (posZ !== z) {
+            distanciaMergulho += Math.abs(z - posZ);
+            posZ = z;
+          }
+        }
+      } else {
+        // Mergulho vertical tradicional
+        if (posZ !== z) {
+          distanciaMergulho += Math.abs(z - posZ);
+          posZ = z;
+        }
+      }
+
+      // 3. Corte do retângulo (4 lados)
+      const perimetro = 2 * (peca.largura + peca.altura);
+      distanciaCorte += perimetro;
+      // Posição final = posição inicial (retângulo fechado)
+
+      // 4. Levanta Z ao final da última passada (dentro do loop de peças, após todas passadas)
+      if (j === numPassadas) {
+        if (posZ < 5) {
+          distanciaPosicionamento += Math.abs(5 - posZ);
+          posZ = 5;
+        }
+      }
+    }
+  }
+
+  // 5. Retorno ao ponto inicial (G0 X0 Y0)
+  if (posX !== 0 || posY !== 0) {
+    distanciaPosicionamento += Math.sqrt(posX * posX + posY * posY);
+    posX = 0;
+    posY = 0;
+  }
+
+  // Calcula tempos em segundos (velocidades em mm/min)
+  const tempoCorte = (distanciaCorte / feedrate) * 60;
+  const tempoMergulho = (distanciaMergulho / plungeRate) * 60;
+  const tempoPosicionamento = (distanciaPosicionamento / rapidsSpeedSafe) * 60;
+  const tempoTotal = tempoCorte + tempoMergulho + tempoPosicionamento;
+
+  return {
+    tempoCorte,
+    tempoMergulho,
+    tempoPosicionamento,
+    tempoTotal
+  };
+}
+
+/**
  * Gera código G-code V1 (versão clássica)
  * Baseado na função GerarGCodePecas do código Delphi (linhas 329-448)
  *
@@ -103,7 +285,10 @@ export function gerarGCodeV1(
   ferramenta?: ConfiguracoesFerramenta
 ): string {
   const { largura: chapaL, altura: chapaA } = config;
-  const { profundidade, profundidadePorPassada, feedrate, plungeRate, spindleSpeed, usarRampa, anguloRampa } = corte;
+  const { profundidade, profundidadePorPassada, feedrate, plungeRate, rapidsSpeed, spindleSpeed, usarRampa, anguloRampa } = corte;
+
+  // Calcula tempo estimado
+  const tempo = calcularTempoEstimado(pecasPos, config, corte);
 
   // Bloco de legenda explicativa
   let gcode = '';
@@ -113,10 +298,12 @@ export function gerarGCodeV1(
 
   // Cabeçalho com configurações de corte
   gcode += `(Chapa ${formatarNumero(chapaL, 0)}x${formatarNumero(chapaA, 0)} mm, Z ${formatarNumero(profundidade, 0)} mm)\n`;
+  gcode += `(Tempo Estimado: ${formatarTempo(tempo.tempoTotal)})\n`;
   gcode += `(Configuracoes de Corte:)\n`;
   gcode += `(  Spindle Speed: ${spindleSpeed} RPM)\n`;
   gcode += `(  Feedrate: ${feedrate} mm/min)\n`;
   gcode += `(  Plunge Rate: ${plungeRate} mm/min)\n`;
+  gcode += `(  Rapids Speed: ${rapidsSpeed} mm/min)\n`;
   gcode += `(  Prof. por Passada: ${formatarNumero(profundidadePorPassada)} mm)\n`;
   gcode += `(  Num. Passadas: ${Math.ceil(profundidade / profundidadePorPassada)})\n`;
 
@@ -253,6 +440,7 @@ export function gerarGCodeV1(
  * @param corte - Configurações do corte
  * @param ferramenta - Configurações da ferramenta (opcional)
  * @param versao - Versão do gerador a usar (padrão: 'v2')
+ * @param incluirComentarios - Se true, inclui comentários detalhados em cada linha (padrão: true)
  * @returns String com código G-code completo
  */
 export function gerarGCode(
@@ -260,16 +448,17 @@ export function gerarGCode(
   config: ConfiguracoesChapa,
   corte: ConfiguracoesCorte,
   ferramenta?: ConfiguracoesFerramenta,
-  versao: VersaoGerador = 'v2'
+  versao: VersaoGerador = 'v2',
+  incluirComentarios: boolean = true
 ): string {
   switch (versao) {
     case 'v1':
       return gerarGCodeV1(pecasPos, config, corte, ferramenta);
     case 'v2':
-      return gerarGCodeV2(pecasPos, config, corte, ferramenta);
+      return gerarGCodeV2(pecasPos, config, corte, ferramenta, incluirComentarios);
     default:
       // Fallback para V2 se versão desconhecida
-      return gerarGCodeV2(pecasPos, config, corte, ferramenta);
+      return gerarGCodeV2(pecasPos, config, corte, ferramenta, incluirComentarios);
   }
 }
 
