@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { MainLayout } from "@/components/MainLayout";
+import { Sidebar, type SecaoSidebar } from "@/components/Sidebar";
 import { ConfiguracoesChapa } from "@/components/ConfiguracoesChapa";
 import { ConfiguracoesCorte } from "@/components/ConfiguracoesCorte";
 import { ConfiguracoesFerramenta } from "@/components/ConfiguracoesFerramenta";
@@ -12,10 +13,9 @@ import { VisualizadorGCode } from "@/components/VisualizadorGCode";
 import { SeletorNesting } from "@/components/SeletorNesting";
 import { DicionarioGCode } from "@/components/DicionarioGCode";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { Peca, PecaPosicionada, ConfiguracoesChapa as TConfigChapa, ConfiguracoesCorte as TConfigCorte, ConfiguracoesFerramenta as TConfigFerramenta, FormatoArquivo, VersaoGerador, TempoEstimado } from "@/types";
 import { posicionarPecas, type MetodoNesting } from "@/lib/nesting-algorithm";
-import { gerarGCode, downloadGCode, calcularTempoEstimado, removerComentarios } from "@/lib/gcode-generator";
+import { gerarGCode, downloadGCode, calcularTempoEstimado } from "@/lib/gcode-generator";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 
 export default function Home() {
@@ -56,7 +56,7 @@ export default function Home() {
   const [gcodeGerado, setGcodeGerado] = useState("");
   const [metricas, setMetricas] = useState<{ areaUtilizada: number; eficiencia: number; tempo: number } | undefined>();
   const [tempoEstimado, setTempoEstimado] = useState<TempoEstimado | undefined>();
-  const [abaAtiva, setAbaAtiva] = useLocalStorage<string>('cnc-aba-ativa', 'chapa');
+  const [secaoAtiva, setSecaoAtiva] = useLocalStorage<SecaoSidebar>('cnc-secao-ativa', 'chapa');
 
   // Atualiza posicionamento sempre que algo mudar
   useEffect(() => {
@@ -141,86 +141,83 @@ export default function Home() {
 
   return (
     <MainLayout>
-      <div className="flex flex-col gap-3 h-full">
-        {/* Top Actions Bar */}
-        <div className="flex items-center justify-between gap-2 flex-shrink-0">
-          <div className="flex items-center gap-2">
-            <DicionarioGCode />
+      <div className="flex h-full">
+        {/* Sidebar */}
+        <Sidebar secaoAtiva={secaoAtiva} onSecaoChange={setSecaoAtiva} />
+
+        {/* Main Content */}
+        <div className="flex-1 flex flex-col overflow-hidden">
+          {/* Top Actions Bar */}
+          <div className="flex items-center justify-between gap-2 p-4 border-b flex-shrink-0 lg:pl-4 pl-20">
+            <div className="flex items-center gap-2">
+              <DicionarioGCode />
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                onClick={handleVisualizarGCode}
+                variant="default"
+                size="sm"
+                disabled={pecas.length === 0}
+              >
+                <span className="hidden sm:inline">Baixar/Copiar </span>G-code
+              </Button>
+              <Button
+                onClick={handleLimpar}
+                variant="destructive"
+                size="sm"
+                disabled={pecas.length === 0}
+              >
+                <span className="hidden sm:inline">Limpar</span>
+              </Button>
+            </div>
           </div>
-          <div className="flex items-center gap-2">
-            <Button
-              onClick={handleVisualizarGCode}
-              variant="default"
-              size="sm"
-              disabled={pecas.length === 0}
-            >
-              <span className="hidden sm:inline">Baixar/Copiar </span>G-code
-            </Button>
-            <Button
-              onClick={handleLimpar}
-              variant="destructive"
-              size="sm"
-              disabled={pecas.length === 0}
-            >
-              <span className="hidden sm:inline">Limpar</span>
-            </Button>
-          </div>
-        </div>
 
-        {/* Main Content Grid */}
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-3 flex-1 overflow-hidden">
-          {/* Left Column - Configurations */}
-          <div className="flex flex-col gap-3 overflow-auto">
-            <Tabs value={abaAtiva} onValueChange={setAbaAtiva} className="w-full">
-              <TabsList className="grid w-full grid-cols-4">
-                <TabsTrigger value="chapa">Chapa</TabsTrigger>
-                <TabsTrigger value="corte">Corte</TabsTrigger>
-                <TabsTrigger value="ferramenta">Fresa</TabsTrigger>
-                <TabsTrigger value="nesting">Nesting</TabsTrigger>
-              </TabsList>
-
-              <div className="space-y-3 mt-3">
-                <TabsContent value="chapa" className="mt-0">
-                  <ConfiguracoesChapa config={configChapa} onChange={setConfigChapa} />
-                </TabsContent>
-
-                <TabsContent value="corte" className="mt-0">
-                  <ConfiguracoesCorte config={configCorte} onChange={setConfigCorte} />
-                </TabsContent>
-
-                <TabsContent value="ferramenta" className="mt-0">
-                  <ConfiguracoesFerramenta config={configFerramenta} onChange={setConfigFerramenta} />
-                </TabsContent>
-
-                <TabsContent value="nesting" className="mt-0">
-                  <SeletorNesting
-                    metodo={metodoNesting}
-                    onChange={setMetodoNesting}
-                    metricas={metricas}
-                    tempoEstimado={tempoEstimado}
-                  />
-                </TabsContent>
+          {/* Content Area */}
+          <div className="flex-1 overflow-hidden">
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 p-4 h-full overflow-auto">
+              {/* Left Panel - Configuration Form */}
+              <div className="overflow-auto h-full">
+                <div className="max-w-3xl">
+                  {secaoAtiva === 'chapa' && (
+                    <ConfiguracoesChapa config={configChapa} onChange={setConfigChapa} />
+                  )}
+                  {secaoAtiva === 'corte' && (
+                    <ConfiguracoesCorte config={configCorte} onChange={setConfigCorte} />
+                  )}
+                  {secaoAtiva === 'ferramenta' && (
+                    <ConfiguracoesFerramenta config={configFerramenta} onChange={setConfigFerramenta} />
+                  )}
+                  {secaoAtiva === 'nesting' && (
+                    <SeletorNesting
+                      metodo={metodoNesting}
+                      onChange={setMetodoNesting}
+                      metricas={metricas}
+                      tempoEstimado={tempoEstimado}
+                    />
+                  )}
+                  {secaoAtiva === 'adicionar-peca' && (
+                    <CadastroPeca
+                      onAdicionar={handleAdicionarPeca}
+                      configChapa={configChapa}
+                      espacamento={configCorte.espacamento}
+                      pecasExistentes={pecas}
+                      metodoNesting={metodoNesting}
+                    />
+                  )}
+                </div>
               </div>
-            </Tabs>
 
-            <CadastroPeca
-              onAdicionar={handleAdicionarPeca}
-              configChapa={configChapa}
-              espacamento={configCorte.espacamento}
-              pecasExistentes={pecas}
-              metodoNesting={metodoNesting}
-            />
-          </div>
-
-          {/* Right Column - Preview and List */}
-          <div className="flex flex-col gap-3 overflow-auto">
-            <PreviewCanvas
-              chapaLargura={configChapa.largura}
-              chapaAltura={configChapa.altura}
-              pecasPosicionadas={pecasPosicionadas}
-              tempoEstimado={tempoEstimado}
-            />
-            <ListaPecas pecas={pecas} onRemover={handleRemoverPeca} />
+              {/* Right Panel - Preview and List */}
+              <div className="flex flex-col gap-4 overflow-auto h-full">
+                <PreviewCanvas
+                  chapaLargura={configChapa.largura}
+                  chapaAltura={configChapa.altura}
+                  pecasPosicionadas={pecasPosicionadas}
+                  tempoEstimado={tempoEstimado}
+                />
+                <ListaPecas pecas={pecas} onRemover={handleRemoverPeca} />
+              </div>
+            </div>
           </div>
         </div>
       </div>
