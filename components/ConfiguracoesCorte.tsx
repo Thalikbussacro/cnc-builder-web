@@ -15,7 +15,27 @@ type ConfiguracoesCorteProps = {
 
 export function ConfiguracoesCorte({ config, onChange }: ConfiguracoesCorteProps) {
   const handleChange = (campo: keyof ConfiguracoesCorte, valor: string) => {
-    const numero = parseFloat(valor) || 0;
+    // Permite string vazia temporariamente (enquanto usuário digita)
+    if (valor === '') {
+      onChange({ ...config, [campo]: 0 });
+      return;
+    }
+
+    const numero = parseFloat(valor);
+
+    // Validações específicas por campo
+    if (campo === 'profundidade' || campo === 'profundidadePorPassada') {
+      // Profundidades não podem ser zero ou negativas
+      if (isNaN(numero) || numero <= 0) {
+        return; // Ignora valor inválido
+      }
+    } else {
+      // Outros campos podem ser zero, mas não negativos
+      if (isNaN(numero) || numero < 0) {
+        return; // Ignora valor inválido
+      }
+    }
+
     onChange({ ...config, [campo]: numero });
   };
 
@@ -43,7 +63,7 @@ export function ConfiguracoesCorte({ config, onChange }: ConfiguracoesCorteProps
               type="number"
               value={config.profundidade}
               onChange={(e) => handleChange("profundidade", e.target.value)}
-              min="0"
+              min="0.1"
               step="1"
             />
           </div>
@@ -79,7 +99,7 @@ export function ConfiguracoesCorte({ config, onChange }: ConfiguracoesCorteProps
             type="number"
             value={config.espacamento}
             onChange={(e) => handleChange("espacamento", e.target.value)}
-            min="0"
+            min="1"
             step="5"
           />
         </div>

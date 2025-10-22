@@ -95,6 +95,19 @@ export function gerarGCodeV2(
   const { largura: chapaL, altura: chapaA } = config;
   const { profundidade, profundidadePorPassada, feedrate, plungeRate, rapidsSpeed, spindleSpeed, usarRampa, anguloRampa } = corte;
 
+  // Validações de segurança para prevenir loops infinitos e valores inválidos
+  if (!profundidade || profundidade <= 0) {
+    return `; ERRO: Profundidade invalida (${profundidade}mm). Deve ser maior que zero.\n`;
+  }
+
+  if (!profundidadePorPassada || profundidadePorPassada <= 0) {
+    return `; ERRO: Profundidade por passada invalida (${profundidadePorPassada}mm). Deve ser maior que zero.\n`;
+  }
+
+  if (profundidadePorPassada > profundidade) {
+    return `; ERRO: Profundidade por passada (${profundidadePorPassada}mm) maior que profundidade total (${profundidade}mm).\n`;
+  }
+
   // Validação: rapidsSpeed pode ser undefined em localStorage antigo
   const rapidsSpeedSafe = rapidsSpeed || 4000;
 
