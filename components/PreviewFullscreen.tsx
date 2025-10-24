@@ -106,20 +106,21 @@ export function PreviewFullscreen({
     ctx.lineWidth = 3;
 
     pecasPosicionadas.forEach((peca, index) => {
-      const cor = CORES[index % CORES.length].hex;
+      const ignorada = peca.ignorada || false;
+      const cor = ignorada ? "#999999" : CORES[index % CORES.length].hex;
       const x = offsetX + peca.x * escala;
       const y = offsetY + peca.y * escala;
       const w = peca.largura * escala;
       const h = peca.altura * escala;
 
-      // Sombra
-      ctx.shadowColor = "rgba(0, 0, 0, 0.2)";
-      ctx.shadowBlur = 6;
+      // Sombra (reduzida para peças ignoradas)
+      ctx.shadowColor = ignorada ? "rgba(0, 0, 0, 0.08)" : "rgba(0, 0, 0, 0.2)";
+      ctx.shadowBlur = ignorada ? 3 : 6;
       ctx.shadowOffsetX = 3;
       ctx.shadowOffsetY = 3;
 
-      // Preenche
-      ctx.fillStyle = cor + "40";
+      // Preenche (mais transparente para ignoradas)
+      ctx.fillStyle = ignorada ? cor + "20" : cor + "40";
       ctx.fillRect(x, y, w, h);
 
       // Remove sombra
@@ -128,12 +129,19 @@ export function PreviewFullscreen({
       ctx.shadowOffsetX = 0;
       ctx.shadowOffsetY = 0;
 
-      // Borda
-      ctx.strokeStyle = cor;
+      // Borda (tracejada para ignoradas)
+      if (ignorada) {
+        ctx.setLineDash([8, 8]);
+        ctx.strokeStyle = cor;
+      } else {
+        ctx.setLineDash([]);
+        ctx.strokeStyle = cor;
+      }
       ctx.strokeRect(x, y, w, h);
+      ctx.setLineDash([]);
 
       // Texto
-      ctx.fillStyle = cor;
+      ctx.fillStyle = ignorada ? cor + "aa" : cor;
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
 
@@ -143,15 +151,16 @@ export function PreviewFullscreen({
       // Tamanho de fonte adaptativo
       const fontSize = Math.max(18, Math.min(28, w / 8, h / 8));
 
-      // Nome ou número da peça
+      // Nome ou número da peça (usa numeroOriginal se disponível)
       ctx.font = `bold ${fontSize}px sans-serif`;
-      const nomePeca = peca.nome || `#${index + 1}`;
+      const numeroPeca = peca.numeroOriginal || index + 1;
+      const nomePeca = peca.nome || `#${numeroPeca}`;
       ctx.fillText(nomePeca, centerX, centerY - fontSize / 2);
 
       // Dimensões (se houver espaço)
       if (w > 100 && h > 60) {
         ctx.font = `${fontSize * 0.7}px sans-serif`;
-        ctx.fillStyle = cor + "dd";
+        ctx.fillStyle = ignorada ? cor + "99" : cor + "dd";
         ctx.fillText(
           `${peca.largura.toFixed(0)}×${peca.altura.toFixed(0)}mm`,
           centerX,

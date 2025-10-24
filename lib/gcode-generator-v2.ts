@@ -416,15 +416,28 @@ export function gerarGCodeV2(
   gcode += incluirComentarios ? `M3 S${spindleSpeed} ; Liga o spindle\n` : `M3 S${spindleSpeed}\n`;
   gcode += incluirComentarios ? 'G0 X0 Y0 ; Posiciona em origem antes de iniciar corte\n\n' : 'G0 X0 Y0\n\n';
 
-  let numPeca = 0;
-
   // === PROCESSAMENTO DE PEÇAS ===
   for (const peca of pecasPos) {
-    numPeca++;
+    const numeroPeca = peca.numeroOriginal || pecasPos.indexOf(peca) + 1;
+
+    // Se a peça está marcada como ignorada, adiciona apenas comentário
+    if (peca.ignorada) {
+      gcode += `; ========================================\n`;
+      if (peca.nome) {
+        gcode += `; PECA #${numeroPeca} (${peca.nome}) - IGNORADA\n`;
+      } else {
+        gcode += `; PECA #${numeroPeca} - IGNORADA\n`;
+      }
+      gcode += `; Dimensoes: ${formatarNumero(peca.largura, 0)}x${formatarNumero(peca.altura, 0)}mm\n`;
+      gcode += `; Tipo de corte: ${peca.tipoCorte}\n`;
+      gcode += `; Posicao: X${formatarNumero(peca.x, 0)} Y${formatarNumero(peca.y, 0)}\n`;
+      gcode += `; ========================================\n\n`;
+      continue; // Pula para próxima peça
+    }
 
     // Cabeçalho da peça
     if (incluirComentarios) {
-      const nomePeca = peca.nome || `Peca ${numPeca}`;
+      const nomePeca = peca.nome || `Peca ${numeroPeca}`;
       gcode += `; === ${nomePeca} (${formatarNumero(peca.largura, 0)}x${formatarNumero(peca.altura, 0)}mm) ===\n`;
     }
 
