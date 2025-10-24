@@ -8,6 +8,29 @@ import { PreviewFullscreen } from "@/components/PreviewFullscreen";
 import type { PecaPosicionada, TempoEstimado } from "@/types";
 import { formatarTempo } from "@/lib/gcode-generator";
 
+// Hook para detectar tema dark
+function useIsDark() {
+  const [isDark, setIsDark] = useState(false);
+
+  useEffect(() => {
+    const checkTheme = () => {
+      setIsDark(document.documentElement.classList.contains('dark'));
+    };
+
+    checkTheme();
+
+    const observer = new MutationObserver(checkTheme);
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class'],
+    });
+
+    return () => observer.disconnect();
+  }, []);
+
+  return isDark;
+}
+
 type PreviewCanvasProps = {
   chapaLargura: number;
   chapaAltura: number;
@@ -15,14 +38,19 @@ type PreviewCanvasProps = {
   tempoEstimado?: TempoEstimado;
 };
 
-// Cores para peças - paleta quente temática
+// Cores para peças - paleta terrosa/quente profissional v2
+// Tons amadeirados e metálicos com alto contraste para legibilidade
 const CORES = [
-  { hex: "#F5B642", nome: "Amarelo" },
-  { hex: "#E67E22", nome: "Laranja" },
-  { hex: "#D35400", nome: "Laranja Escuro" },
-  { hex: "#F39C12", nome: "Dourado" },
-  { hex: "#E59866", nome: "Pêssego" },
-  { hex: "#DC7633", nome: "Terracota" },
+  { hex: "#D2691E", nome: "Chocolate" },       // Chocolate (laranja terroso)
+  { hex: "#A0522D", nome: "Siena" },           // Siena queimado
+  { hex: "#8B4513", nome: "Mogno" },           // Mogno escuro
+  { hex: "#CD853F", nome: "Peru" },            // Peru (bege dourado)
+  { hex: "#DEB887", nome: "Madeira Clara" },   // Madeira clara
+  { hex: "#D2691E", nome: "Cobre" },           // Cobre
+  { hex: "#B8860B", nome: "Ouro Escuro" },     // Ouro escuro
+  { hex: "#8B7355", nome: "Bege Escuro" },     // Bege escuro
+  { hex: "#A0826D", nome: "Taupe" },           // Taupe
+  { hex: "#6B4423", nome: "Castanho" },        // Castanho profundo
 ];
 
 export function PreviewCanvas({
@@ -35,6 +63,7 @@ export function PreviewCanvas({
   const containerRef = useRef<HTMLDivElement>(null);
   const [canvasSize, setCanvasSize] = useState({ width: 500, height: 380 });
   const [fullscreenOpen, setFullscreenOpen] = useState(false);
+  const isDark = useIsDark();
 
   // Calcula taxa de aproveitamento (apenas peças não ignoradas)
   const areaTotalChapa = chapaLargura * chapaAltura;
@@ -73,8 +102,15 @@ export function PreviewCanvas({
     const canvasWidth = canvasSize.width;
     const canvasHeight = canvasSize.height;
 
-    // Limpa canvas com cor de fundo escura
-    ctx.fillStyle = "#1a1613";
+    // Cores adaptadas ao tema
+    const corFundo = isDark ? "#1a1a1a" : "#f5f5f5";
+    const corChapa = isDark ? "#2a2a2a" : "#e5e5e5";
+    const corGrid = isDark ? "#3a3a3a" : "#d0d0d0";
+    const corBorda = isDark ? "#555555" : "#999999";
+    const corTexto = isDark ? "#888888" : "#333333";
+
+    // Limpa canvas com cor de fundo
+    ctx.fillStyle = corFundo;
     ctx.fillRect(0, 0, canvasWidth, canvasHeight);
 
     // Calcula escala para caber a chapa no canvas com margem
@@ -89,9 +125,9 @@ export function PreviewCanvas({
     const offsetY = margem;
 
     // GRID DE FUNDO - Linhas a cada 100mm
-    ctx.strokeStyle = "#3a342e";
-    ctx.lineWidth = 0.5;
-    ctx.setLineDash([2, 2]);
+    ctx.strokeStyle = corGrid;
+    ctx.lineWidth = 0.8;
+    ctx.setLineDash([3, 3]);
 
     // Grid vertical
     for (let x = 0; x <= chapaLargura; x += 100) {
@@ -111,15 +147,15 @@ export function PreviewCanvas({
 
     ctx.setLineDash([]);
 
-    // Desenha chapa (madeira clara)
-    ctx.fillStyle = "#d4a574";
+    // Desenha chapa
+    ctx.fillStyle = corChapa;
     ctx.fillRect(offsetX, offsetY, chapaLargura * escala, chapaAltura * escala);
-    ctx.strokeStyle = "#c89858";
+    ctx.strokeStyle = corBorda;
     ctx.lineWidth = 3;
     ctx.strokeRect(offsetX, offsetY, chapaLargura * escala, chapaAltura * escala);
 
     // Indicador de origem (0,0)
-    ctx.fillStyle = "#2d251f";
+    ctx.fillStyle = corTexto;
     ctx.font = "bold 10px sans-serif";
     ctx.textAlign = "left";
     ctx.textBaseline = "top";
@@ -137,13 +173,13 @@ export function PreviewCanvas({
       const h = peca.altura * escala;
 
       // Sombra para profundidade (reduzida para peças ignoradas)
-      ctx.shadowColor = ignorada ? "rgba(0, 0, 0, 0.05)" : "rgba(0, 0, 0, 0.15)";
-      ctx.shadowBlur = ignorada ? 2 : 4;
+      ctx.shadowColor = ignorada ? "rgba(0, 0, 0, 0.08)" : "rgba(0, 0, 0, 0.2)";
+      ctx.shadowBlur = ignorada ? 2 : 5;
       ctx.shadowOffsetX = 2;
       ctx.shadowOffsetY = 2;
 
-      // Preenche com cor transparente (mais transparente para ignoradas)
-      ctx.fillStyle = ignorada ? cor + "20" : cor + "40";
+      // Preenche com cor mais sólida (mais transparente para ignoradas)
+      ctx.fillStyle = ignorada ? cor + "30" : cor + "CC";
       ctx.fillRect(x, y, w, h);
 
       // Remove sombra para borda
@@ -152,19 +188,20 @@ export function PreviewCanvas({
       ctx.shadowOffsetX = 0;
       ctx.shadowOffsetY = 0;
 
-      // Borda da peça (tracejada para ignoradas)
+      // Borda da peça mais escura (tracejada para ignoradas)
       if (ignorada) {
         ctx.setLineDash([5, 5]);
         ctx.strokeStyle = cor;
+        ctx.lineWidth = 2;
       } else {
         ctx.setLineDash([]);
         ctx.strokeStyle = cor;
+        ctx.lineWidth = 2.5;
       }
       ctx.strokeRect(x, y, w, h);
       ctx.setLineDash([]);
 
-      // Texto da peça (número + dimensões)
-      ctx.fillStyle = ignorada ? cor + "aa" : cor;
+      // Texto da peça (número + dimensões) - BRANCO COM STROKE PRETO
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
 
@@ -175,12 +212,30 @@ export function PreviewCanvas({
       const fontSize = Math.max(12, Math.min(16, w / 8, h / 8));
       ctx.font = `bold ${fontSize}px sans-serif`;
       const numeroPeca = peca.numeroOriginal || index + 1;
+
+      // Stroke preto para maior contraste
+      ctx.strokeStyle = ignorada ? "#666666" : "#000000";
+      ctx.lineWidth = ignorada ? 2 : 3;
+      ctx.strokeText(`#${numeroPeca}`, centerX, centerY - fontSize / 2);
+
+      // Texto branco por cima
+      ctx.fillStyle = ignorada ? "#cccccc" : "#ffffff";
       ctx.fillText(`#${numeroPeca}`, centerX, centerY - fontSize / 2);
 
       // Dimensões (se houver espaço)
       if (w > 60 && h > 40) {
         ctx.font = `${fontSize * 0.7}px sans-serif`;
-        ctx.fillStyle = ignorada ? cor + "99" : cor + "dd";
+
+        // Stroke preto para dimensões
+        ctx.lineWidth = ignorada ? 1.5 : 2.5;
+        ctx.strokeText(
+          `${peca.largura.toFixed(0)}×${peca.altura.toFixed(0)}mm`,
+          centerX,
+          centerY + fontSize / 2 + 2
+        );
+
+        // Texto branco
+        ctx.fillStyle = ignorada ? "#aaaaaa" : "#ffffff";
         ctx.fillText(
           `${peca.largura.toFixed(0)}×${peca.altura.toFixed(0)}mm`,
           centerX,
@@ -188,7 +243,7 @@ export function PreviewCanvas({
         );
       }
     });
-  }, [chapaLargura, chapaAltura, pecasPosicionadas, canvasSize]);
+  }, [chapaLargura, chapaAltura, pecasPosicionadas, canvasSize, isDark]);
 
   return (
     <>
@@ -246,13 +301,13 @@ export function PreviewCanvas({
           </div>
         </CardHeader>
         <CardContent className="p-2 pb-3">
-          <div className="flex items-center justify-center bg-black/20 rounded-lg p-1.5">
+          <div className="flex items-center justify-center bg-slate-100 dark:bg-neutral-900 rounded-lg p-1.5">
             <canvas
               ref={canvasRef}
               width={canvasSize.width}
               height={canvasSize.height}
-              className="border border-border"
-              style={{ backgroundColor: "#1a1613" }}
+              className="border border-border shadow-sm"
+              style={{ backgroundColor: isDark ? "#1a1a1a" : "#f5f5f5" }}
             />
           </div>
         </CardContent>
