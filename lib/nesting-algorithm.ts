@@ -320,12 +320,13 @@ export function posicionarPecasShelf(
     let colocado = false;
 
     // Tenta colocar na shelf atual
-    if (shelfAtual.xAtual + peca.largura <= chapaLargura) {
+    // Verifica se cabe horizontalmente com espaçamento da borda direita
+    if (shelfAtual.xAtual + peca.largura + espacamento <= chapaLargura) {
       const yPosicao = shelfAtual.y;
 
-      // Verifica se cabe verticalmente
-      if (yPosicao + peca.altura <= chapaAltura) {
-        posicionadas.push({
+      // Verifica se cabe verticalmente com espaçamento da borda superior
+      if (yPosicao + peca.altura + espacamento <= chapaAltura) {
+        const novaPeca: PecaPosicionada = {
           x: shelfAtual.xAtual,
           y: yPosicao,
           largura: peca.largura,
@@ -333,11 +334,18 @@ export function posicionarPecasShelf(
           tipoCorte: peca.tipoCorte,
           id: peca.id,
           nome: peca.nome,
-        });
+          ignorada: peca.ignorada,
+          numeroOriginal: peca.numeroOriginal,
+        };
 
-        shelfAtual.xAtual += peca.largura + espacamento;
-        shelfAtual.altura = Math.max(shelfAtual.altura, peca.altura);
-        colocado = true;
+        // Safety check: valida que não há colisões com peças já posicionadas
+        if (cabeNoEspaco(novaPeca, posicionadas, chapaLargura, chapaAltura, espacamento)) {
+          posicionadas.push(novaPeca);
+
+          shelfAtual.xAtual += peca.largura + espacamento;
+          shelfAtual.altura = Math.max(shelfAtual.altura, peca.altura);
+          colocado = true;
+        }
       }
     }
 
@@ -345,16 +353,11 @@ export function posicionarPecasShelf(
     if (!colocado) {
       const novaShelfY = shelfAtual.y + shelfAtual.altura + espacamento;
 
-      if (novaShelfY + peca.altura <= chapaAltura && peca.largura <= chapaLargura) {
-        shelves.push(shelfAtual);
+      // Verifica se nova shelf cabe com espaçamento das bordas
+      if (novaShelfY + peca.altura + espacamento <= chapaAltura &&
+          espacamento + peca.largura + espacamento <= chapaLargura) {
 
-        shelfAtual = {
-          y: novaShelfY,
-          altura: peca.altura,
-          xAtual: peca.largura + espacamento,
-        };
-
-        posicionadas.push({
+        const novaPeca: PecaPosicionada = {
           x: espacamento,
           y: novaShelfY,
           largura: peca.largura,
@@ -362,9 +365,23 @@ export function posicionarPecasShelf(
           tipoCorte: peca.tipoCorte,
           id: peca.id,
           nome: peca.nome,
-        });
+          ignorada: peca.ignorada,
+          numeroOriginal: peca.numeroOriginal,
+        };
 
-        colocado = true;
+        // Safety check: valida que não há colisões
+        if (cabeNoEspaco(novaPeca, posicionadas, chapaLargura, chapaAltura, espacamento)) {
+          shelves.push(shelfAtual);
+
+          shelfAtual = {
+            y: novaShelfY,
+            altura: peca.altura,
+            xAtual: espacamento + peca.largura + espacamento,
+          };
+
+          posicionadas.push(novaPeca);
+          colocado = true;
+        }
       }
     }
 
