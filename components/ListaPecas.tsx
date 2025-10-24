@@ -30,12 +30,30 @@ const TIPO_CORTE_INFO = {
 } as const;
 
 export function ListaPecas({ pecas, onRemover, onToggleIgnorar }: ListaPecasProps) {
+  // Agrupa peças por dimensões para o resumo
+  const resumo = pecas.reduce((acc, peca) => {
+    const chave = `${peca.largura.toFixed(0)}×${peca.altura.toFixed(0)}`;
+    acc[chave] = (acc[chave] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
+
+  // Ordena resumo por quantidade (decrescente)
+  const resumoOrdenado = Object.entries(resumo)
+    .sort(([, a], [, b]) => b - a)
+    .map(([dimensoes, qtd]) => `${qtd}× ${dimensoes}mm`)
+    .join(', ');
+
   return (
     <Card>
       <CardHeader className="pb-2">
         <CardTitle className="text-base sm:text-lg">
           Lista de Peças ({pecas.length})
         </CardTitle>
+        {pecas.length > 0 && (
+          <p className="text-xs font-medium text-foreground/70 pt-1 border-t border-border/50 mt-2 pt-2">
+            <span className="font-semibold">Resumo:</span> {resumoOrdenado}
+          </p>
+        )}
       </CardHeader>
       <CardContent>
         {pecas.length === 0 ? (
