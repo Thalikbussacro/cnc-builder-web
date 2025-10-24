@@ -6,13 +6,17 @@ import { Label } from "@/components/ui/label";
 import { InfoTooltip } from "@/components/InfoTooltip";
 import { parametrosInfo } from "@/lib/parametros-info";
 import type { ConfiguracoesFerramenta } from "@/types";
+import type { ValidationField } from "@/lib/validator";
+import { cn } from "@/lib/utils";
 
 type ConfiguracoesFerramentaProps = {
   config: ConfiguracoesFerramenta;
   onChange: (config: ConfiguracoesFerramenta) => void;
+  errorFields?: ValidationField[];
 };
 
-export function ConfiguracoesFerramenta({ config, onChange }: ConfiguracoesFerramentaProps) {
+export function ConfiguracoesFerramenta({ config, onChange, errorFields = [] }: ConfiguracoesFerramentaProps) {
+  const hasError = (field: ValidationField) => errorFields.includes(field);
   const handleChange = (campo: keyof ConfiguracoesFerramenta, valor: string | number) => {
     onChange({ ...config, [campo]: valor });
   };
@@ -39,6 +43,7 @@ export function ConfiguracoesFerramenta({ config, onChange }: ConfiguracoesFerra
               onChange={(e) => handleChange("diametro", parseFloat(e.target.value) || 0)}
               min="0.1"
               step="0.5"
+              className={cn(hasError('diametroFresa') && "border-destructive focus-visible:ring-destructive")}
             />
           </div>
           <div className="space-y-1">

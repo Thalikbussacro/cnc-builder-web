@@ -4,16 +4,20 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { InfoTooltip } from "@/components/InfoTooltip";
 import { parametrosInfo } from "@/lib/parametros-info";
-import type { ConfiguracoesCorte } from "@/types";
+import type { ConfiguracoesCorte, AplicarRampaEm } from "@/types";
+import type { ValidationField } from "@/lib/validator";
+import { cn } from "@/lib/utils";
 
 type ConfiguracoesCorteProps = {
   config: ConfiguracoesCorte;
   onChange: (config: ConfiguracoesCorte) => void;
+  errorFields?: ValidationField[];
 };
 
-export function ConfiguracoesCorte({ config, onChange }: ConfiguracoesCorteProps) {
+export function ConfiguracoesCorte({ config, onChange, errorFields = [] }: ConfiguracoesCorteProps) {
   const handleChange = (campo: keyof ConfiguracoesCorte, valor: string) => {
     // Permite string vazia temporariamente (enquanto usuário digita)
     if (valor === '') {
@@ -43,6 +47,12 @@ export function ConfiguracoesCorte({ config, onChange }: ConfiguracoesCorteProps
     onChange({ ...config, [campo]: valor });
   };
 
+  const handleSelectChange = (campo: keyof ConfiguracoesCorte, valor: string) => {
+    onChange({ ...config, [campo]: valor });
+  };
+
+  const hasError = (field: ValidationField) => errorFields.includes(field);
+
   return (
     <Card>
       <CardHeader>
@@ -65,6 +75,7 @@ export function ConfiguracoesCorte({ config, onChange }: ConfiguracoesCorteProps
               onChange={(e) => handleChange("profundidade", e.target.value)}
               min="0.1"
               step="1"
+              className={cn(hasError('profundidade') && "border-destructive focus-visible:ring-destructive")}
             />
           </div>
           <div className="space-y-1">
@@ -82,6 +93,7 @@ export function ConfiguracoesCorte({ config, onChange }: ConfiguracoesCorteProps
               onChange={(e) => handleChange("profundidadePorPassada", e.target.value)}
               min="0.1"
               step="0.5"
+              className={cn(hasError('profundidadePorPassada') && "border-destructive focus-visible:ring-destructive")}
             />
           </div>
         </div>
@@ -124,6 +136,7 @@ export function ConfiguracoesCorte({ config, onChange }: ConfiguracoesCorteProps
                 min="100"
                 max="5000"
                 step="100"
+                className={cn(hasError('feedrate') && "border-destructive focus-visible:ring-destructive")}
               />
             </div>
             <div className="space-y-1">
@@ -142,6 +155,7 @@ export function ConfiguracoesCorte({ config, onChange }: ConfiguracoesCorteProps
                 min="50"
                 max="2000"
                 step="50"
+                className={cn(hasError('plungeRate') && "border-destructive focus-visible:ring-destructive")}
               />
             </div>
           </div>
@@ -162,6 +176,7 @@ export function ConfiguracoesCorte({ config, onChange }: ConfiguracoesCorteProps
               min="500"
               max="10000"
               step="100"
+              className={cn(hasError('rapidsSpeed') && "border-destructive focus-visible:ring-destructive")}
             />
           </div>
 
@@ -181,6 +196,7 @@ export function ConfiguracoesCorte({ config, onChange }: ConfiguracoesCorteProps
               min="5000"
               max="30000"
               step="1000"
+              className={cn(hasError('spindleSpeed') && "border-destructive focus-visible:ring-destructive")}
             />
           </div>
 
@@ -212,25 +228,50 @@ export function ConfiguracoesCorte({ config, onChange }: ConfiguracoesCorteProps
             </div>
 
             {config.usarRampa && (
-              <div className="space-y-1 ml-6">
-                <div className="flex items-center gap-1">
-                  <Label htmlFor="anguloRampa">Ângulo da Rampa (°)</Label>
-                  <InfoTooltip
-                    title={parametrosInfo.anguloRampa.title}
-                    content={parametrosInfo.anguloRampa.content}
-                  />
+              <div className="space-y-3 ml-6">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-1">
+                    <Label htmlFor="aplicarRampaEm">Aplicar Rampa</Label>
+                    <InfoTooltip
+                      title="Quando Aplicar Rampa"
+                      content="Escolha se a rampa deve ser aplicada apenas na primeira passada ou em todas as passadas. Aplicar em todas as passadas protege mais a ferramenta, mas aumenta o tempo de usinagem."
+                    />
+                  </div>
+                  <Select
+                    value={config.aplicarRampaEm}
+                    onValueChange={(value) => handleSelectChange("aplicarRampaEm", value as AplicarRampaEm)}
+                  >
+                    <SelectTrigger id="aplicarRampaEm">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="primeira-passada">Primeira passada</SelectItem>
+                      <SelectItem value="todas-passadas">Todas as passadas</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
-                <Input
-                  id="anguloRampa"
-                  type="number"
-                  value={config.anguloRampa}
-                  onChange={(e) => handleChange("anguloRampa", e.target.value)}
-                  min="2"
-                  max="5"
-                  step="0.5"
-                />
-                <div className="text-xs text-muted-foreground mt-1 p-2 bg-muted rounded">
-                  Recomendado: 3° (equilíbrio ideal). Mínimo: 2° (mais suave). Máximo: 5° (mais rápido)
+
+                <div className="space-y-1">
+                  <div className="flex items-center gap-1">
+                    <Label htmlFor="anguloRampa">Ângulo da Rampa (°)</Label>
+                    <InfoTooltip
+                      title={parametrosInfo.anguloRampa.title}
+                      content={parametrosInfo.anguloRampa.content}
+                    />
+                  </div>
+                  <Input
+                    id="anguloRampa"
+                    type="number"
+                    value={config.anguloRampa}
+                    onChange={(e) => handleChange("anguloRampa", e.target.value)}
+                    min="2"
+                    max="5"
+                    step="0.5"
+                    className={cn(hasError('anguloRampa') && "border-destructive focus-visible:ring-destructive")}
+                  />
+                  <div className="text-xs text-muted-foreground mt-1 p-2 bg-muted rounded">
+                    Recomendado: 3° (equilíbrio ideal). Mínimo: 2° (mais suave). Máximo: 5° (mais rápido)
+                  </div>
                 </div>
               </div>
             )}

@@ -18,7 +18,14 @@ export function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T)
     try {
       const item = window.localStorage.getItem(key);
       if (item) {
-        setStoredValue(JSON.parse(item));
+        const parsed = JSON.parse(item);
+        // Mescla valores salvos com valores padrão (para adicionar campos novos)
+        // Isso garante compatibilidade quando novos campos são adicionados
+        const merged = { ...initialValue, ...parsed };
+        setStoredValue(merged as T);
+
+        // Salva de volta para atualizar com novos campos
+        window.localStorage.setItem(key, JSON.stringify(merged));
       }
     } catch (error) {
       console.warn(`Erro ao carregar ${key} do localStorage:`, error);

@@ -37,6 +37,11 @@ export type ConfiguracoesChapa = {
 };
 
 /**
+ * Define quando aplicar rampa de entrada
+ */
+export type AplicarRampaEm = 'primeira-passada' | 'todas-passadas';
+
+/**
  * Configurações do processo de corte
  */
 export type ConfiguracoesCorte = {
@@ -49,6 +54,7 @@ export type ConfiguracoesCorte = {
   spindleSpeed: number;             // RPM - Rotação da fresa
   usarRampa: boolean;               // Ativar rampa de entrada ao invés de mergulho vertical
   anguloRampa: number;              // graus - Ângulo da rampa de entrada (2° a 5°)
+  aplicarRampaEm: AplicarRampaEm;   // Quando aplicar rampa (primeira ou todas passadas)
 };
 
 /**
