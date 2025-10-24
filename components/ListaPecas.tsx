@@ -2,12 +2,14 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { X } from "lucide-react";
 import type { Peca } from "@/types";
 
 type ListaPecasProps = {
   pecas: Peca[];
   onRemover?: (id: string) => void;
+  onToggleIgnorar?: (id: string) => void;
 };
 
 // Cores temáticas quentes (mesmas do PreviewCanvas)
@@ -27,7 +29,7 @@ const TIPO_CORTE_INFO = {
   'na-linha': { color: 'text-yellow-600', label: 'Linha', bg: 'bg-yellow-100 dark:bg-yellow-950' },
 } as const;
 
-export function ListaPecas({ pecas, onRemover }: ListaPecasProps) {
+export function ListaPecas({ pecas, onRemover, onToggleIgnorar }: ListaPecasProps) {
   return (
     <Card>
       <CardHeader className="pb-2">
@@ -45,22 +47,27 @@ export function ListaPecas({ pecas, onRemover }: ListaPecasProps) {
             {pecas.map((peca, index) => {
               const cor = CORES[index % CORES.length];
               const tipoInfo = TIPO_CORTE_INFO[peca.tipoCorte];
+              const ignorada = peca.ignorada || false;
+
               return (
                 <div
                   key={peca.id}
-                  className="flex flex-col gap-1.5 p-2 bg-secondary/30 rounded-lg border border-border hover:shadow-md transition-shadow"
+                  className={`flex flex-col gap-1.5 p-2 bg-secondary/30 rounded-lg border border-border hover:shadow-md transition-all ${
+                    ignorada ? 'opacity-50 bg-muted/20' : ''
+                  }`}
                 >
+                  {/* Linha 1: Indicador + Nome + Remover */}
                   <div className="flex items-center gap-2">
                     {/* Indicador de cor */}
                     <div
                       className="w-3 h-3 rounded-full border-2 flex-shrink-0"
                       style={{
-                        backgroundColor: cor.hex + '60',
-                        borderColor: cor.hex,
+                        backgroundColor: ignorada ? '#999' : cor.hex + '60',
+                        borderColor: ignorada ? '#666' : cor.hex,
                       }}
                     />
                     {/* Nome ou Número */}
-                    <span className="text-xs font-bold flex-1 min-w-0 truncate" title={peca.nome || `Peça #${index + 1}`}>
+                    <span className={`text-xs font-bold flex-1 min-w-0 truncate ${ignorada ? 'line-through text-muted-foreground' : ''}`} title={peca.nome || `Peça #${index + 1}`}>
                       {peca.nome || `#${index + 1}`}
                     </span>
                     {/* Botão Remover */}
@@ -76,16 +83,36 @@ export function ListaPecas({ pecas, onRemover }: ListaPecasProps) {
                       </Button>
                     )}
                   </div>
+
+                  {/* Linha 2: Dimensões + Tipo de Corte */}
                   <div className="flex items-center justify-between gap-2 text-xs">
                     {/* Dimensões */}
-                    <span className="font-mono font-medium text-muted-foreground">
+                    <span className={`font-mono font-medium ${ignorada ? 'text-muted-foreground/60' : 'text-muted-foreground'}`}>
                       {peca.largura.toFixed(0)}×{peca.altura.toFixed(0)}mm
                     </span>
                     {/* Tipo de Corte */}
-                    <span className={`px-1.5 py-0.5 rounded text-[10px] font-semibold ${tipoInfo.bg} ${tipoInfo.color}`}>
+                    <span className={`px-1.5 py-0.5 rounded text-[10px] font-semibold ${ignorada ? 'bg-muted text-muted-foreground' : `${tipoInfo.bg} ${tipoInfo.color}`}`}>
                       {tipoInfo.label}
                     </span>
                   </div>
+
+                  {/* Linha 3: Checkbox Ignorar com Label */}
+                  {onToggleIgnorar && (
+                    <div className="flex items-center gap-1.5 pt-0.5 border-t border-border/50">
+                      <Checkbox
+                        id={`ignorar-${peca.id}`}
+                        checked={ignorada}
+                        onCheckedChange={() => onToggleIgnorar(peca.id)}
+                        className="h-3.5 w-3.5 flex-shrink-0"
+                      />
+                      <label
+                        htmlFor={`ignorar-${peca.id}`}
+                        className="text-[10px] font-medium text-muted-foreground cursor-pointer select-none"
+                      >
+                        Ignorar
+                      </label>
+                    </div>
+                  )}
                 </div>
               );
             })}

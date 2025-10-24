@@ -62,6 +62,7 @@ export function CadastroPeca({
       tipoCorte: tipoCorte,
       id: crypto.randomUUID(),
       nome: nome.trim() || undefined, // Só adiciona nome se não estiver vazio
+      numeroOriginal: pecasExistentes.length + 1, // Número sequencial baseado na quantidade de peças
     };
 
     // Simula nesting com todas as peças (existentes + nova) para validar

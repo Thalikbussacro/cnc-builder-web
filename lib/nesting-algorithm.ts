@@ -73,6 +73,8 @@ export function posicionarPecasGreedy(
         tipoCorte: peca.tipoCorte,
         id: peca.id,
         nome: peca.nome,
+        ignorada: peca.ignorada,
+        numeroOriginal: peca.numeroOriginal,
       };
 
       if (cabeNoEspaco(novaPos, posicionadas, chapaLargura, chapaAltura, espacamento)) {
@@ -243,6 +245,8 @@ export function posicionarPecasGreedy(
         tipoCorte: peca.tipoCorte,
         id: peca.id,
         nome: peca.nome,
+        ignorada: peca.ignorada,
+        numeroOriginal: peca.numeroOriginal,
       };
 
       if (cabeNoEspaco(novaPos, posicionadas, chapaLargura, chapaAltura, espacamento)) {

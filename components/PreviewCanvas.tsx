@@ -36,12 +36,11 @@ export function PreviewCanvas({
   const [canvasSize, setCanvasSize] = useState({ width: 500, height: 380 });
   const [fullscreenOpen, setFullscreenOpen] = useState(false);
 
-  // Calcula taxa de aproveitamento
+  // Calcula taxa de aproveitamento (apenas peças não ignoradas)
   const areaTotalChapa = chapaLargura * chapaAltura;
-  const areaPecas = pecasPosicionadas.reduce(
-    (total, peca) => total + peca.largura * peca.altura,
-    0
-  );
+  const areaPecas = pecasPosicionadas
+    .filter(peca => !peca.ignorada)
+    .reduce((total, peca) => total + peca.largura * peca.altura, 0);
   const taxaAproveitamento = areaTotalChapa > 0 ? (areaPecas / areaTotalChapa) * 100 : 0;
 
   // Ajusta tamanho do canvas baseado no container (reduzido pela metade)
@@ -130,20 +129,21 @@ export function PreviewCanvas({
     ctx.lineWidth = 2;
 
     pecasPosicionadas.forEach((peca, index) => {
-      const cor = CORES[index % CORES.length].hex;
+      const ignorada = peca.ignorada || false;
+      const cor = ignorada ? "#999999" : CORES[index % CORES.length].hex;
       const x = offsetX + peca.x * escala;
       const y = offsetY + peca.y * escala;
       const w = peca.largura * escala;
       const h = peca.altura * escala;
 
-      // Sombra para profundidade
-      ctx.shadowColor = "rgba(0, 0, 0, 0.15)";
-      ctx.shadowBlur = 4;
+      // Sombra para profundidade (reduzida para peças ignoradas)
+      ctx.shadowColor = ignorada ? "rgba(0, 0, 0, 0.05)" : "rgba(0, 0, 0, 0.15)";
+      ctx.shadowBlur = ignorada ? 2 : 4;
       ctx.shadowOffsetX = 2;
       ctx.shadowOffsetY = 2;
 
-      // Preenche com cor transparente
-      ctx.fillStyle = cor + "40";
+      // Preenche com cor transparente (mais transparente para ignoradas)
+      ctx.fillStyle = ignorada ? cor + "20" : cor + "40";
       ctx.fillRect(x, y, w, h);
 
       // Remove sombra para borda
@@ -152,27 +152,35 @@ export function PreviewCanvas({
       ctx.shadowOffsetX = 0;
       ctx.shadowOffsetY = 0;
 
-      // Borda da peça
-      ctx.strokeStyle = cor;
+      // Borda da peça (tracejada para ignoradas)
+      if (ignorada) {
+        ctx.setLineDash([5, 5]);
+        ctx.strokeStyle = cor;
+      } else {
+        ctx.setLineDash([]);
+        ctx.strokeStyle = cor;
+      }
       ctx.strokeRect(x, y, w, h);
+      ctx.setLineDash([]);
 
       // Texto da peça (número + dimensões)
-      ctx.fillStyle = cor;
+      ctx.fillStyle = ignorada ? cor + "aa" : cor;
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
 
       const centerX = x + w / 2;
       const centerY = y + h / 2;
 
-      // Número da peça
+      // Número da peça (usa numeroOriginal se disponível)
       const fontSize = Math.max(12, Math.min(16, w / 8, h / 8));
       ctx.font = `bold ${fontSize}px sans-serif`;
-      ctx.fillText(`#${index + 1}`, centerX, centerY - fontSize / 2);
+      const numeroPeca = peca.numeroOriginal || index + 1;
+      ctx.fillText(`#${numeroPeca}`, centerX, centerY - fontSize / 2);
 
       // Dimensões (se houver espaço)
       if (w > 60 && h > 40) {
         ctx.font = `${fontSize * 0.7}px sans-serif`;
-        ctx.fillStyle = cor + "dd";
+        ctx.fillStyle = ignorada ? cor + "99" : cor + "dd";
         ctx.fillText(
           `${peca.largura.toFixed(0)}×${peca.altura.toFixed(0)}mm`,
           centerX,
@@ -206,7 +214,7 @@ export function PreviewCanvas({
             <div className="w-px h-4 bg-border hidden sm:block" />
             <div className="flex items-center gap-1.5">
               <span className="text-muted-foreground">Peças:</span>
-              <span className="font-semibold">{pecasPosicionadas.length}</span>
+              <span className="font-semibold">{pecasPosicionadas.filter(p => !p.ignorada).length}/{pecasPosicionadas.length}</span>
             </div>
             <div className="w-px h-4 bg-border hidden sm:block" />
             <div className="flex items-center gap-1.5">

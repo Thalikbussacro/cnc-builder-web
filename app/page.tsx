@@ -112,6 +112,13 @@ export default function Home() {
     setPecas(pecas.filter(p => p.id !== id));
   };
 
+  // Handler para alternar estado de ignorar peça
+  const handleToggleIgnorar = (id: string) => {
+    setPecas(pecas.map(p =>
+      p.id === id ? { ...p, ignorada: !p.ignorada } : p
+    ));
+  };
+
   // Handler para limpar tudo
   const handleLimpar = () => {
     if (pecas.length > 0 && !confirm("Deseja limpar todas as peças?")) {
@@ -281,7 +288,7 @@ export default function Home() {
                   pecasPosicionadas={pecasPosicionadas}
                   tempoEstimado={tempoEstimado}
                 />
-                <ListaPecas pecas={pecas} onRemover={handleRemoverPeca} />
+                <ListaPecas pecas={pecas} onRemover={handleRemoverPeca} onToggleIgnorar={handleToggleIgnorar} />
               </div>
             </div>
           </div>

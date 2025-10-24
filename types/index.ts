@@ -12,6 +12,8 @@ export type Peca = {
   tipoCorte: TipoCorte;
   id: string; // UUID para React keys
   nome?: string; // Nome customizável da peça
+  ignorada?: boolean; // Se true, peça é ignorada no G-code (reserva espaço mas não corta)
+  numeroOriginal?: number; // Número original da peça na ordem de adição (1, 2, 3...)
 };
 
 /**
@@ -25,6 +27,8 @@ export type PecaPosicionada = {
   tipoCorte: TipoCorte;
   id: string;
   nome?: string; // Nome customizável da peça
+  ignorada?: boolean; // Se true, peça é ignorada no G-code (reserva espaço mas não corta)
+  numeroOriginal?: number; // Número original da peça na ordem de adição (1, 2, 3...)
 };
 
 /**

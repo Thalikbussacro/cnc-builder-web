@@ -165,6 +165,9 @@ export function calcularTempoEstimado(
   const { profundidade, profundidadePorPassada, feedrate, plungeRate, rapidsSpeed, usarRampa, anguloRampa, aplicarRampaEm } = corte;
   const { largura: chapaL, altura: chapaA } = config;
 
+  // Filtra peças ignoradas (não devem ser calculadas no tempo)
+  const pecasAtivas = pecasPos.filter(p => !p.ignorada);
+
   // Validação: rapidsSpeed pode ser undefined em localStorage antigo
   const rapidsSpeedSafe = rapidsSpeed || 4000; // Valor padrão se não existir
 
@@ -180,8 +183,8 @@ export function calcularTempoEstimado(
   let posY = 0;
   let posZ = 5;
 
-  // Para cada peça
-  for (const peca of pecasPos) {
+  // Para cada peça ativa (não ignorada)
+  for (const peca of pecasAtivas) {
     // Para cada passada
     for (let j = 1; j <= numPassadas; j++) {
       const z = -Math.min(j * profundidadePorPassada, profundidade);
@@ -385,11 +388,24 @@ export function gerarGCodeV1(
 
   const numPassadas = Math.ceil(profundidade / profundidadePorPassada);
 
-  let cortadas = 0;
-
   // Para cada peça posicionada
   for (const peca of pecasPos) {
-    cortadas++;
+    const numeroPeca = peca.numeroOriginal || pecasPos.indexOf(peca) + 1;
+
+    // Se a peça está marcada como ignorada, adiciona apenas comentário
+    if (peca.ignorada) {
+      gcode += `; ========================================\n`;
+      if (peca.nome) {
+        gcode += `; PECA #${numeroPeca} (${peca.nome}) - IGNORADA\n`;
+      } else {
+        gcode += `; PECA #${numeroPeca} - IGNORADA\n`;
+      }
+      gcode += `; Dimensoes: ${formatarNumero(peca.largura, 0)}x${formatarNumero(peca.altura, 0)}mm\n`;
+      gcode += `; Tipo de corte: ${peca.tipoCorte}\n`;
+      gcode += `; Posicao: X${formatarNumero(peca.x, 0)} Y${formatarNumero(peca.y, 0)}\n`;
+      gcode += `; ========================================\n\n`;
+      continue; // Pula para próxima peça
+    }
 
     // Verifica se deve aplicar compensação baseado no tipo de corte da peça
     const aplicarOffset = ferramenta && peca.tipoCorte !== 'na-linha';
@@ -402,9 +418,9 @@ export function gerarGCodeV1(
       gcode += '\n';
       // Adiciona nome customizado da peça se disponível
       if (peca.nome) {
-        gcode += `; ${peca.nome} - Peca ${cortadas} (${formatarNumero(peca.largura, 0)}x${formatarNumero(peca.altura, 0)}) - Tipo: ${peca.tipoCorte} - passada ${j}\n`;
+        gcode += `; ${peca.nome} - Peca ${numeroPeca} (${formatarNumero(peca.largura, 0)}x${formatarNumero(peca.altura, 0)}) - Tipo: ${peca.tipoCorte} - passada ${j}\n`;
       } else {
-        gcode += `; Peca ${cortadas} (${formatarNumero(peca.largura, 0)}x${formatarNumero(peca.altura, 0)}) - Tipo: ${peca.tipoCorte} - passada ${j}\n`;
+        gcode += `; Peca ${numeroPeca} (${formatarNumero(peca.largura, 0)}x${formatarNumero(peca.altura, 0)}) - Tipo: ${peca.tipoCorte} - passada ${j}\n`;
       }
       gcode += 'G0 Z5 ; Levanta fresa antes de posicionar\n';
 
