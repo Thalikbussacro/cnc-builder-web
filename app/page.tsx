@@ -102,9 +102,13 @@ export default function Home() {
     configCorte.aplicarRampaEm
   ]);
 
-  // Handler para adicionar peça
-  const handleAdicionarPeca = (peca: Peca) => {
-    setPecas([...pecas, peca]);
+  // Handler para adicionar peça (aceita uma ou múltiplas)
+  const handleAdicionarPeca = (peca: Peca | Peca[]) => {
+    if (Array.isArray(peca)) {
+      setPecas([...pecas, ...peca]);
+    } else {
+      setPecas([...pecas, peca]);
+    }
   };
 
   // Handler para remover peça individual

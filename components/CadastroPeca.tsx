@@ -12,7 +12,7 @@ import type { Peca, ConfiguracoesChapa, TipoCorte } from "@/types";
 import { posicionarPecas, type MetodoNesting } from "@/lib/nesting-algorithm";
 
 type CadastroPecaProps = {
-  onAdicionar: (peca: Peca) => void;
+  onAdicionar: (peca: Peca | Peca[]) => void;
   configChapa: ConfiguracoesChapa;
   espacamento: number;
   pecasExistentes: Peca[];
@@ -30,6 +30,7 @@ export function CadastroPeca({
   const [altura, setAltura] = useState<string>("500");
   const [tipoCorte, setTipoCorte] = useState<TipoCorte>("externo");
   const [nome, setNome] = useState<string>("");
+  const [quantidade, setQuantidade] = useState<string>("1");
   const [erro, setErro] = useState<string>("");
 
   const handleAdicionar = () => {
@@ -37,6 +38,7 @@ export function CadastroPeca({
 
     const larguraNum = parseFloat(largura);
     const alturaNum = parseFloat(altura);
+    const quantidadeNum = parseInt(quantidade);
 
     // Validações básicas
     if (isNaN(larguraNum) || larguraNum <= 0) {
@@ -49,24 +51,32 @@ export function CadastroPeca({
       return;
     }
 
+    if (isNaN(quantidadeNum) || quantidadeNum <= 0) {
+      setErro("Informe uma quantidade válida.");
+      return;
+    }
+
     // Verifica se a peça é maior que a chapa
     if (larguraNum > configChapa.largura || alturaNum > configChapa.altura) {
       setErro("Peça maior que a chapa.");
       return;
     }
 
-    // Cria nova peça
-    const novaPeca: Peca = {
-      largura: larguraNum,
-      altura: alturaNum,
-      tipoCorte: tipoCorte,
-      id: crypto.randomUUID(),
-      nome: nome.trim() || undefined, // Só adiciona nome se não estiver vazio
-      numeroOriginal: pecasExistentes.length + 1, // Número sequencial baseado na quantidade de peças
-    };
+    // Cria N peças idênticas
+    const novasPecas: Peca[] = [];
+    for (let i = 0; i < quantidadeNum; i++) {
+      novasPecas.push({
+        largura: larguraNum,
+        altura: alturaNum,
+        tipoCorte: tipoCorte,
+        id: crypto.randomUUID(),
+        nome: nome.trim() || undefined,
+        numeroOriginal: pecasExistentes.length + i + 1,
+      });
+    }
 
-    // Simula nesting com todas as peças (existentes + nova) para validar
-    const pecasTemp = [...pecasExistentes, novaPeca];
+    // Simula nesting com todas as peças (existentes + novas) para validar
+    const pecasTemp = [...pecasExistentes, ...novasPecas];
     const resultado = posicionarPecas(
       pecasTemp,
       configChapa.largura,
@@ -75,19 +85,26 @@ export function CadastroPeca({
       metodoNesting
     );
 
-    // Verifica se a nova peça coube
-    const novaPecaCoube = resultado.posicionadas.some((p) => p.id === novaPeca.id);
+    // Verifica quantas das novas peças couberam
+    const novasIds = new Set(novasPecas.map(p => p.id));
+    const couberamCount = resultado.posicionadas.filter(p => novasIds.has(p.id)).length;
 
-    if (!novaPecaCoube) {
-      setErro("Não há espaço na chapa para esta peça.");
+    if (couberamCount === 0) {
+      setErro("Não há espaço na chapa para nenhuma destas peças.");
       return;
     }
 
-    // Adiciona a peça
-    onAdicionar(novaPeca);
+    if (couberamCount < quantidadeNum) {
+      setErro(`Apenas ${couberamCount} de ${quantidadeNum} peças cabem na chapa.`);
+      return;
+    }
 
-    // Reseta apenas o nome após adicionar
+    // Adiciona todas as peças de uma vez
+    onAdicionar(quantidadeNum === 1 ? novasPecas[0] : novasPecas);
+
+    // Reseta nome e quantidade após adicionar
     setNome("");
+    setQuantidade("1");
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -117,7 +134,7 @@ export function CadastroPeca({
           />
         </div>
 
-        <div className="grid grid-cols-2 gap-2 sm:gap-3">
+        <div className="grid grid-cols-3 gap-2 sm:gap-3">
           <div className="space-y-1.5">
             <Label htmlFor="pecaLargura" className="text-xs sm:text-sm">
               Largura (mm)
@@ -133,7 +150,7 @@ export function CadastroPeca({
               className="h-9 sm:h-10"
             />
           </div>
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             <Label htmlFor="pecaAltura" className="text-xs sm:text-sm">
               Altura (mm)
             </Label>
@@ -145,6 +162,21 @@ export function CadastroPeca({
               onKeyPress={handleKeyPress}
               min="0"
               step="10"
+              className="h-9 sm:h-10"
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="pecaQuantidade" className="text-xs sm:text-sm">
+              Qtd
+            </Label>
+            <Input
+              id="pecaQuantidade"
+              type="number"
+              value={quantidade}
+              onChange={(e) => setQuantidade(e.target.value)}
+              onKeyPress={handleKeyPress}
+              min="1"
+              step="1"
               className="h-9 sm:h-10"
             />
           </div>
