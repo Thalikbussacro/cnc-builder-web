@@ -46,7 +46,10 @@ function formatarNumero(num: number, decimals: number = 2): string {
  * Calcula a distância horizontal necessária para uma rampa de entrada
  * @param profundidade - Profundidade a descer (mm)
  * @param anguloGraus - Ângulo da rampa em graus
- * @returns Distância horizontal em mm
+ * @returns Distância horizontal necessária (mm)
+ *
+ * NOTA: Retorna apenas a distância HORIZONTAL (projeção no plano XY).
+ * A distância real percorrida pela fresa será ligeiramente maior (hipotenusa).
  */
 function calcularDistanciaRampa(profundidade: number, anguloGraus: number): number {
   const anguloRadianos = (anguloGraus * Math.PI) / 180;
@@ -54,36 +57,54 @@ function calcularDistanciaRampa(profundidade: number, anguloGraus: number): numb
 }
 
 /**
- * Determina a direção da rampa com base na posição da peça e tipo de corte
+ * Calcula o feedrate ajustado para rampa linear
+ * @param feedrateNormal - Feedrate normal de corte (mm/min)
+ * @param anguloGraus - Ângulo da rampa em graus
+ * @returns Feedrate ajustado para rampa
+ *
+ * Baseado em melhores práticas:
+ * - Ângulos até 5°: 70% do feedrate normal
+ * - Ângulos acima de 5°: 50% do feedrate normal
+ */
+function calcularFeedrateRampa(feedrateNormal: number, anguloGraus: number): number {
+  if (anguloGraus > 5) {
+    return Math.round(feedrateNormal * 0.5); // 50% para ângulos agressivos
+  }
+  return Math.round(feedrateNormal * 0.7); // 70% para ângulos conservadores
+}
+
+/**
+ * Determina a direção da rampa com base na posição da peça e distância necessária
  * @param peca - Peça posicionada
- * @param chapaLargura - Largura da chapa
- * @param chapaAltura - Altura da chapa
- * @returns Objeto com deltaX e deltaY para a direção da rampa
+ * @param chapaLargura - Largura da chapa (mm)
+ * @param chapaAltura - Altura da chapa (mm)
+ * @param distanciaRampa - Distância horizontal necessária para rampa (mm)
+ * @returns Objeto com deltaX, deltaY (direção) e temEspaco (boolean)
  */
 function determinarDirecaoRampa(
   peca: PecaPosicionada,
   chapaLargura: number,
-  chapaAltura: number
-): { deltaX: number; deltaY: number } {
-  // A direção da rampa depende do tipo de corte e da posição inicial
-  // Para cortes que vão da esquerda para direita (padrão), a rampa vai para -X
-  // Isso permite que a fresa entre no material na direção do corte
-
-  // Verificamos se há espaço suficiente à esquerda
-  const temEspacoEsquerda = peca.x >= 10; // Margem de 10mm
+  chapaAltura: number,
+  distanciaRampa: number
+): { deltaX: number; deltaY: number; temEspaco: boolean } {
+  // Verifica se há espaço suficiente à ESQUERDA da peça
+  // (rampa vai em -X, então precisa ter espaço antes da posição inicial)
+  const temEspacoEsquerda = peca.x >= distanciaRampa;
 
   if (temEspacoEsquerda) {
-    return { deltaX: -1, deltaY: 0 }; // Rampa vai para esquerda
+    return { deltaX: -1, deltaY: 0, temEspaco: true };
   }
 
-  // Se não há espaço à esquerda, tenta para baixo
-  const temEspacoAbaixo = peca.y >= 10;
+  // Se não há espaço à esquerda, tenta para BAIXO
+  // (rampa vai em -Y, então precisa ter espaço antes da posição inicial)
+  const temEspacoAbaixo = peca.y >= distanciaRampa;
+
   if (temEspacoAbaixo) {
-    return { deltaX: 0, deltaY: -1 }; // Rampa vai para baixo
+    return { deltaX: 0, deltaY: -1, temEspaco: true };
   }
 
-  // Fallback: sem direção específica (não usar rampa)
-  return { deltaX: 0, deltaY: 0 };
+  // Sem espaço suficiente para rampa em nenhuma direção
+  return { deltaX: 0, deltaY: 0, temEspaco: false };
 }
 
 /**
@@ -141,7 +162,7 @@ export function calcularTempoEstimado(
   config: ConfiguracoesChapa,
   corte: ConfiguracoesCorte
 ): TempoEstimado {
-  const { profundidade, profundidadePorPassada, feedrate, plungeRate, rapidsSpeed, usarRampa, anguloRampa } = corte;
+  const { profundidade, profundidadePorPassada, feedrate, plungeRate, rapidsSpeed, usarRampa, anguloRampa, aplicarRampaEm } = corte;
   const { largura: chapaL, altura: chapaA } = config;
 
   // Validação: rapidsSpeed pode ser undefined em localStorage antigo
@@ -149,9 +170,10 @@ export function calcularTempoEstimado(
 
   const numPassadas = Math.ceil(profundidade / profundidadePorPassada);
 
-  let distanciaCorte = 0;        // mm - movimentos G1 laterais (XY)
-  let distanciaMergulho = 0;     // mm - movimentos G1 verticais (Z)
-  let distanciaPosicionamento = 0; // mm - movimentos G0
+  let distanciaCorte = 0;        // mm - movimentos G1 laterais (XY) - usa feedrate
+  let distanciaMergulho = 0;     // mm - movimentos G1 verticais (Z) - usa plungeRate
+  let distanciaRampa = 0;        // mm - movimentos G1 diagonais (XYZ) - usa feedrateRampa
+  let distanciaPosicionamento = 0; // mm - movimentos G0 - usa rapidsSpeed
 
   // Posição atual simulada
   let posX = 0;
@@ -181,14 +203,17 @@ export function calcularTempoEstimado(
       }
 
       // 2. Entrada (rampa ou mergulho vertical)
-      if (usarRampa) {
-        const distanciaRampa = calcularDistanciaRampa(profundidadePassada, anguloRampa);
-        const direcao = determinarDirecaoRampa(peca, chapaL, chapaA);
-        const temEspaco = direcao.deltaX !== 0 || direcao.deltaY !== 0;
+      const ehPrimeiraPassada = j === 1;
+      const deveUsarRampaNaPassada = aplicarRampaEm === 'todas-passadas' || ehPrimeiraPassada;
+
+      if (usarRampa && deveUsarRampaNaPassada) {
+        const distanciaRampaNecessaria = calcularDistanciaRampa(profundidadePassada, anguloRampa);
+        const direcao = determinarDirecaoRampa(peca, chapaL, chapaA, distanciaRampaNecessaria);
+        const temEspaco = direcao.temEspaco;
 
         if (temEspaco) {
-          const xInicio = peca.x + (direcao.deltaX * distanciaRampa);
-          const yInicio = peca.y + (direcao.deltaY * distanciaRampa);
+          const xInicio = peca.x + (direcao.deltaX * distanciaRampaNecessaria);
+          const yInicio = peca.y + (direcao.deltaY * distanciaRampaNecessaria);
 
           // Move para início da rampa se necessário
           if (posX !== xInicio || posY !== yInicio) {
@@ -209,11 +234,11 @@ export function calcularTempoEstimado(
             posZ = 0;
           }
 
-          // Rampa de entrada (movimento 3D)
+          // Rampa de entrada (movimento 3D) - usa feedrateRampa
           const dx = peca.x - xInicio;
           const dy = peca.y - yInicio;
           const dz = z - posZ;
-          distanciaMergulho += Math.sqrt(dx * dx + dy * dy + dz * dz);
+          distanciaRampa += Math.sqrt(dx * dx + dy * dy + dz * dz);
           posX = peca.x;
           posY = peca.y;
           posZ = z;
@@ -257,17 +282,22 @@ export function calcularTempoEstimado(
   // Calcula tempos em segundos (velocidades em mm/min)
   const tempoCorte = (distanciaCorte / feedrate) * 60;
   const tempoMergulho = (distanciaMergulho / plungeRate) * 60;
+
+  // Tempo da rampa: usa feedrateRampa (70% ou 50% do feedrate)
+  const feedrateRampa = usarRampa ? calcularFeedrateRampa(feedrate, anguloRampa) : feedrate;
+  const tempoRampa = (distanciaRampa / feedrateRampa) * 60;
+
   const tempoPosicionamento = (distanciaPosicionamento / rapidsSpeedSafe) * 60;
-  const tempoTotal = tempoCorte + tempoMergulho + tempoPosicionamento;
-  const distanciaTotal = distanciaCorte + distanciaMergulho + distanciaPosicionamento;
+  const tempoTotal = tempoCorte + tempoMergulho + tempoRampa + tempoPosicionamento;
+  const distanciaTotal = distanciaCorte + distanciaMergulho + distanciaRampa + distanciaPosicionamento;
 
   return {
     tempoCorte,
-    tempoMergulho,
+    tempoMergulho: tempoMergulho + tempoRampa, // Combina mergulho e rampa para compatibilidade
     tempoPosicionamento,
     tempoTotal,
     distanciaCorte,
-    distanciaMergulho,
+    distanciaMergulho: distanciaMergulho + distanciaRampa, // Combina mergulho e rampa para compatibilidade
     distanciaPosicionamento,
     distanciaTotal
   };
@@ -290,7 +320,7 @@ export function gerarGCodeV1(
   ferramenta?: ConfiguracoesFerramenta
 ): string {
   const { largura: chapaL, altura: chapaA } = config;
-  const { profundidade, profundidadePorPassada, feedrate, plungeRate, rapidsSpeed, spindleSpeed, usarRampa, anguloRampa } = corte;
+  const { profundidade, profundidadePorPassada, feedrate, plungeRate, rapidsSpeed, spindleSpeed, usarRampa, anguloRampa, aplicarRampaEm } = corte;
 
   // Validações de segurança para prevenir loops infinitos e valores inválidos
   if (!profundidade || profundidade <= 0) {
@@ -379,14 +409,15 @@ export function gerarGCodeV1(
       gcode += 'G0 Z5 ; Levanta fresa antes de posicionar\n';
 
       // Verifica se deve usar rampa de entrada
-      if (usarRampa) {
+      const ehPrimeiraPassada = j === 1;
+      const deveUsarRampaNaPassada = aplicarRampaEm === 'todas-passadas' || ehPrimeiraPassada;
+
+      if (usarRampa && deveUsarRampaNaPassada) {
         const distanciaRampa = calcularDistanciaRampa(profundidadePassada, anguloRampa);
-        const direcao = determinarDirecaoRampa(peca, chapaL, chapaA);
+        const direcao = determinarDirecaoRampa(peca, chapaL, chapaA, distanciaRampa);
+        const feedrateRampa = calcularFeedrateRampa(feedrate, anguloRampa);
 
-        // Verifica se há espaço para a rampa
-        const temEspaco = direcao.deltaX !== 0 || direcao.deltaY !== 0;
-
-        if (temEspaco) {
+        if (direcao.temEspaco) {
           // Calcula ponto de início da rampa
           const xInicio = peca.x + (direcao.deltaX * distanciaRampa);
           const yInicio = peca.y + (direcao.deltaY * distanciaRampa);
@@ -395,18 +426,24 @@ export function gerarGCodeV1(
           gcode += `G0 X${formatarNumero(xInicio)} Y${formatarNumero(yInicio)} ; Posiciona no início da rampa\n`;
           gcode += `G1 Z0 F${plungeRate} ; Desce até a superfície\n`;
 
-          // Executa rampa de entrada
-          gcode += `G1 X${formatarNumero(peca.x)} Y${formatarNumero(peca.y)} Z${formatarNumero(z)} F${plungeRate} ; Rampa de entrada (${formatarNumero(anguloRampa, 1)} graus)\n`;
+          // Executa rampa de entrada (usa feedrateRampa, NÃO plungeRate)
+          gcode += `G1 X${formatarNumero(peca.x)} Y${formatarNumero(peca.y)} Z${formatarNumero(z)} F${feedrateRampa} ; Rampa de entrada (${formatarNumero(anguloRampa, 1)}° @ ${anguloRampa > 5 ? '50%' : '70%'} feed)\n`;
         } else {
           // Não há espaço para rampa, faz mergulho vertical com aviso
-          gcode += `; AVISO: Espaco insuficiente para rampa - usando mergulho vertical\n`;
+          gcode += `; AVISO: Espaco insuficiente para rampa (requer ${formatarNumero(distanciaRampa, 0)}mm)\n`;
           gcode += `G0 X${formatarNumero(peca.x)} Y${formatarNumero(peca.y)} ; Posiciona no início da peça\n`;
           gcode += `G1 Z${formatarNumero(z)} F${plungeRate} ; Desce a fresa com plunge rate (mergulho vertical)\n`;
         }
       } else {
-        // Mergulho vertical tradicional
+        // Mergulho vertical (sem rampa OU config = primeira-passada)
+        let comentario = '; Desce a fresa com plunge rate';
+
+        if (!ehPrimeiraPassada && usarRampa && aplicarRampaEm === 'primeira-passada') {
+          comentario = '; Mergulho vertical (rampa apenas na 1ª passada)';
+        }
+
         gcode += `G0 X${formatarNumero(peca.x)} Y${formatarNumero(peca.y)} ; Posiciona no início da peça\n`;
-        gcode += `G1 Z${formatarNumero(z)} F${plungeRate} ; Desce a fresa com plunge rate\n`;
+        gcode += `G1 Z${formatarNumero(z)} F${plungeRate} ${comentario}\n`;
       }
 
       // Ativa compensação de ferramenta se necessário

@@ -35,6 +35,12 @@ function removerAcentos(texto: string): string {
 
 /**
  * Calcula a distância horizontal necessária para uma rampa de entrada
+ * @param profundidade - Profundidade a descer (mm)
+ * @param anguloGraus - Ângulo da rampa em graus
+ * @returns Distância horizontal necessária (mm)
+ *
+ * NOTA: Retorna apenas a distância HORIZONTAL (projeção no plano XY).
+ * A distância real percorrida pela fresa será ligeiramente maior (hipotenusa).
  */
 function calcularDistanciaRampa(profundidade: number, anguloGraus: number): number {
   const anguloRadianos = (anguloGraus * Math.PI) / 180;
@@ -42,24 +48,55 @@ function calcularDistanciaRampa(profundidade: number, anguloGraus: number): numb
 }
 
 /**
- * Determina a direção da rampa com base na posição da peça
+ * Calcula o feedrate ajustado para rampa linear
+ * @param feedrateNormal - Feedrate normal de corte (mm/min)
+ * @param anguloGraus - Ângulo da rampa em graus
+ * @returns Feedrate ajustado para rampa
+ *
+ * Baseado em melhores práticas:
+ * - Ângulos até 5°: 70% do feedrate normal
+ * - Ângulos acima de 5°: 50% do feedrate normal
+ */
+function calcularFeedrateRampa(feedrateNormal: number, anguloGraus: number): number {
+  if (anguloGraus > 5) {
+    return Math.round(feedrateNormal * 0.5); // 50% para ângulos agressivos
+  }
+  return Math.round(feedrateNormal * 0.7); // 70% para ângulos conservadores
+}
+
+/**
+ * Determina se a peça tem tamanho suficiente para rampa INTERNA
+ * @param peca - Peça posicionada
+ * @param distanciaRampa - Distância horizontal necessária para rampa (mm)
+ * @returns Objeto indicando se rampa é possível e qual direção usar
+ *
+ * IMPORTANTE: Rampa agora é INTERNA (dentro da peça), não externa!
+ * A rampa acontece DURANTE o primeiro lado do corte, não antes.
  */
 function determinarDirecaoRampa(
   peca: PecaPosicionada,
   chapaLargura: number,
-  chapaAltura: number
-): { deltaX: number; deltaY: number } {
-  const temEspacoEsquerda = peca.x >= 10;
-  if (temEspacoEsquerda) {
-    return { deltaX: -1, deltaY: 0 };
+  chapaAltura: number,
+  distanciaRampa: number
+): { deltaX: number; deltaY: number; temEspaco: boolean; usarLadoX: boolean } {
+  // Verifica se a LARGURA da peça comporta a rampa (no eixo X)
+  const larguraSuficiente = peca.largura >= distanciaRampa;
+
+  if (larguraSuficiente) {
+    // Rampa no lado inferior (movimento +X enquanto desce Z)
+    return { deltaX: 1, deltaY: 0, temEspaco: true, usarLadoX: true };
   }
 
-  const temEspacoAbaixo = peca.y >= 10;
-  if (temEspacoAbaixo) {
-    return { deltaX: 0, deltaY: -1 };
+  // Verifica se a ALTURA da peça comporta a rampa (no eixo Y)
+  const alturaSuficiente = peca.altura >= distanciaRampa;
+
+  if (alturaSuficiente) {
+    // Rampa no lado esquerdo (movimento +Y enquanto desce Z)
+    return { deltaX: 0, deltaY: 1, temEspaco: true, usarLadoX: false };
   }
 
-  return { deltaX: 0, deltaY: 0 };
+  // Peça muito pequena para rampa interna
+  return { deltaX: 0, deltaY: 0, temEspaco: false, usarLadoX: false };
 }
 
 /**
@@ -93,7 +130,7 @@ export function gerarGCodeV2(
   incluirComentarios: boolean = true
 ): string {
   const { largura: chapaL, altura: chapaA } = config;
-  const { profundidade, profundidadePorPassada, feedrate, plungeRate, rapidsSpeed, spindleSpeed, usarRampa, anguloRampa } = corte;
+  const { profundidade, profundidadePorPassada, feedrate, plungeRate, rapidsSpeed, spindleSpeed, usarRampa, anguloRampa, aplicarRampaEm } = corte;
 
   // Validações de segurança para prevenir loops infinitos e valores inválidos
   if (!profundidade || profundidade <= 0) {
@@ -196,7 +233,18 @@ export function gerarGCodeV2(
 
     if (usarRampa) {
       const distEx = calcularDistanciaRampa(profundidadePorPassada, anguloRampa);
-      gcode += `; Rampa: ${formatarNumero(anguloRampa, 1)}° (~${formatarNumero(distEx, 0)}mm)\n`;
+      const feedrateRampa = calcularFeedrateRampa(feedrate, anguloRampa);
+      gcode += `; Rampa INTERNA: ${formatarNumero(anguloRampa, 1)}° (~${formatarNumero(distEx, 0)}mm dentro da peca)\n`;
+      gcode += `; Feedrate rampa: ${feedrateRampa}mm/min (${anguloRampa > 5 ? '50%' : '70%'} do normal)\n`;
+      gcode += `; NOTA: Rampa acontece DURANTE o 1o lado do corte (nao precisa espaco externo!)\n`;
+      gcode += `; Tamanho minimo da peca: ${formatarNumero(distEx, 0)}mm (largura OU altura)\n`;
+
+      // Aviso se ângulo for muito agressivo ou muito conservador
+      if (anguloRampa < 2) {
+        gcode += `; AVISO: Angulo ${formatarNumero(anguloRampa, 1)}° muito baixo (rampa muito longa)\n`;
+      } else if (anguloRampa > 5) {
+        gcode += `; AVISO: Angulo ${formatarNumero(anguloRampa, 1)}° agressivo (feedrate reduzido para 50%)\n`;
+      }
     }
 
     const numPassadas = Math.ceil(profundidade / profundidadePorPassada);
@@ -294,6 +342,61 @@ export function gerarGCodeV2(
       }
     }
 
+    // ========================================================================
+    // VALIDAÇÃO DE RAMPA INTERNA
+    // ========================================================================
+    if (usarRampa) {
+      const distanciaRampaNecessaria = calcularDistanciaRampa(profundidadePorPassada, anguloRampa);
+      gcode += `; \n`;
+      gcode += `; ========================================================================\n`;
+      gcode += `; VALIDACAO DE RAMPA INTERNA\n`;
+      gcode += `; ========================================================================\n`;
+      gcode += `; Tamanho minimo necessario: ${formatarNumero(distanciaRampaNecessaria, 0)}mm (largura OU altura)\n`;
+      gcode += `; \n`;
+
+      let pecasPequenas = 0;
+
+      for (let i = 0; i < pecasPos.length; i++) {
+        const peca = pecasPos[i];
+        const nome = peca.nome || `Peca ${i + 1}`;
+
+        // ÚNICO PROBLEMA: Peça muito pequena para rampa interna
+        const larguraSuficiente = peca.largura >= distanciaRampaNecessaria;
+        const alturaSuficiente = peca.altura >= distanciaRampaNecessaria;
+
+        if (!larguraSuficiente && !alturaSuficiente) {
+          pecasPequenas++;
+          gcode += `; AVISO - "${nome}" (${formatarNumero(peca.largura, 0)}x${formatarNumero(peca.altura, 0)}mm):\n`;
+          gcode += `;   Peca muito pequena para rampa de ${formatarNumero(distanciaRampaNecessaria, 0)}mm\n`;
+          gcode += `;   >> SOLUCAO: Usara MERGULHO VERTICAL\n`;
+          gcode += `; \n`;
+        }
+      }
+
+      if (pecasPequenas > 0) {
+        gcode += `; ========================================================================\n`;
+        gcode += `; RESUMO: ${pecasPequenas}/${pecasPos.length} pecas usarao mergulho vertical\n`;
+        gcode += `; ========================================================================\n`;
+        gcode += `; \n`;
+        gcode += `; ATENCAO: Pecas listadas acima usarao MERGULHO VERTICAL.\n`;
+        gcode += `; Isso pode causar:\n`;
+        gcode += `;   - Maior desgaste na ferramenta\n`;
+        gcode += `;   - Marcas no ponto de entrada\n`;
+        gcode += `;   - Risco de quebra da fresa (se material for duro)\n`;
+        gcode += `; \n`;
+        gcode += `; RECOMENDACOES:\n`;
+        gcode += `;   1. Aumente tamanho das pecas para >= ${formatarNumero(distanciaRampaNecessaria, 0)}mm\n`;
+        gcode += `;   2. Reduza angulo da rampa (ex: 2° ao inves de ${formatarNumero(anguloRampa, 1)}°)\n`;
+        gcode += `;   3. Ou desative rampa completamente (mergulho vertical em todas)\n`;
+        gcode += `; \n`;
+      } else {
+        gcode += `; ========================================================================\n`;
+        gcode += `; OK: Todas as ${pecasPos.length} pecas usarao RAMPA INTERNA!\n`;
+        gcode += `; ========================================================================\n`;
+        gcode += `; \n`;
+      }
+    }
+
     gcode += '\n';
   }
 
@@ -358,135 +461,180 @@ export function gerarGCodeV2(
     for (let j = 1; j <= numPassadas; j++) {
       const z = -Math.min(j * profundidadePorPassada, profundidade);
       const profundidadePassada = Math.abs(z);
+      const ehPrimeiraPassada = j === 1;
 
       if (incluirComentarios) {
         gcode += `\n; Passada ${j}/${numPassadas}\n`;
       }
 
       // === ENTRADA (RAMPA OU VERTICAL) ===
-      if (usarRampa) {
-        const distanciaRampa = calcularDistanciaRampa(profundidadePassada, anguloRampa);
-        const direcao = determinarDirecaoRampa(peca, chapaL, chapaA);
-        const temEspaco = direcao.deltaX !== 0 || direcao.deltaY !== 0;
+      // RAMPA INTERNA: Rampa acontece DURANTE o primeiro lado do corte
+      // Não precisa de espaço externo, usa a própria peça!
+      const distanciaRampa = calcularDistanciaRampa(profundidadePassada, anguloRampa);
+      const direcao = determinarDirecaoRampa(peca, chapaL, chapaA, distanciaRampa);
 
-        if (temEspaco) {
-          const xInicio = peca.x + (direcao.deltaX * distanciaRampa);
-          const yInicio = peca.y + (direcao.deltaY * distanciaRampa);
+      // Decide se usa rampa baseado na configuração do usuário
+      const deveUsarRampaNaPassada = aplicarRampaEm === 'todas-passadas' || ehPrimeiraPassada;
+      const usarRampaNestaPeca = usarRampa && deveUsarRampaNaPassada && direcao.temEspaco;
 
-          // Move para início da rampa (se necessário)
-          if (estado.posX !== xInicio || estado.posY !== yInicio) {
-            // Sobe Z se não estiver em posição segura
-            if (estado.posZ < 5) {
-              gcode += incluirComentarios ? 'G0 Z5 ; Levanta fresa para posição segura\n' : 'G0 Z5\n';
-              estado.posZ = 5;
-            }
-            gcode += incluirComentarios
-              ? `G0 X${formatarNumero(xInicio)} Y${formatarNumero(yInicio)} ; Posiciona no início da rampa\n`
-              : `G0 X${formatarNumero(xInicio)} Y${formatarNumero(yInicio)}\n`;
-            estado.posX = xInicio;
-            estado.posY = yInicio;
-          }
+      // IMPORTANTE: Se vai usar rampa, SEMPRE levantar fresa antes (mesmo que já esteja na posição XY)
+      // Isso é necessário porque rampa interna requer que a fresa esteja em Z seguro antes de começar
+      if (usarRampaNestaPeca && estado.posZ < 5) {
+        gcode += incluirComentarios ? 'G0 Z5 ; Levanta fresa para posição segura (rampa)\n' : 'G0 Z5\n';
+        estado.posZ = 5;
+      }
 
-          // Desce até superfície
-          if (estado.posZ !== 0) {
-            const feedCmd = estado.feedrate !== plungeRate ? ` F${plungeRate}` : '';
-            gcode += incluirComentarios
-              ? `G1 Z0${feedCmd} ; Desce até a superfície\n`
-              : `G1 Z0${feedCmd}\n`;
-            estado.posZ = 0;
-            if (feedCmd) estado.feedrate = plungeRate;
-          }
-
-          // Rampa de entrada
-          const feedCmd = estado.feedrate !== plungeRate ? ` F${plungeRate}` : '';
-          gcode += incluirComentarios
-            ? `G1 X${formatarNumero(peca.x)} Y${formatarNumero(peca.y)} Z${formatarNumero(z)}${feedCmd} ; Rampa de entrada\n`
-            : `G1 X${formatarNumero(peca.x)} Y${formatarNumero(peca.y)} Z${formatarNumero(z)}${feedCmd}\n`;
-          estado.posX = peca.x;
-          estado.posY = peca.y;
-          estado.posZ = z;
-          if (feedCmd) estado.feedrate = plungeRate;
-        } else {
-          // Sem espaço para rampa
-          if (incluirComentarios) {
-            gcode += `; AVISO: Sem espaco para rampa\n`;
-          }
-
-          // Posiciona XY se necessário
-          if (estado.posX !== peca.x || estado.posY !== peca.y) {
-            if (estado.posZ < 5) {
-              gcode += incluirComentarios ? 'G0 Z5 ; Levanta fresa para posição segura\n' : 'G0 Z5\n';
-              estado.posZ = 5;
-            }
-            gcode += incluirComentarios
-              ? `G0 X${formatarNumero(peca.x)} Y${formatarNumero(peca.y)} ; Posiciona no início da peça\n`
-              : `G0 X${formatarNumero(peca.x)} Y${formatarNumero(peca.y)}\n`;
-            estado.posX = peca.x;
-            estado.posY = peca.y;
-          }
-
-          // Mergulho vertical
-          const feedCmd = estado.feedrate !== plungeRate ? ` F${plungeRate}` : '';
-          gcode += incluirComentarios
-            ? `G1 Z${formatarNumero(z)}${feedCmd} ; Mergulho vertical\n`
-            : `G1 Z${formatarNumero(z)}${feedCmd}\n`;
-          estado.posZ = z;
-          if (feedCmd) estado.feedrate = plungeRate;
+      // Posiciona no início da peça (se necessário)
+      if (estado.posX !== peca.x || estado.posY !== peca.y) {
+        // Se NÃO vai usar rampa E ainda não levantou, levanta agora
+        if (!usarRampaNestaPeca && estado.posZ < 5) {
+          gcode += incluirComentarios ? 'G0 Z5 ; Levanta fresa para posição segura\n' : 'G0 Z5\n';
+          estado.posZ = 5;
         }
-      } else {
-        // Mergulho vertical tradicional
-
-        // Posiciona XY se necessário
-        if (estado.posX !== peca.x || estado.posY !== peca.y) {
-          if (estado.posZ < 5) {
-            gcode += incluirComentarios ? 'G0 Z5 ; Levanta fresa para posição segura\n' : 'G0 Z5\n';
-            estado.posZ = 5;
-          }
-          gcode += incluirComentarios
-            ? `G0 X${formatarNumero(peca.x)} Y${formatarNumero(peca.y)} ; Posiciona no início da peça\n`
-            : `G0 X${formatarNumero(peca.x)} Y${formatarNumero(peca.y)}\n`;
-          estado.posX = peca.x;
-          estado.posY = peca.y;
-        }
-
-        // Desce
-        const feedCmd = estado.feedrate !== plungeRate ? ` F${plungeRate}` : '';
         gcode += incluirComentarios
-          ? `G1 Z${formatarNumero(z)}${feedCmd} ; Mergulho vertical\n`
+          ? `G0 X${formatarNumero(peca.x)} Y${formatarNumero(peca.y)} ; Posiciona no início da peça\n`
+          : `G0 X${formatarNumero(peca.x)} Y${formatarNumero(peca.y)}\n`;
+        estado.posX = peca.x;
+        estado.posY = peca.y;
+      }
+
+      if (!usarRampaNestaPeca) {
+        // MERGULHO VERTICAL (sem rampa OU peça pequena OU config = primeira-passada)
+        const feedCmd = estado.feedrate !== plungeRate ? ` F${plungeRate}` : '';
+        let comentario = '; Mergulho vertical';
+
+        if (!ehPrimeiraPassada && usarRampa && aplicarRampaEm === 'primeira-passada') {
+          comentario = '; Mergulho vertical (rampa apenas na 1ª passada)';
+        } else if (!direcao.temEspaco) {
+          comentario = `; Mergulho vertical (peca < ${formatarNumero(distanciaRampa, 0)}mm)`;
+        }
+
+        gcode += incluirComentarios
+          ? `G1 Z${formatarNumero(z)}${feedCmd} ${comentario}\n`
           : `G1 Z${formatarNumero(z)}${feedCmd}\n`;
         estado.posZ = z;
         if (feedCmd) estado.feedrate = plungeRate;
       }
+      // NOTA: Se usar rampa, o mergulho acontece DURANTE o primeiro lado (ver abaixo)
 
       // === CORTE DO RETÂNGULO ===
       const x1 = peca.x + peca.largura;
       const y1 = peca.y + peca.altura;
 
-      // Lado inferior
-      const feedCmd1 = estado.feedrate !== feedrate ? ` F${feedrate}` : '';
-      gcode += incluirComentarios
-        ? `G1 X${formatarNumero(x1)} Y${formatarNumero(peca.y)}${feedCmd1} ; Corta lado inferior\n`
-        : `G1 X${formatarNumero(x1)} Y${formatarNumero(peca.y)}${feedCmd1}\n`;
-      estado.posX = x1;
-      if (feedCmd1) estado.feedrate = feedrate;
+      if (usarRampaNestaPeca) {
+        // RAMPA INTERNA: Rampa acontece DURANTE o primeiro lado
+        const feedrateRampa = calcularFeedrateRampa(feedrate, anguloRampa);
 
-      // Lado direito
-      gcode += incluirComentarios
-        ? `G1 X${formatarNumero(x1)} Y${formatarNumero(y1)} ; Corta lado direito\n`
-        : `G1 X${formatarNumero(x1)} Y${formatarNumero(y1)}\n`;
-      estado.posY = y1;
+        if (direcao.usarLadoX) {
+          // Rampa no lado INFERIOR (X): desce enquanto move em +X
+          const xRampa = peca.x + distanciaRampa;
+          const feedCmd = estado.feedrate !== feedrateRampa ? ` F${feedrateRampa}` : '';
 
-      // Lado superior
-      gcode += incluirComentarios
-        ? `G1 X${formatarNumero(peca.x)} Y${formatarNumero(y1)} ; Corta lado superior\n`
-        : `G1 X${formatarNumero(peca.x)} Y${formatarNumero(y1)}\n`;
-      estado.posX = peca.x;
+          gcode += incluirComentarios
+            ? `G1 X${formatarNumero(xRampa)} Y${formatarNumero(peca.y)} Z${formatarNumero(z)}${feedCmd} ; Rampa interna (lado inferior)\n`
+            : `G1 X${formatarNumero(xRampa)} Y${formatarNumero(peca.y)} Z${formatarNumero(z)}${feedCmd}\n`;
+          estado.posX = xRampa;
+          estado.posZ = z;
+          if (feedCmd) estado.feedrate = feedrateRampa;
 
-      // Lado esquerdo (fecha)
-      gcode += incluirComentarios
-        ? `G1 X${formatarNumero(peca.x)} Y${formatarNumero(peca.y)} ; Corta lado esquerdo (fecha o retângulo)\n`
-        : `G1 X${formatarNumero(peca.x)} Y${formatarNumero(peca.y)}\n`;
-      estado.posY = peca.y;
+          // Completa o resto do lado inferior (se houver)
+          if (xRampa < x1) {
+            const feedCmd2 = estado.feedrate !== feedrate ? ` F${feedrate}` : '';
+            gcode += incluirComentarios
+              ? `G1 X${formatarNumero(x1)} Y${formatarNumero(peca.y)}${feedCmd2} ; Completa lado inferior\n`
+              : `G1 X${formatarNumero(x1)} Y${formatarNumero(peca.y)}${feedCmd2}\n`;
+            estado.posX = x1;
+            if (feedCmd2) estado.feedrate = feedrate;
+          }
+
+          // Lado direito
+          gcode += incluirComentarios
+            ? `G1 X${formatarNumero(x1)} Y${formatarNumero(y1)} ; Corta lado direito\n`
+            : `G1 X${formatarNumero(x1)} Y${formatarNumero(y1)}\n`;
+          estado.posY = y1;
+
+          // Lado superior
+          gcode += incluirComentarios
+            ? `G1 X${formatarNumero(peca.x)} Y${formatarNumero(y1)} ; Corta lado superior\n`
+            : `G1 X${formatarNumero(peca.x)} Y${formatarNumero(y1)}\n`;
+          estado.posX = peca.x;
+
+          // Lado esquerdo (fecha)
+          gcode += incluirComentarios
+            ? `G1 X${formatarNumero(peca.x)} Y${formatarNumero(peca.y)} ; Corta lado esquerdo (fecha o retângulo)\n`
+            : `G1 X${formatarNumero(peca.x)} Y${formatarNumero(peca.y)}\n`;
+          estado.posY = peca.y;
+
+        } else {
+          // Rampa no lado ESQUERDO (Y): desce enquanto move em +Y
+          const yRampa = peca.y + distanciaRampa;
+          const feedCmd = estado.feedrate !== feedrateRampa ? ` F${feedrateRampa}` : '';
+
+          gcode += incluirComentarios
+            ? `G1 X${formatarNumero(peca.x)} Y${formatarNumero(yRampa)} Z${formatarNumero(z)}${feedCmd} ; Rampa interna (lado esquerdo)\n`
+            : `G1 X${formatarNumero(peca.x)} Y${formatarNumero(yRampa)} Z${formatarNumero(z)}${feedCmd}\n`;
+          estado.posY = yRampa;
+          estado.posZ = z;
+          if (feedCmd) estado.feedrate = feedrateRampa;
+
+          // Completa o resto do lado esquerdo (se houver)
+          if (yRampa < y1) {
+            const feedCmd2 = estado.feedrate !== feedrate ? ` F${feedrate}` : '';
+            gcode += incluirComentarios
+              ? `G1 X${formatarNumero(peca.x)} Y${formatarNumero(y1)}${feedCmd2} ; Completa lado esquerdo\n`
+              : `G1 X${formatarNumero(peca.x)} Y${formatarNumero(y1)}${feedCmd2}\n`;
+            estado.posY = y1;
+            if (feedCmd2) estado.feedrate = feedrate;
+          }
+
+          // Lado superior
+          gcode += incluirComentarios
+            ? `G1 X${formatarNumero(x1)} Y${formatarNumero(y1)} ; Corta lado superior\n`
+            : `G1 X${formatarNumero(x1)} Y${formatarNumero(y1)}\n`;
+          estado.posX = x1;
+
+          // Lado direito
+          gcode += incluirComentarios
+            ? `G1 X${formatarNumero(x1)} Y${formatarNumero(peca.y)} ; Corta lado direito\n`
+            : `G1 X${formatarNumero(x1)} Y${formatarNumero(peca.y)}\n`;
+          estado.posY = peca.y;
+
+          // Lado inferior (fecha)
+          gcode += incluirComentarios
+            ? `G1 X${formatarNumero(peca.x)} Y${formatarNumero(peca.y)} ; Corta lado inferior (fecha o retângulo)\n`
+            : `G1 X${formatarNumero(peca.x)} Y${formatarNumero(peca.y)}\n`;
+          estado.posX = peca.x;
+        }
+
+      } else {
+        // SEM RAMPA: Corte tradicional (4 lados na ordem normal)
+
+        // Lado inferior
+        const feedCmd1 = estado.feedrate !== feedrate ? ` F${feedrate}` : '';
+        gcode += incluirComentarios
+          ? `G1 X${formatarNumero(x1)} Y${formatarNumero(peca.y)}${feedCmd1} ; Corta lado inferior\n`
+          : `G1 X${formatarNumero(x1)} Y${formatarNumero(peca.y)}${feedCmd1}\n`;
+        estado.posX = x1;
+        if (feedCmd1) estado.feedrate = feedrate;
+
+        // Lado direito
+        gcode += incluirComentarios
+          ? `G1 X${formatarNumero(x1)} Y${formatarNumero(y1)} ; Corta lado direito\n`
+          : `G1 X${formatarNumero(x1)} Y${formatarNumero(y1)}\n`;
+        estado.posY = y1;
+
+        // Lado superior
+        gcode += incluirComentarios
+          ? `G1 X${formatarNumero(peca.x)} Y${formatarNumero(y1)} ; Corta lado superior\n`
+          : `G1 X${formatarNumero(peca.x)} Y${formatarNumero(y1)}\n`;
+        estado.posX = peca.x;
+
+        // Lado esquerdo (fecha)
+        gcode += incluirComentarios
+          ? `G1 X${formatarNumero(peca.x)} Y${formatarNumero(peca.y)} ; Corta lado esquerdo (fecha o retângulo)\n`
+          : `G1 X${formatarNumero(peca.x)} Y${formatarNumero(peca.y)}\n`;
+        estado.posY = peca.y;
+      }
     }
 
     // Cancela compensação UMA VEZ após todas as passadas

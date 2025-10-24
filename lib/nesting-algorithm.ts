@@ -14,7 +14,20 @@ export function cabeNoEspaco(
   chapaAltura: number,
   espacamento: number
 ): boolean {
+  // Verifica se a peça ultrapassa os limites da chapa
   if (nova.x + nova.largura > chapaLargura || nova.y + nova.altura > chapaAltura) {
+    return false;
+  }
+
+  // Verifica se a peça respeita o espaçamento mínimo das bordas
+  // (como se as bordas fossem "outras peças")
+  if (nova.x < espacamento || nova.y < espacamento) {
+    return false;
+  }
+
+  // Verifica espaçamento da borda direita e superior
+  if (nova.x + nova.largura + espacamento > chapaLargura ||
+      nova.y + nova.altura + espacamento > chapaAltura) {
     return false;
   }
 
@@ -103,7 +116,20 @@ export function cabeNoEspaco(
   chapaAltura: number,
   espacamento: number
 ): boolean {
+  // Verifica se a peça ultrapassa os limites da chapa
   if (nova.x + nova.largura > chapaLargura || nova.y + nova.altura > chapaAltura) {
+    return false;
+  }
+
+  // Verifica se a peça respeita o espaçamento mínimo das bordas
+  // (como se as bordas fossem "outras peças")
+  if (nova.x < espacamento || nova.y < espacamento) {
+    return false;
+  }
+
+  // Verifica espaçamento da borda direita e superior
+  if (nova.x + nova.largura + espacamento > chapaLargura ||
+      nova.y + nova.altura + espacamento > chapaAltura) {
     return false;
   }
 
@@ -203,7 +229,7 @@ export function posicionarPecasGreedy(
 
   const posicionadas: PecaPosicionada[] = [];
   const naoCouberam: Peca[] = [];
-  const candidatos: Candidato[] = [{ x: 0, y: 0 }];
+  const candidatos: Candidato[] = [{ x: espacamento, y: espacamento }];
 
   for (const peca of pecasOrdenadas) {
     let colocado = false;
@@ -281,9 +307,9 @@ export function posicionarPecasShelf(
   const shelves: Shelf[] = [];
 
   let shelfAtual: Shelf = {
-    y: 0,
+    y: espacamento,
     altura: 0,
-    xAtual: 0,
+    xAtual: espacamento,
   };
 
   for (const peca of pecasOrdenadas) {
@@ -325,7 +351,7 @@ export function posicionarPecasShelf(
         };
 
         posicionadas.push({
-          x: 0,
+          x: espacamento,
           y: novaShelfY,
           largura: peca.largura,
           altura: peca.altura,
@@ -382,7 +408,7 @@ export function posicionarPecasGuillotine(
 
   // Lista de retângulos livres disponíveis
   const retangulosLivres: Retangulo[] = [
-    { x: 0, y: 0, largura: chapaLargura, altura: chapaAltura }
+    { x: espacamento, y: espacamento, largura: chapaLargura - 2 * espacamento, altura: chapaAltura - 2 * espacamento }
   ];
 
   for (const peca of pecasOrdenadas) {

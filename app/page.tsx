@@ -12,12 +12,14 @@ import { PreviewCanvas } from "@/components/PreviewCanvas";
 import { VisualizadorGCode } from "@/components/VisualizadorGCode";
 import { SeletorNesting } from "@/components/SeletorNesting";
 import { DicionarioGCode } from "@/components/DicionarioGCode";
+import { ValidationDialog } from "@/components/ValidationDialog";
 import { Button } from "@/components/ui/button";
 import { Menu } from "lucide-react";
 import type { Peca, PecaPosicionada, ConfiguracoesChapa as TConfigChapa, ConfiguracoesCorte as TConfigCorte, ConfiguracoesFerramenta as TConfigFerramenta, FormatoArquivo, VersaoGerador, TempoEstimado } from "@/types";
 import { posicionarPecas, type MetodoNesting } from "@/lib/nesting-algorithm";
 import { gerarGCode, downloadGCode, calcularTempoEstimado } from "@/lib/gcode-generator";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
+import { validateConfigurations, type ValidationResult, type ValidationField } from "@/lib/validator";
 
 export default function Home() {
   // Estados com localStorage
@@ -37,6 +39,7 @@ export default function Home() {
     spindleSpeed: 18000,
     usarRampa: false,
     anguloRampa: 3,
+    aplicarRampaEm: 'primeira-passada',
   });
 
   const [configFerramenta, setConfigFerramenta] = useLocalStorage<TConfigFerramenta>('cnc-config-ferramenta', {
@@ -59,6 +62,11 @@ export default function Home() {
   const [tempoEstimado, setTempoEstimado] = useState<TempoEstimado | undefined>();
   const [secaoAtiva, setSecaoAtiva] = useLocalStorage<SecaoSidebar>('cnc-secao-ativa', 'chapa');
   const [sidebarMobileOpen, setSidebarMobileOpen] = useState(false);
+
+  // Estados de validação
+  const [validationDialogOpen, setValidationDialogOpen] = useState(false);
+  const [validationResult, setValidationResult] = useState<ValidationResult>({ valid: true, errors: [], warnings: [] });
+  const [errorFields, setErrorFields] = useState<ValidationField[]>([]);
 
   // Atualiza posicionamento sempre que algo mudar
   useEffect(() => {
@@ -90,7 +98,8 @@ export default function Home() {
     configCorte.plungeRate,
     configCorte.rapidsSpeed,
     configCorte.usarRampa,
-    configCorte.anguloRampa
+    configCorte.anguloRampa,
+    configCorte.aplicarRampaEm
   ]);
 
   // Handler para adicionar peça
@@ -113,11 +122,35 @@ export default function Home() {
 
   // Handler para visualizar G-code
   const handleVisualizarGCode = () => {
-    if (pecas.length === 0) {
-      alert("Adicione ao menos uma peça antes de visualizar o G-code.");
+    // Executa validações
+    const result = validateConfigurations(
+      configChapa,
+      configCorte,
+      configFerramenta,
+      pecasPosicionadas
+    );
+
+    // Extrai campos com erro para destacar na UI
+    const fieldsWithErrors: ValidationField[] = [
+      ...result.errors.map(e => e.field),
+      ...result.warnings.map(w => w.field)
+    ];
+    setErrorFields(fieldsWithErrors);
+
+    // Se houver erros ou avisos, mostra dialog
+    if (!result.valid || result.warnings.length > 0) {
+      setValidationResult(result);
+      setValidationDialogOpen(true);
       return;
     }
 
+    // Tudo OK, abre visualizador
+    setVisualizadorAberto(true);
+  };
+
+  // Handler para continuar mesmo com avisos
+  const handleContinueWithWarnings = () => {
+    setValidationDialogOpen(false);
     setVisualizadorAberto(true);
   };
 
@@ -207,10 +240,18 @@ export default function Home() {
                     <ConfiguracoesChapa config={configChapa} onChange={setConfigChapa} />
                   )}
                   {secaoAtiva === 'corte' && (
-                    <ConfiguracoesCorte config={configCorte} onChange={setConfigCorte} />
+                    <ConfiguracoesCorte
+                      config={configCorte}
+                      onChange={setConfigCorte}
+                      errorFields={errorFields}
+                    />
                   )}
                   {secaoAtiva === 'ferramenta' && (
-                    <ConfiguracoesFerramenta config={configFerramenta} onChange={setConfigFerramenta} />
+                    <ConfiguracoesFerramenta
+                      config={configFerramenta}
+                      onChange={setConfigFerramenta}
+                      errorFields={errorFields}
+                    />
                   )}
                   {secaoAtiva === 'nesting' && (
                     <SeletorNesting
@@ -246,6 +287,14 @@ export default function Home() {
           </div>
         </div>
       </div>
+
+      {/* Validation Dialog */}
+      <ValidationDialog
+        open={validationDialogOpen}
+        onOpenChange={setValidationDialogOpen}
+        validation={validationResult}
+        onContinue={validationResult.errors.length === 0 ? handleContinueWithWarnings : undefined}
+      />
 
       {/* G-Code Viewer */}
       <VisualizadorGCode
