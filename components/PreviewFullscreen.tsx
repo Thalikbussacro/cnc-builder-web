@@ -1,9 +1,32 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import type { PecaPosicionada } from "@/types";
+
+// Hook para detectar tema dark
+function useIsDark() {
+  const [isDark, setIsDark] = useState(false);
+
+  useEffect(() => {
+    const checkTheme = () => {
+      setIsDark(document.documentElement.classList.contains('dark'));
+    };
+
+    checkTheme();
+
+    const observer = new MutationObserver(checkTheme);
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class'],
+    });
+
+    return () => observer.disconnect();
+  }, []);
+
+  return isDark;
+}
 
 type PreviewFullscreenProps = {
   open: boolean;
@@ -13,14 +36,18 @@ type PreviewFullscreenProps = {
   pecasPosicionadas: PecaPosicionada[];
 };
 
-// Cores temáticas quentes (mesmas do PreviewCanvas)
+// Cores terrosas/quentes profissionais (mesmas do PreviewCanvas)
 const CORES = [
-  { hex: "#F5B642", nome: "Amarelo" },
-  { hex: "#E67E22", nome: "Laranja" },
-  { hex: "#D35400", nome: "Laranja Escuro" },
-  { hex: "#F39C12", nome: "Dourado" },
-  { hex: "#E59866", nome: "Pêssego" },
-  { hex: "#DC7633", nome: "Terracota" },
+  { hex: "#D2691E", nome: "Chocolate" },
+  { hex: "#A0522D", nome: "Siena" },
+  { hex: "#8B4513", nome: "Mogno" },
+  { hex: "#CD853F", nome: "Peru" },
+  { hex: "#DEB887", nome: "Madeira Clara" },
+  { hex: "#D2691E", nome: "Cobre" },
+  { hex: "#B8860B", nome: "Ouro Escuro" },
+  { hex: "#8B7355", nome: "Bege Escuro" },
+  { hex: "#A0826D", nome: "Taupe" },
+  { hex: "#6B4423", nome: "Castanho" },
 ];
 
 export function PreviewFullscreen({
@@ -31,6 +58,7 @@ export function PreviewFullscreen({
   pecasPosicionadas,
 }: PreviewFullscreenProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const isDark = useIsDark();
 
   useEffect(() => {
     if (!open) return;
@@ -62,14 +90,21 @@ export function PreviewFullscreen({
     const offsetX = margem;
     const offsetY = margem;
 
+    // Cores adaptadas ao tema
+    const corFundo = isDark ? "#1a1a1a" : "#f5f5f5";
+    const corChapa = isDark ? "#2a2a2a" : "#e5e5e5";
+    const corGrid = isDark ? "#3a3a3a" : "#d0d0d0";
+    const corBorda = isDark ? "#555555" : "#999999";
+    const corTexto = isDark ? "#888888" : "#333333";
+
     // Limpa canvas
-    ctx.fillStyle = "#1a1613";
+    ctx.fillStyle = corFundo;
     ctx.fillRect(0, 0, canvasWidth, canvasHeight);
 
     // Grid
-    ctx.strokeStyle = "#2d2520";
+    ctx.strokeStyle = corGrid;
     ctx.lineWidth = 1;
-    ctx.setLineDash([3, 3]);
+    ctx.setLineDash([4, 4]);
 
     const gridSpacing = 100;
     for (let x = 0; x <= chapaLargura; x += gridSpacing) {
@@ -89,14 +124,14 @@ export function PreviewFullscreen({
     ctx.setLineDash([]);
 
     // Desenha chapa
-    ctx.fillStyle = "#d4a574";
+    ctx.fillStyle = corChapa;
     ctx.fillRect(offsetX, offsetY, chapaLargura * escala, chapaAltura * escala);
-    ctx.strokeStyle = "#c89858";
+    ctx.strokeStyle = corBorda;
     ctx.lineWidth = 4;
     ctx.strokeRect(offsetX, offsetY, chapaLargura * escala, chapaAltura * escala);
 
     // Indicador de origem
-    ctx.fillStyle = "#2d251f";
+    ctx.fillStyle = corTexto;
     ctx.font = "bold 14px sans-serif";
     ctx.textAlign = "left";
     ctx.textBaseline = "top";
@@ -114,13 +149,13 @@ export function PreviewFullscreen({
       const h = peca.altura * escala;
 
       // Sombra (reduzida para peças ignoradas)
-      ctx.shadowColor = ignorada ? "rgba(0, 0, 0, 0.08)" : "rgba(0, 0, 0, 0.2)";
-      ctx.shadowBlur = ignorada ? 3 : 6;
+      ctx.shadowColor = ignorada ? "rgba(0, 0, 0, 0.1)" : "rgba(0, 0, 0, 0.25)";
+      ctx.shadowBlur = ignorada ? 3 : 8;
       ctx.shadowOffsetX = 3;
       ctx.shadowOffsetY = 3;
 
-      // Preenche (mais transparente para ignoradas)
-      ctx.fillStyle = ignorada ? cor + "20" : cor + "40";
+      // Preenche com cor mais sólida (mais transparente para ignoradas)
+      ctx.fillStyle = ignorada ? cor + "30" : cor + "CC";
       ctx.fillRect(x, y, w, h);
 
       // Remove sombra
@@ -129,19 +164,20 @@ export function PreviewFullscreen({
       ctx.shadowOffsetX = 0;
       ctx.shadowOffsetY = 0;
 
-      // Borda (tracejada para ignoradas)
+      // Borda mais escura (tracejada para ignoradas)
       if (ignorada) {
         ctx.setLineDash([8, 8]);
         ctx.strokeStyle = cor;
+        ctx.lineWidth = 3;
       } else {
         ctx.setLineDash([]);
         ctx.strokeStyle = cor;
+        ctx.lineWidth = 3.5;
       }
       ctx.strokeRect(x, y, w, h);
       ctx.setLineDash([]);
 
-      // Texto
-      ctx.fillStyle = ignorada ? cor + "aa" : cor;
+      // Texto - BRANCO COM STROKE PRETO
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
 
@@ -155,12 +191,30 @@ export function PreviewFullscreen({
       ctx.font = `bold ${fontSize}px sans-serif`;
       const numeroPeca = peca.numeroOriginal || index + 1;
       const nomePeca = peca.nome || `#${numeroPeca}`;
+
+      // Stroke preto para maior contraste
+      ctx.strokeStyle = ignorada ? "#666666" : "#000000";
+      ctx.lineWidth = ignorada ? 3 : 4;
+      ctx.strokeText(nomePeca, centerX, centerY - fontSize / 2);
+
+      // Texto branco por cima
+      ctx.fillStyle = ignorada ? "#cccccc" : "#ffffff";
       ctx.fillText(nomePeca, centerX, centerY - fontSize / 2);
 
       // Dimensões (se houver espaço)
       if (w > 100 && h > 60) {
         ctx.font = `${fontSize * 0.7}px sans-serif`;
-        ctx.fillStyle = ignorada ? cor + "99" : cor + "dd";
+
+        // Stroke preto para dimensões
+        ctx.lineWidth = ignorada ? 2 : 3.5;
+        ctx.strokeText(
+          `${peca.largura.toFixed(0)}×${peca.altura.toFixed(0)}mm`,
+          centerX,
+          centerY + fontSize / 2 + 4
+        );
+
+        // Texto branco
+        ctx.fillStyle = ignorada ? "#aaaaaa" : "#ffffff";
         ctx.fillText(
           `${peca.largura.toFixed(0)}×${peca.altura.toFixed(0)}mm`,
           centerX,
@@ -171,7 +225,7 @@ export function PreviewFullscreen({
     }, 50); // 50ms delay
 
     return () => clearTimeout(timeoutId);
-  }, [open, chapaLargura, chapaAltura, pecasPosicionadas]);
+  }, [open, chapaLargura, chapaAltura, pecasPosicionadas, isDark]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -181,11 +235,11 @@ export function PreviewFullscreen({
             <DialogTitle>Pré-visualização em tela cheia</DialogTitle>
           </VisuallyHidden>
         </DialogHeader>
-        <div className="flex-1 flex items-center justify-center overflow-auto rounded-lg bg-slate-900 dark:bg-black p-3">
+        <div className="flex-1 flex items-center justify-center overflow-auto rounded-lg bg-slate-100 dark:bg-neutral-900 p-3">
           <canvas
             ref={canvasRef}
-            className="border-2 border-amber-600/30 rounded shadow-2xl"
-            style={{ backgroundColor: "#1a1613" }}
+            className="border-2 border-slate-400/50 dark:border-neutral-700/50 rounded shadow-2xl"
+            style={{ backgroundColor: isDark ? "#1a1a1a" : "#f5f5f5" }}
           />
         </div>
       </DialogContent>
