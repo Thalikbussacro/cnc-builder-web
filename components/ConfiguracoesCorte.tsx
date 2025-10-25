@@ -20,7 +20,9 @@ type ConfiguracoesCorteProps = {
 
 export function ConfiguracoesCorte({ config, onChange, errorFields = [] }: ConfiguracoesCorteProps) {
   // Calcula número de passadas baseado na profundidade total e profundidade por passada
-  const numeroPassadas = Math.ceil(config.profundidade / config.profundidadePorPassada) || 1;
+  // Usa Math.round com tolerância para evitar erros de arredondamento
+  // Ex: 16/5.33 = 3.0018... deve mostrar 3, não 4
+  const numeroPassadas = Math.round(config.profundidade / config.profundidadePorPassada + 0.01) || 1;
 
   // Estado local para permitir edição do campo de passadas
   const [numeroPassadasTemp, setNumeroPassadasTemp] = React.useState<string>(numeroPassadas.toString());
