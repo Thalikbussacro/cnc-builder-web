@@ -49,7 +49,7 @@ export default function Home() {
     numeroFerramenta: 1,
   });
 
-  const [metodoNesting, setMetodoNesting] = useLocalStorage<MetodoNesting>('cnc-metodo-nesting', 'greedy');
+  const [metodoNesting, setMetodoNesting] = useLocalStorage<MetodoNesting>('cnc-metodo-nesting', 'shelf');
 
   const [versaoGerador, setVersaoGerador] = useLocalStorage<VersaoGerador>('cnc-versao-gerador', 'v2');
 
@@ -285,6 +285,7 @@ export default function Home() {
                       espacamento={configCorte.espacamento}
                       pecasExistentes={pecas}
                       metodoNesting={metodoNesting}
+                      margemBorda={configCorte.usarMesmoEspacamentoBorda ? undefined : configCorte.margemBorda}
                     />
                   )}
                 </div>

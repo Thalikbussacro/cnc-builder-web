@@ -17,6 +17,7 @@ type CadastroPecaProps = {
   espacamento: number;
   pecasExistentes: Peca[];
   metodoNesting?: MetodoNesting;
+  margemBorda?: number;
 };
 
 export function CadastroPeca({
@@ -25,6 +26,7 @@ export function CadastroPeca({
   espacamento,
   pecasExistentes,
   metodoNesting = 'greedy',
+  margemBorda,
 }: CadastroPecaProps) {
   const [largura, setLargura] = useState<string>("500");
   const [altura, setAltura] = useState<string>("500");
@@ -82,7 +84,8 @@ export function CadastroPeca({
       configChapa.largura,
       configChapa.altura,
       espacamento,
-      metodoNesting
+      metodoNesting,
+      margemBorda
     );
 
     // Verifica quantas das novas peças couberam
