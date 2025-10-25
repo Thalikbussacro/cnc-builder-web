@@ -491,7 +491,8 @@ export function gerarGCodeV2(
     // === PASSADAS ===
     for (let j = 1; j <= numPassadas; j++) {
       const z = -Math.min(j * profundidadePorPassada, profundidade);
-      const profundidadePassada = Math.abs(z);
+      const zAnterior = j === 1 ? 0 : -Math.min((j - 1) * profundidadePorPassada, profundidade);
+      const profundidadeIncrementalPassada = Math.abs(z - zAnterior); // Profundidade DESTA passada apenas
       const ehPrimeiraPassada = j === 1;
 
       if (incluirComentarios) {
@@ -501,7 +502,8 @@ export function gerarGCodeV2(
       // === ENTRADA (RAMPA OU VERTICAL) ===
       // RAMPA INTERNA: Rampa acontece DURANTE o primeiro lado do corte
       // Não precisa de espaço externo, usa a própria peça!
-      const distanciaRampa = calcularDistanciaRampa(profundidadePassada, anguloRampa);
+      // IMPORTANTE: Calcula rampa baseado na profundidade INCREMENTAL (não acumulada)
+      const distanciaRampa = calcularDistanciaRampa(profundidadeIncrementalPassada, anguloRampa);
       const direcao = determinarDirecaoRampa(peca, chapaL, chapaA, distanciaRampa);
 
       // Decide se usa rampa baseado na configuração do usuário
