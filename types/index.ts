@@ -59,6 +59,8 @@ export type ConfiguracoesCorte = {
   usarRampa: boolean;               // Ativar rampa de entrada ao invés de mergulho vertical
   anguloRampa: number;              // graus - Ângulo da rampa de entrada (2° a 5°)
   aplicarRampaEm: AplicarRampaEm;   // Quando aplicar rampa (primeira ou todas passadas)
+  usarMesmoEspacamentoBorda: boolean; // Se true, usa o mesmo espaçamento entre peças para margem de borda
+  margemBorda: number;              // mm - Margem de borda customizada (só usado se usarMesmoEspacamentoBorda = false)
 };
 
 /**
