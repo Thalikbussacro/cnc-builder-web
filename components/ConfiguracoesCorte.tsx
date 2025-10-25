@@ -1,5 +1,6 @@
 "use client";
 
+import * as React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -20,6 +21,14 @@ type ConfiguracoesCorteProps = {
 export function ConfiguracoesCorte({ config, onChange, errorFields = [] }: ConfiguracoesCorteProps) {
   // Calcula número de passadas baseado na profundidade total e profundidade por passada
   const numeroPassadas = Math.ceil(config.profundidade / config.profundidadePorPassada) || 1;
+
+  // Estado local para permitir edição do campo de passadas
+  const [numeroPassadasTemp, setNumeroPassadasTemp] = React.useState<string>(numeroPassadas.toString());
+
+  // Atualiza o valor temporário quando o cálculo mudar (usuário mudou prof. ou prof./passada)
+  React.useEffect(() => {
+    setNumeroPassadasTemp(numeroPassadas.toString());
+  }, [numeroPassadas]);
 
   const handleChange = (campo: keyof ConfiguracoesCorte, valor: string) => {
     // Permite string vazia temporariamente (enquanto usuário digita)
@@ -47,10 +56,20 @@ export function ConfiguracoesCorte({ config, onChange, errorFields = [] }: Confi
   };
 
   const handleNumeroPassadasChange = (valor: string) => {
-    if (valor === '') return;
+    // Atualiza estado temporário (permite digitar livremente)
+    setNumeroPassadasTemp(valor);
+
+    // Permite string vazia temporariamente (enquanto usuário digita)
+    if (valor === '') {
+      return;
+    }
 
     const numero = parseInt(valor);
-    if (isNaN(numero) || numero <= 0) return;
+
+    // Só valida se for um número válido e maior que zero
+    if (isNaN(numero) || numero <= 0) {
+      return; // Ignora valores inválidos mas mantém no campo
+    }
 
     // Ao mudar número de passadas, recalcula profundidade por passada
     const novaProfundidadePorPassada = Math.round((config.profundidade / numero) * 100) / 100;
@@ -104,7 +123,7 @@ export function ConfiguracoesCorte({ config, onChange, errorFields = [] }: Confi
             <Input
               id="numeroPassadas"
               type="number"
-              value={numeroPassadas}
+              value={numeroPassadasTemp}
               onChange={(e) => handleNumeroPassadasChange(e.target.value)}
               min="1"
               step="1"
