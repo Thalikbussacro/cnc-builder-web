@@ -702,10 +702,16 @@ export function gerarGCodeV2(
     // === OVERLAP DA RAMPA ===
     // Se usou rampa em qualquer passada, precisa re-cortar TODO o lado da rampa na profundidade final
     // Isso elimina completamente a "rampa de material" que ficaria nas passadas intermediárias
+    //
+    // IMPORTANTE: Precisamos verificar TODAS as passadas para encontrar a maior distância de rampa,
+    // pois a última passada pode ter profundidade menor (ex: 4mm) e rampa mais curta que as anteriores (6mm)
     if (usarRampa && numPassadas > 1) {
-      const zFinal = -Math.min(numPassadas * profundidadePorPassada, profundidade);
-      const distanciaRampaFinal = calcularDistanciaRampa(profundidadePorPassada, anguloRampa);
-      const direcaoRampa = determinarDirecaoRampa(peca, distanciaRampaFinal);
+      const zFinal = -profundidade; // Profundidade final absoluta
+
+      // Calcula a MAIOR distância de rampa possível (sempre usando profundidadePorPassada completo)
+      // Isso garante que cobrimos a área da rampa mais longa
+      const distanciaRampaMaior = calcularDistanciaRampa(profundidadePorPassada, anguloRampa);
+      const direcaoRampa = determinarDirecaoRampa(peca, distanciaRampaMaior);
 
       // Só faz overlap se houve espaço para rampa (se não teve, não há área não cortada)
       if (direcaoRampa.temEspaco) {
@@ -735,22 +741,51 @@ export function gerarGCodeV2(
           gcode += `\n; OVERLAP: Re-corta lado COMPLETO da rampa na profundidade final (${formatarNumero(-zFinal)}mm)\n`;
         }
 
+        // CORREÇÃO: O overlap precisa começar do ponto inicial e ir até o final do lado
+        // Isso garante que toda a área da rampa (inclusive a mais longa) seja coberta
+        const feedrateNormal = feedrate;
+        const feedCmd = estado.feedrate !== feedrateNormal ? ` F${feedrateNormal}` : '';
+
         if (direcaoRampa.usarLadoX) {
-          // Overlap no lado X (inferior): re-corta do início ATÉ O FINAL do lado
+          // Overlap no lado X (inferior): re-corta TODO o lado desde o início
+          // Primeiro, garante que está na posição inicial do lado da rampa
+          if (estado.posX !== x0Overlap || estado.posY !== y0Overlap) {
+            // Reposiciona para o início do lado (sem levantar a fresa - já está na profundidade correta)
+            gcode += incluirComentarios
+              ? `G1 X${formatarNumero(x0Overlap)} Y${formatarNumero(y0Overlap)} ; Reposiciona para início do overlap\n`
+              : `G1 X${formatarNumero(x0Overlap)} Y${formatarNumero(y0Overlap)}\n`;
+            estado.posX = x0Overlap;
+            estado.posY = y0Overlap;
+          }
+
+          // Agora re-corta TODO o lado inferior na profundidade final
           gcode += incluirComentarios
-            ? `G1 X${formatarNumero(x1Overlap)} Y${formatarNumero(y0Overlap)} Z${formatarNumero(zFinal)} ; Overlap lado inferior completo\n`
-            : `G1 X${formatarNumero(x1Overlap)} Y${formatarNumero(y0Overlap)} Z${formatarNumero(zFinal)}\n`;
+            ? `G1 X${formatarNumero(x1Overlap)} Y${formatarNumero(y0Overlap)} Z${formatarNumero(zFinal)}${feedCmd} ; Overlap lado inferior completo\n`
+            : `G1 X${formatarNumero(x1Overlap)} Y${formatarNumero(y0Overlap)} Z${formatarNumero(zFinal)}${feedCmd}\n`;
           estado.posX = x1Overlap;
           estado.posY = y0Overlap;
           estado.posZ = zFinal;
+          if (feedCmd) estado.feedrate = feedrateNormal;
         } else {
-          // Overlap no lado Y (esquerdo): re-corta do início ATÉ O FINAL do lado
+          // Overlap no lado Y (esquerdo): re-corta TODO o lado desde o início
+          // Primeiro, garante que está na posição inicial do lado da rampa
+          if (estado.posX !== x0Overlap || estado.posY !== y0Overlap) {
+            // Reposiciona para o início do lado (sem levantar a fresa - já está na profundidade correta)
+            gcode += incluirComentarios
+              ? `G1 X${formatarNumero(x0Overlap)} Y${formatarNumero(y0Overlap)} ; Reposiciona para início do overlap\n`
+              : `G1 X${formatarNumero(x0Overlap)} Y${formatarNumero(y0Overlap)}\n`;
+            estado.posX = x0Overlap;
+            estado.posY = y0Overlap;
+          }
+
+          // Agora re-corta TODO o lado esquerdo na profundidade final
           gcode += incluirComentarios
-            ? `G1 X${formatarNumero(x0Overlap)} Y${formatarNumero(y1Overlap)} Z${formatarNumero(zFinal)} ; Overlap lado esquerdo completo\n`
-            : `G1 X${formatarNumero(x0Overlap)} Y${formatarNumero(y1Overlap)} Z${formatarNumero(zFinal)}\n`;
+            ? `G1 X${formatarNumero(x0Overlap)} Y${formatarNumero(y1Overlap)} Z${formatarNumero(zFinal)}${feedCmd} ; Overlap lado esquerdo completo\n`
+            : `G1 X${formatarNumero(x0Overlap)} Y${formatarNumero(y1Overlap)} Z${formatarNumero(zFinal)}${feedCmd}\n`;
           estado.posX = x0Overlap;
           estado.posY = y1Overlap;
           estado.posZ = zFinal;
+          if (feedCmd) estado.feedrate = feedrateNormal;
         }
       }
     }
