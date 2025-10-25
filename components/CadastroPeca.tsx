@@ -28,8 +28,8 @@ export function CadastroPeca({
   metodoNesting = 'greedy',
   margemBorda,
 }: CadastroPecaProps) {
-  const [largura, setLargura] = useState<string>("500");
-  const [altura, setAltura] = useState<string>("500");
+  const [largura, setLargura] = useState<string>("");
+  const [altura, setAltura] = useState<string>("");
   const [tipoCorte, setTipoCorte] = useState<TipoCorte>("externo");
   const [nome, setNome] = useState<string>("");
   const [quantidade, setQuantidade] = useState<string>("1");
@@ -150,7 +150,7 @@ export function CadastroPeca({
         <div className="grid grid-cols-3 gap-2 sm:gap-3">
           <div className="space-y-1.5">
             <Label htmlFor="pecaLargura" className="text-xs sm:text-sm">
-              Largura (mm)
+              Comprimento (Eixo X)
             </Label>
             <Input
               id="pecaLargura"
@@ -161,11 +161,12 @@ export function CadastroPeca({
               min="0"
               step="10"
               className="h-9 sm:h-10"
+              placeholder="mm"
             />
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="pecaAltura" className="text-xs sm:text-sm">
-              Altura (mm)
+              Largura (Eixo Y)
             </Label>
             <Input
               id="pecaAltura"
@@ -176,6 +177,7 @@ export function CadastroPeca({
               min="0"
               step="10"
               className="h-9 sm:h-10"
+              placeholder="mm"
             />
           </div>
           <div className="space-y-1.5">
