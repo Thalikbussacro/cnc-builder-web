@@ -75,8 +75,6 @@ function calcularFeedrateRampa(feedrateNormal: number, anguloGraus: number): num
  */
 function determinarDirecaoRampa(
   peca: PecaPosicionada,
-  chapaLargura: number,
-  chapaAltura: number,
   distanciaRampa: number
 ): { deltaX: number; deltaY: number; temEspaco: boolean; usarLadoX: boolean } {
   // Verifica se a LARGURA da peça comporta a rampa (no eixo X)
@@ -504,7 +502,7 @@ export function gerarGCodeV2(
       // Não precisa de espaço externo, usa a própria peça!
       // IMPORTANTE: Calcula rampa baseado na profundidade INCREMENTAL (não acumulada)
       const distanciaRampa = calcularDistanciaRampa(profundidadeIncrementalPassada, anguloRampa);
-      const direcao = determinarDirecaoRampa(peca, chapaL, chapaA, distanciaRampa);
+      const direcao = determinarDirecaoRampa(peca, distanciaRampa);
 
       // Decide se usa rampa baseado na configuração do usuário
       const deveUsarRampaNaPassada = aplicarRampaEm === 'todas-passadas' || ehPrimeiraPassada;
@@ -702,13 +700,12 @@ export function gerarGCodeV2(
     }
 
     // === OVERLAP DA RAMPA ===
-    // Se usou rampa em qualquer passada, precisa re-cortar a área da rampa na profundidade final
-    // Isso garante que toda a peça seja cortada na profundidade total
+    // Se usou rampa em qualquer passada, precisa re-cortar TODO o lado da rampa na profundidade final
+    // Isso elimina completamente a "rampa de material" que ficaria nas passadas intermediárias
     if (usarRampa && numPassadas > 1) {
       const zFinal = -Math.min(numPassadas * profundidadePorPassada, profundidade);
-      // Calcula distância da rampa (sempre baseado na profundidade por passada, não acumulada)
       const distanciaRampaFinal = calcularDistanciaRampa(profundidadePorPassada, anguloRampa);
-      const direcaoRampa = determinarDirecaoRampa(peca, chapaL, chapaA, distanciaRampaFinal);
+      const direcaoRampa = determinarDirecaoRampa(peca, distanciaRampaFinal);
 
       // Só faz overlap se houve espaço para rampa (se não teve, não há área não cortada)
       if (direcaoRampa.temEspaco) {
@@ -735,26 +732,24 @@ export function gerarGCodeV2(
         }
 
         if (incluirComentarios) {
-          gcode += `\n; OVERLAP: Re-corta area da rampa na profundidade final (${formatarNumero(-zFinal)}mm)\n`;
+          gcode += `\n; OVERLAP: Re-corta lado COMPLETO da rampa na profundidade final (${formatarNumero(-zFinal)}mm)\n`;
         }
 
         if (direcaoRampa.usarLadoX) {
-          // Overlap no lado X (inferior)
-          const xOverlapFim = x0Overlap + distanciaRampaFinal;
+          // Overlap no lado X (inferior): re-corta do início ATÉ O FINAL do lado
           gcode += incluirComentarios
-            ? `G1 X${formatarNumero(xOverlapFim)} Y${formatarNumero(y0Overlap)} Z${formatarNumero(zFinal)} ; Overlap lado inferior\n`
-            : `G1 X${formatarNumero(xOverlapFim)} Y${formatarNumero(y0Overlap)} Z${formatarNumero(zFinal)}\n`;
-          estado.posX = xOverlapFim;
+            ? `G1 X${formatarNumero(x1Overlap)} Y${formatarNumero(y0Overlap)} Z${formatarNumero(zFinal)} ; Overlap lado inferior completo\n`
+            : `G1 X${formatarNumero(x1Overlap)} Y${formatarNumero(y0Overlap)} Z${formatarNumero(zFinal)}\n`;
+          estado.posX = x1Overlap;
           estado.posY = y0Overlap;
           estado.posZ = zFinal;
         } else {
-          // Overlap no lado Y (esquerdo)
-          const yOverlapFim = y0Overlap + distanciaRampaFinal;
+          // Overlap no lado Y (esquerdo): re-corta do início ATÉ O FINAL do lado
           gcode += incluirComentarios
-            ? `G1 X${formatarNumero(x0Overlap)} Y${formatarNumero(yOverlapFim)} Z${formatarNumero(zFinal)} ; Overlap lado esquerdo\n`
-            : `G1 X${formatarNumero(x0Overlap)} Y${formatarNumero(yOverlapFim)} Z${formatarNumero(zFinal)}\n`;
+            ? `G1 X${formatarNumero(x0Overlap)} Y${formatarNumero(y1Overlap)} Z${formatarNumero(zFinal)} ; Overlap lado esquerdo completo\n`
+            : `G1 X${formatarNumero(x0Overlap)} Y${formatarNumero(y1Overlap)} Z${formatarNumero(zFinal)}\n`;
           estado.posX = x0Overlap;
-          estado.posY = yOverlapFim;
+          estado.posY = y1Overlap;
           estado.posZ = zFinal;
         }
       }
