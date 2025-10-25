@@ -88,6 +88,16 @@ export function CadastroPeca({
       margemBorda
     );
 
+    // VALIDAÇÃO CRÍTICA: Verifica se TODAS as peças existentes continuam posicionadas
+    const existentesIds = new Set(pecasExistentes.map(p => p.id));
+    const existentesPosicionadas = resultado.posicionadas.filter(p => existentesIds.has(p.id)).length;
+
+    if (existentesPosicionadas < pecasExistentes.length) {
+      const perdidas = pecasExistentes.length - existentesPosicionadas;
+      setErro(`Não há espaço suficiente. Adicionar estas peças removeria ${perdidas} peça(s) existente(s).`);
+      return;
+    }
+
     // Verifica quantas das novas peças couberam
     const novasIds = new Set(novasPecas.map(p => p.id));
     const couberamCount = resultado.posicionadas.filter(p => novasIds.has(p.id)).length;
