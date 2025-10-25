@@ -245,7 +245,10 @@ export function gerarGCodeV2(
       }
     }
 
-    const numPassadas = Math.ceil(profundidade / profundidadePorPassada);
+    // Calcula número de passadas com tolerância para arredondamento
+    // Adiciona pequena tolerância (0.01) para evitar erros de ponto flutuante
+    // Ex: 16/5.33 = 3.0018... deve ser 3, não 4
+    const numPassadas = Math.round(profundidade / profundidadePorPassada + 0.01);
     gcode += `; Passadas: ${numPassadas} x ${formatarNumero(profundidadePorPassada)}mm\n`;
 
     // SEGURANÇA: Verificar profundidade vs espessura da chapa
@@ -398,7 +401,10 @@ export function gerarGCodeV2(
     gcode += '\n';
   }
 
-  const numPassadas = Math.ceil(profundidade / profundidadePorPassada);
+  // Calcula número de passadas com tolerância para arredondamento
+  // Adiciona pequena tolerância (0.01) para evitar erros de ponto flutuante
+  // Ex: 16/5.33 = 3.0018... deve ser 3, não 4
+  const numPassadas = Math.round(profundidade / profundidadePorPassada + 0.01);
 
   // === INICIALIZAÇÃO ===
   gcode += incluirComentarios ? 'G21 ; Define unidades em milímetros\n' : 'G21\n';
