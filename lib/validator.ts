@@ -310,48 +310,64 @@ export function validateConfigurations(
   // Validação de rampa vs tamanho das peças
   if (configCorte.usarRampa && pecasPosicionadas.length > 0) {
     const anguloRadianos = (configCorte.anguloRampa * Math.PI) / 180;
+    // Calcula distância necessária por passada (não acumulada)
     const distanciaRampaNecessaria = configCorte.profundidadePorPassada / Math.tan(anguloRadianos);
 
     let pecasPequenas = 0;
+    const pecasProblematicas: { nome: string; largura: number; altura: number }[] = [];
+
     pecasPosicionadas.forEach(peca => {
       const larguraSuficiente = peca.largura >= distanciaRampaNecessaria;
       const alturaSuficiente = peca.altura >= distanciaRampaNecessaria;
       if (!larguraSuficiente && !alturaSuficiente) {
         pecasPequenas++;
+        pecasProblematicas.push({
+          nome: peca.nome || `Peça ${pecasPequenas}`,
+          largura: peca.largura,
+          altura: peca.altura,
+        });
       }
     });
 
     if (pecasPequenas === pecasPosicionadas.length) {
-      // Todas as peças são pequenas - ERRO
+      // Todas as peças são pequenas - ERRO CRÍTICO
+      const detalhes = pecasProblematicas.length <= 3
+        ? pecasProblematicas.map(p => `${p.nome} (${Math.round(p.largura)}x${Math.round(p.altura)}mm)`).join(', ')
+        : `${pecasPequenas} peças`;
+
       errors.push({
         severity: 'error',
         field: 'rampa',
-        message: VALIDATION_MESSAGES.todasPecasPequenasParaRampa,
-        suggestion: `Aumente o tamanho das peças, reduza o ângulo da rampa, ou desative a rampa`,
-        currentValue: `Rampa requer ${Math.round(distanciaRampaNecessaria)}mm mínimo`,
-        recommendedValue: `Ângulo de 2° ou desative a rampa`,
+        message: `TODAS as peças são pequenas demais para rampa de ${configCorte.anguloRampa}°`,
+        suggestion: `Com ângulo de ${configCorte.anguloRampa}°, cada passada de ${configCorte.profundidadePorPassada}mm precisa de ${Math.round(distanciaRampaNecessaria)}mm de espaço. Opções:\n1) Aumentar tamanho das peças\n2) Reduzir ângulo (ex: 2°)\n3) Desativar rampa`,
+        currentValue: `${detalhes} - todas < ${Math.round(distanciaRampaNecessaria)}mm`,
+        recommendedValue: `Peças com ${Math.round(distanciaRampaNecessaria)}mm+ OU ângulo 2°`,
       });
     } else if (pecasPequenas > 0) {
       // Algumas peças são pequenas
-      // Se configurado para "todas passadas", isso é PROBLEMA sério
+      const detalhes = pecasProblematicas.length <= 3
+        ? pecasProblematicas.map(p => `${p.nome} (${Math.round(p.largura)}x${Math.round(p.altura)}mm)`).join(', ')
+        : `${pecasPequenas} peças`;
+
+      // Se configurado para "todas passadas", isso é ERRO (inconsistência)
       if (configCorte.aplicarRampaEm === 'todas-passadas') {
         errors.push({
           severity: 'error',
           field: 'rampa',
-          message: `Configurado "rampa em todas passadas" mas ${pecasPequenas} de ${pecasPosicionadas.length} peças não comportam rampa`,
-          suggestion: `Você configurou para usar rampa em TODAS as passadas, mas ${pecasPequenas} peça(s) usarão mergulho vertical. Escolha uma opção:`,
-          currentValue: `${pecasPequenas} peças menores que ${Math.round(distanciaRampaNecessaria)}mm`,
-          recommendedValue: `1) Mudar para "Primeira passada" | 2) Aumentar peças | 3) Reduzir ângulo`,
+          message: `Configuração inconsistente: ${pecasPequenas} de ${pecasPosicionadas.length} peças usarão mergulho vertical`,
+          suggestion: `Você configurou "rampa em TODAS as passadas", mas ${pecasPequenas} peça(s) são pequenas demais para rampa de ${configCorte.anguloRampa}°.\n\nCada passada de ${configCorte.profundidadePorPassada}mm requer ${Math.round(distanciaRampaNecessaria)}mm de espaço.\n\nEscolha uma solução:\n1) Mudar para "Primeira passada apenas"\n2) Aumentar tamanho das peças\n3) Reduzir ângulo para 2°`,
+          currentValue: `${detalhes} - menores que ${Math.round(distanciaRampaNecessaria)}mm`,
+          recommendedValue: `Mudar para "Primeira passada" ou ajustar parâmetros`,
         });
       } else {
         // Se configurado para "primeira passada", é apenas AVISO
         warnings.push({
           severity: 'warning',
           field: 'rampa',
-          message: `${pecasPequenas} de ${pecasPosicionadas.length} peças usarão mergulho vertical na 1ª passada`,
-          suggestion: `Peças menores que ${Math.round(distanciaRampaNecessaria)}mm (largura ou altura) não comportam rampa`,
-          currentValue: `${pecasPequenas} peças pequenas`,
-          recommendedValue: `Aumente tamanho das peças ou reduza ângulo da rampa`,
+          message: `${pecasPequenas} de ${pecasPosicionadas.length} peças usarão mergulho vertical`,
+          suggestion: `Peças menores que ${Math.round(distanciaRampaNecessaria)}mm (largura ou altura) não comportam rampa de ${configCorte.anguloRampa}°. Elas usarão mergulho vertical na 1ª passada.`,
+          currentValue: `${detalhes}`,
+          recommendedValue: `Aumentar peças para ${Math.round(distanciaRampaNecessaria)}mm+ ou reduzir ângulo`,
         });
       }
     }
