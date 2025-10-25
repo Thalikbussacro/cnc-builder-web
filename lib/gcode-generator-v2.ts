@@ -441,33 +441,51 @@ export function gerarGCodeV2(
       gcode += `; === ${nomePeca} (${formatarNumero(peca.largura, 0)}x${formatarNumero(peca.altura, 0)}mm) ===\n`;
     }
 
-    // Posiciona no início da peça (se necessário)
-    if (estado.posX !== peca.x || estado.posY !== peca.y) {
+    // === COMPENSAÇÃO DE FERRAMENTA (MANUAL) ===
+    // IMPORTANTE: Compensação calculada matematicamente no código (não usa G41/G42)
+    // Isso garante compatibilidade com todos os controladores CNC
+    const raioFerramenta = ferramenta ? ferramenta.diametro / 2 : 0;
+    const aplicarOffset = ferramenta && peca.tipoCorte !== 'na-linha';
+
+    // Calcula ponto inicial (com compensação se aplicável)
+    let pontoInicialX = peca.x;
+    let pontoInicialY = peca.y;
+
+    if (aplicarOffset) {
+      const offset = raioFerramenta;
+      if (peca.tipoCorte === 'externo') {
+        // Corte externo: começa ANTES do canto (expandido)
+        pontoInicialX -= offset;
+        pontoInicialY -= offset;
+      } else if (peca.tipoCorte === 'interno') {
+        // Corte interno: começa DEPOIS do canto (reduzido)
+        pontoInicialX += offset;
+        pontoInicialY += offset;
+      }
+    }
+
+    if (aplicarOffset && incluirComentarios) {
+      if (peca.tipoCorte === 'externo') {
+        gcode += `; COMPENSACAO MANUAL: Corte externo - caminho expandido +${formatarNumero(raioFerramenta)}mm (raio da fresa)\n`;
+        gcode += `; Peca final: ${formatarNumero(peca.largura)}x${formatarNumero(peca.altura)}mm (dimensoes exatas)\n`;
+      } else if (peca.tipoCorte === 'interno') {
+        gcode += `; COMPENSACAO MANUAL: Corte interno - caminho reduzido -${formatarNumero(raioFerramenta)}mm (raio da fresa)\n`;
+        gcode += `; Furo final: ${formatarNumero(peca.largura)}x${formatarNumero(peca.altura)}mm (dimensoes exatas)\n`;
+      }
+    }
+
+    // Posiciona no início da peça (com compensação aplicada)
+    if (estado.posX !== pontoInicialX || estado.posY !== pontoInicialY) {
       // SEGURANÇA: Garante Z em posição segura antes de movimento XY
       if (estado.posZ < 5) {
         gcode += incluirComentarios ? 'G0 Z5 ; Levanta fresa para posição segura\n' : 'G0 Z5\n';
         estado.posZ = 5;
       }
       gcode += incluirComentarios
-        ? `G0 X${formatarNumero(peca.x)} Y${formatarNumero(peca.y)} ; Posiciona no início da peça\n`
-        : `G0 X${formatarNumero(peca.x)} Y${formatarNumero(peca.y)}\n`;
-      estado.posX = peca.x;
-      estado.posY = peca.y;
-    }
-
-    // Ativa compensação UMA VEZ para a peça inteira
-    const aplicarOffset = ferramenta && peca.tipoCorte !== 'na-linha';
-    if (aplicarOffset) {
-      if (peca.tipoCorte === 'externo') {
-        gcode += incluirComentarios
-          ? `G41 D${ferramenta!.numeroFerramenta} ; Ativa compensação esquerda (externo)\n`
-          : `G41 D${ferramenta!.numeroFerramenta}\n`;
-      } else if (peca.tipoCorte === 'interno') {
-        gcode += incluirComentarios
-          ? `G42 D${ferramenta!.numeroFerramenta} ; Ativa compensação direita (interno)\n`
-          : `G42 D${ferramenta!.numeroFerramenta}\n`;
-      }
-      estado.compensacaoAtiva = true;
+        ? `G0 X${formatarNumero(pontoInicialX)} Y${formatarNumero(pontoInicialY)} ; Posiciona no início da peça\n`
+        : `G0 X${formatarNumero(pontoInicialX)} Y${formatarNumero(pontoInicialY)}\n`;
+      estado.posX = pontoInicialX;
+      estado.posY = pontoInicialY;
     }
 
     // === PASSADAS ===
@@ -497,18 +515,18 @@ export function gerarGCodeV2(
         estado.posZ = 5;
       }
 
-      // Posiciona no início da peça (se necessário)
-      if (estado.posX !== peca.x || estado.posY !== peca.y) {
+      // Posiciona no início da peça (se necessário) - usa ponto inicial com compensação
+      if (estado.posX !== pontoInicialX || estado.posY !== pontoInicialY) {
         // Se NÃO vai usar rampa E ainda não levantou, levanta agora
         if (!usarRampaNestaPeca && estado.posZ < 5) {
           gcode += incluirComentarios ? 'G0 Z5 ; Levanta fresa para posição segura\n' : 'G0 Z5\n';
           estado.posZ = 5;
         }
         gcode += incluirComentarios
-          ? `G0 X${formatarNumero(peca.x)} Y${formatarNumero(peca.y)} ; Posiciona no início da peça\n`
-          : `G0 X${formatarNumero(peca.x)} Y${formatarNumero(peca.y)}\n`;
-        estado.posX = peca.x;
-        estado.posY = peca.y;
+          ? `G0 X${formatarNumero(pontoInicialX)} Y${formatarNumero(pontoInicialY)} ; Posiciona no início da peça\n`
+          : `G0 X${formatarNumero(pontoInicialX)} Y${formatarNumero(pontoInicialY)}\n`;
+        estado.posX = pontoInicialX;
+        estado.posY = pontoInicialY;
       }
 
       if (!usarRampaNestaPeca) {
@@ -531,8 +549,29 @@ export function gerarGCodeV2(
       // NOTA: Se usar rampa, o mergulho acontece DURANTE o primeiro lado (ver abaixo)
 
       // === CORTE DO RETÂNGULO ===
-      const x1 = peca.x + peca.largura;
-      const y1 = peca.y + peca.altura;
+      // Coordenadas base (dimensões programadas da peça)
+      let x0 = peca.x;
+      let y0 = peca.y;
+      let x1 = peca.x + peca.largura;
+      let y1 = peca.y + peca.altura;
+
+      // Aplica compensação manual nas coordenadas
+      if (aplicarOffset) {
+        const offset = raioFerramenta;
+        if (peca.tipoCorte === 'externo') {
+          // Corte EXTERNO: expande o caminho para FORA (peça final = dimensões programadas)
+          x0 -= offset;
+          y0 -= offset;
+          x1 += offset;
+          y1 += offset;
+        } else if (peca.tipoCorte === 'interno') {
+          // Corte INTERNO: reduz o caminho para DENTRO (furo final = dimensões programadas)
+          x0 += offset;
+          y0 += offset;
+          x1 -= offset;
+          y1 -= offset;
+        }
+      }
 
       if (usarRampaNestaPeca) {
         // RAMPA INTERNA: Rampa acontece DURANTE o primeiro lado
@@ -540,12 +579,12 @@ export function gerarGCodeV2(
 
         if (direcao.usarLadoX) {
           // Rampa no lado INFERIOR (X): desce enquanto move em +X
-          const xRampa = peca.x + distanciaRampa;
+          const xRampa = x0 + distanciaRampa;
           const feedCmd = estado.feedrate !== feedrateRampa ? ` F${feedrateRampa}` : '';
 
           gcode += incluirComentarios
-            ? `G1 X${formatarNumero(xRampa)} Y${formatarNumero(peca.y)} Z${formatarNumero(z)}${feedCmd} ; Rampa interna (lado inferior)\n`
-            : `G1 X${formatarNumero(xRampa)} Y${formatarNumero(peca.y)} Z${formatarNumero(z)}${feedCmd}\n`;
+            ? `G1 X${formatarNumero(xRampa)} Y${formatarNumero(y0)} Z${formatarNumero(z)}${feedCmd} ; Rampa interna (lado inferior)\n`
+            : `G1 X${formatarNumero(xRampa)} Y${formatarNumero(y0)} Z${formatarNumero(z)}${feedCmd}\n`;
           estado.posX = xRampa;
           estado.posZ = z;
           if (feedCmd) estado.feedrate = feedrateRampa;
@@ -554,8 +593,8 @@ export function gerarGCodeV2(
           if (xRampa < x1) {
             const feedCmd2 = estado.feedrate !== feedrate ? ` F${feedrate}` : '';
             gcode += incluirComentarios
-              ? `G1 X${formatarNumero(x1)} Y${formatarNumero(peca.y)}${feedCmd2} ; Completa lado inferior\n`
-              : `G1 X${formatarNumero(x1)} Y${formatarNumero(peca.y)}${feedCmd2}\n`;
+              ? `G1 X${formatarNumero(x1)} Y${formatarNumero(y0)}${feedCmd2} ; Completa lado inferior\n`
+              : `G1 X${formatarNumero(x1)} Y${formatarNumero(y0)}${feedCmd2}\n`;
             estado.posX = x1;
             if (feedCmd2) estado.feedrate = feedrate;
           }
@@ -568,24 +607,24 @@ export function gerarGCodeV2(
 
           // Lado superior
           gcode += incluirComentarios
-            ? `G1 X${formatarNumero(peca.x)} Y${formatarNumero(y1)} ; Corta lado superior\n`
-            : `G1 X${formatarNumero(peca.x)} Y${formatarNumero(y1)}\n`;
-          estado.posX = peca.x;
+            ? `G1 X${formatarNumero(x0)} Y${formatarNumero(y1)} ; Corta lado superior\n`
+            : `G1 X${formatarNumero(x0)} Y${formatarNumero(y1)}\n`;
+          estado.posX = x0;
 
           // Lado esquerdo (fecha)
           gcode += incluirComentarios
-            ? `G1 X${formatarNumero(peca.x)} Y${formatarNumero(peca.y)} ; Corta lado esquerdo (fecha o retângulo)\n`
-            : `G1 X${formatarNumero(peca.x)} Y${formatarNumero(peca.y)}\n`;
-          estado.posY = peca.y;
+            ? `G1 X${formatarNumero(x0)} Y${formatarNumero(y0)} ; Corta lado esquerdo (fecha o retângulo)\n`
+            : `G1 X${formatarNumero(x0)} Y${formatarNumero(y0)}\n`;
+          estado.posY = y0;
 
         } else {
           // Rampa no lado ESQUERDO (Y): desce enquanto move em +Y
-          const yRampa = peca.y + distanciaRampa;
+          const yRampa = y0 + distanciaRampa;
           const feedCmd = estado.feedrate !== feedrateRampa ? ` F${feedrateRampa}` : '';
 
           gcode += incluirComentarios
-            ? `G1 X${formatarNumero(peca.x)} Y${formatarNumero(yRampa)} Z${formatarNumero(z)}${feedCmd} ; Rampa interna (lado esquerdo)\n`
-            : `G1 X${formatarNumero(peca.x)} Y${formatarNumero(yRampa)} Z${formatarNumero(z)}${feedCmd}\n`;
+            ? `G1 X${formatarNumero(x0)} Y${formatarNumero(yRampa)} Z${formatarNumero(z)}${feedCmd} ; Rampa interna (lado esquerdo)\n`
+            : `G1 X${formatarNumero(x0)} Y${formatarNumero(yRampa)} Z${formatarNumero(z)}${feedCmd}\n`;
           estado.posY = yRampa;
           estado.posZ = z;
           if (feedCmd) estado.feedrate = feedrateRampa;
@@ -594,8 +633,8 @@ export function gerarGCodeV2(
           if (yRampa < y1) {
             const feedCmd2 = estado.feedrate !== feedrate ? ` F${feedrate}` : '';
             gcode += incluirComentarios
-              ? `G1 X${formatarNumero(peca.x)} Y${formatarNumero(y1)}${feedCmd2} ; Completa lado esquerdo\n`
-              : `G1 X${formatarNumero(peca.x)} Y${formatarNumero(y1)}${feedCmd2}\n`;
+              ? `G1 X${formatarNumero(x0)} Y${formatarNumero(y1)}${feedCmd2} ; Completa lado esquerdo\n`
+              : `G1 X${formatarNumero(x0)} Y${formatarNumero(y1)}${feedCmd2}\n`;
             estado.posY = y1;
             if (feedCmd2) estado.feedrate = feedrate;
           }
@@ -608,15 +647,15 @@ export function gerarGCodeV2(
 
           // Lado direito
           gcode += incluirComentarios
-            ? `G1 X${formatarNumero(x1)} Y${formatarNumero(peca.y)} ; Corta lado direito\n`
-            : `G1 X${formatarNumero(x1)} Y${formatarNumero(peca.y)}\n`;
-          estado.posY = peca.y;
+            ? `G1 X${formatarNumero(x1)} Y${formatarNumero(y0)} ; Corta lado direito\n`
+            : `G1 X${formatarNumero(x1)} Y${formatarNumero(y0)}\n`;
+          estado.posY = y0;
 
           // Lado inferior (fecha)
           gcode += incluirComentarios
-            ? `G1 X${formatarNumero(peca.x)} Y${formatarNumero(peca.y)} ; Corta lado inferior (fecha o retângulo)\n`
-            : `G1 X${formatarNumero(peca.x)} Y${formatarNumero(peca.y)}\n`;
-          estado.posX = peca.x;
+            ? `G1 X${formatarNumero(x0)} Y${formatarNumero(y0)} ; Corta lado inferior (fecha o retângulo)\n`
+            : `G1 X${formatarNumero(x0)} Y${formatarNumero(y0)}\n`;
+          estado.posX = x0;
         }
 
       } else {
@@ -625,8 +664,8 @@ export function gerarGCodeV2(
         // Lado inferior
         const feedCmd1 = estado.feedrate !== feedrate ? ` F${feedrate}` : '';
         gcode += incluirComentarios
-          ? `G1 X${formatarNumero(x1)} Y${formatarNumero(peca.y)}${feedCmd1} ; Corta lado inferior\n`
-          : `G1 X${formatarNumero(x1)} Y${formatarNumero(peca.y)}${feedCmd1}\n`;
+          ? `G1 X${formatarNumero(x1)} Y${formatarNumero(y0)}${feedCmd1} ; Corta lado inferior\n`
+          : `G1 X${formatarNumero(x1)} Y${formatarNumero(y0)}${feedCmd1}\n`;
         estado.posX = x1;
         if (feedCmd1) estado.feedrate = feedrate;
 
@@ -638,23 +677,19 @@ export function gerarGCodeV2(
 
         // Lado superior
         gcode += incluirComentarios
-          ? `G1 X${formatarNumero(peca.x)} Y${formatarNumero(y1)} ; Corta lado superior\n`
-          : `G1 X${formatarNumero(peca.x)} Y${formatarNumero(y1)}\n`;
-        estado.posX = peca.x;
+          ? `G1 X${formatarNumero(x0)} Y${formatarNumero(y1)} ; Corta lado superior\n`
+          : `G1 X${formatarNumero(x0)} Y${formatarNumero(y1)}\n`;
+        estado.posX = x0;
 
         // Lado esquerdo (fecha)
         gcode += incluirComentarios
-          ? `G1 X${formatarNumero(peca.x)} Y${formatarNumero(peca.y)} ; Corta lado esquerdo (fecha o retângulo)\n`
-          : `G1 X${formatarNumero(peca.x)} Y${formatarNumero(peca.y)}\n`;
-        estado.posY = peca.y;
+          ? `G1 X${formatarNumero(x0)} Y${formatarNumero(y0)} ; Corta lado esquerdo (fecha o retângulo)\n`
+          : `G1 X${formatarNumero(x0)} Y${formatarNumero(y0)}\n`;
+        estado.posY = y0;
       }
     }
 
-    // Cancela compensação UMA VEZ após todas as passadas
-    if (estado.compensacaoAtiva) {
-      gcode += incluirComentarios ? 'G40 ; Cancela compensação de raio\n' : 'G40\n';
-      estado.compensacaoAtiva = false;
-    }
+    // Nota: Compensação manual não requer cancelamento (não usa G41/G42/G40)
 
     // Sobe Z uma vez ao final da peça
     gcode += incluirComentarios ? 'G0 Z5 ; Levanta fresa após completar peça\n' : 'G0 Z5\n';
