@@ -44,7 +44,7 @@ export function ConfiguracoesChapa({ config, onChange }: ConfiguracoesChapaProps
           </div>
           <div className="space-y-1">
             <div className="flex items-center gap-1">
-              <Label htmlFor="chapaAltura">Largura (Eixo Y)</Label>
+              <Label htmlFor="chapaAltura">Altura (Eixo Y)</Label>
               <InfoTooltip
                 title={parametrosInfo.chapaAltura.title}
                 content={parametrosInfo.chapaAltura.content}
