@@ -508,25 +508,35 @@ export function gerarGCodeV2(
       const deveUsarRampaNaPassada = aplicarRampaEm === 'todas-passadas' || ehPrimeiraPassada;
       const usarRampaNestaPeca = usarRampa && deveUsarRampaNaPassada && direcao.temEspaco;
 
-      // IMPORTANTE: Se vai usar rampa, SEMPRE levantar fresa antes (mesmo que já esteja na posição XY)
-      // Isso é necessário porque rampa interna requer que a fresa esteja em Z seguro antes de começar
-      if (usarRampaNestaPeca && estado.posZ < 5) {
-        gcode += incluirComentarios ? 'G0 Z5 ; Levanta fresa para posição segura (rampa)\n' : 'G0 Z5\n';
-        estado.posZ = 5;
-      }
-
-      // Posiciona no início da peça (se necessário) - usa ponto inicial com compensação
-      if (estado.posX !== pontoInicialX || estado.posY !== pontoInicialY) {
-        // Se NÃO vai usar rampa E ainda não levantou, levanta agora
-        if (!usarRampaNestaPeca && estado.posZ < 5) {
-          gcode += incluirComentarios ? 'G0 Z5 ; Levanta fresa para posição segura\n' : 'G0 Z5\n';
+      // IMPORTANTE: Se vai usar rampa, SEMPRE levantar fresa antes de CADA passada
+      // Isso garante que a rampa comece do ponto inicial em Z seguro
+      if (usarRampaNestaPeca) {
+        // Sempre levanta se vai usar rampa (independente da posição Z atual)
+        if (estado.posZ !== 5) {
+          gcode += incluirComentarios ? 'G0 Z5 ; Levanta fresa para posição segura (rampa)\n' : 'G0 Z5\n';
           estado.posZ = 5;
         }
+        // SEMPRE reposiciona no ponto inicial para rampa (mesmo se já estiver lá)
+        // Isso garante que a rampa comece corretamente em cada passada
         gcode += incluirComentarios
-          ? `G0 X${formatarNumero(pontoInicialX)} Y${formatarNumero(pontoInicialY)} ; Posiciona no início da peça\n`
+          ? `G0 X${formatarNumero(pontoInicialX)} Y${formatarNumero(pontoInicialY)} ; Posiciona no início da peça (rampa)\n`
           : `G0 X${formatarNumero(pontoInicialX)} Y${formatarNumero(pontoInicialY)}\n`;
         estado.posX = pontoInicialX;
         estado.posY = pontoInicialY;
+      } else {
+        // SEM rampa: reposiciona apenas se necessário
+        if (estado.posX !== pontoInicialX || estado.posY !== pontoInicialY) {
+          // Levanta se ainda não levantou
+          if (estado.posZ < 5) {
+            gcode += incluirComentarios ? 'G0 Z5 ; Levanta fresa para posição segura\n' : 'G0 Z5\n';
+            estado.posZ = 5;
+          }
+          gcode += incluirComentarios
+            ? `G0 X${formatarNumero(pontoInicialX)} Y${formatarNumero(pontoInicialY)} ; Posiciona no início da peça\n`
+            : `G0 X${formatarNumero(pontoInicialX)} Y${formatarNumero(pontoInicialY)}\n`;
+          estado.posX = pontoInicialX;
+          estado.posY = pontoInicialY;
+        }
       }
 
       if (!usarRampaNestaPeca) {
