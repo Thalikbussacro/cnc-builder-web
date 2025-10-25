@@ -154,6 +154,19 @@ export function validateConfigurations(
     });
   }
 
+  // Espaçamento menor que diâmetro da fresa com peças de corte externo
+  const temPecasExternas = pecasPosicionadas.some(peca => peca.tipoCorte === 'externo');
+  if (temPecasExternas && configCorte.espacamento < configFerramenta.diametro) {
+    errors.push({
+      severity: 'error',
+      field: 'espacamento',
+      message: `Espaçamento (${configCorte.espacamento}mm) menor que diâmetro da fresa (${configFerramenta.diametro}mm)`,
+      suggestion: `Com peças de corte externo, o espaçamento deve ser maior que o diâmetro da fresa. A compensação G42 expande o caminho em ${configFerramenta.diametro / 2}mm de cada lado, causando colisões entre peças.`,
+      currentValue: `Espaçamento: ${configCorte.espacamento}mm | Fresa: Ø${configFerramenta.diametro}mm`,
+      recommendedValue: `${configFerramenta.diametro * 2}mm ou mais (ideal: 2x o diâmetro)`,
+    });
+  }
+
   // ========================================================================
   // VALIDAÇÕES DE RANGES (ERROS)
   // ========================================================================
