@@ -701,6 +701,65 @@ export function gerarGCodeV2(
       }
     }
 
+    // === OVERLAP DA RAMPA ===
+    // Se usou rampa em qualquer passada, precisa re-cortar a área da rampa na profundidade final
+    // Isso garante que toda a peça seja cortada na profundidade total
+    if (usarRampa && numPassadas > 1) {
+      const zFinal = -Math.min(numPassadas * profundidadePorPassada, profundidade);
+      // Calcula distância da rampa (sempre baseado na profundidade por passada, não acumulada)
+      const distanciaRampaFinal = calcularDistanciaRampa(profundidadePorPassada, anguloRampa);
+      const direcaoRampa = determinarDirecaoRampa(peca, chapaL, chapaA, distanciaRampaFinal);
+
+      // Só faz overlap se houve espaço para rampa (se não teve, não há área não cortada)
+      if (direcaoRampa.temEspaco) {
+        // Coordenadas base para overlap
+        let x0Overlap = peca.x;
+        let y0Overlap = peca.y;
+        let x1Overlap = peca.x + peca.largura;
+        let y1Overlap = peca.y + peca.altura;
+
+        // Aplica compensação se necessário
+        if (aplicarOffset) {
+          const offset = raioFerramenta;
+          if (peca.tipoCorte === 'externo') {
+            x0Overlap -= offset;
+            y0Overlap -= offset;
+            x1Overlap += offset;
+            y1Overlap += offset;
+          } else if (peca.tipoCorte === 'interno') {
+            x0Overlap += offset;
+            y0Overlap += offset;
+            x1Overlap -= offset;
+            y1Overlap -= offset;
+          }
+        }
+
+        if (incluirComentarios) {
+          gcode += `\n; OVERLAP: Re-corta area da rampa na profundidade final (${formatarNumero(-zFinal)}mm)\n`;
+        }
+
+        if (direcaoRampa.usarLadoX) {
+          // Overlap no lado X (inferior)
+          const xOverlapFim = x0Overlap + distanciaRampaFinal;
+          gcode += incluirComentarios
+            ? `G1 X${formatarNumero(xOverlapFim)} Y${formatarNumero(y0Overlap)} Z${formatarNumero(zFinal)} ; Overlap lado inferior\n`
+            : `G1 X${formatarNumero(xOverlapFim)} Y${formatarNumero(y0Overlap)} Z${formatarNumero(zFinal)}\n`;
+          estado.posX = xOverlapFim;
+          estado.posY = y0Overlap;
+          estado.posZ = zFinal;
+        } else {
+          // Overlap no lado Y (esquerdo)
+          const yOverlapFim = y0Overlap + distanciaRampaFinal;
+          gcode += incluirComentarios
+            ? `G1 X${formatarNumero(x0Overlap)} Y${formatarNumero(yOverlapFim)} Z${formatarNumero(zFinal)} ; Overlap lado esquerdo\n`
+            : `G1 X${formatarNumero(x0Overlap)} Y${formatarNumero(yOverlapFim)} Z${formatarNumero(zFinal)}\n`;
+          estado.posX = x0Overlap;
+          estado.posY = yOverlapFim;
+          estado.posZ = zFinal;
+        }
+      }
+    }
+
     // Nota: Compensação manual não requer cancelamento (não usa G41/G42/G40)
 
     // Sobe Z uma vez ao final da peça
