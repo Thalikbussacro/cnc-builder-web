@@ -53,7 +53,7 @@ export function ConfiguracoesCorte({ config, onChange, errorFields = [] }: Confi
     if (isNaN(numero) || numero <= 0) return;
 
     // Ao mudar número de passadas, recalcula profundidade por passada
-    const novaProfundidadePorPassada = config.profundidade / numero;
+    const novaProfundidadePorPassada = Math.round((config.profundidade / numero) * 100) / 100;
     onChange({ ...config, profundidadePorPassada: novaProfundidadePorPassada });
   };
 
