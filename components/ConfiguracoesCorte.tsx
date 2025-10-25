@@ -18,6 +18,9 @@ type ConfiguracoesCorteProps = {
 };
 
 export function ConfiguracoesCorte({ config, onChange, errorFields = [] }: ConfiguracoesCorteProps) {
+  // Calcula número de passadas baseado na profundidade total e profundidade por passada
+  const numeroPassadas = Math.ceil(config.profundidade / config.profundidadePorPassada) || 1;
+
   const handleChange = (campo: keyof ConfiguracoesCorte, valor: string) => {
     // Permite string vazia temporariamente (enquanto usuário digita)
     if (valor === '') {
@@ -43,6 +46,17 @@ export function ConfiguracoesCorte({ config, onChange, errorFields = [] }: Confi
     onChange({ ...config, [campo]: numero });
   };
 
+  const handleNumeroPassadasChange = (valor: string) => {
+    if (valor === '') return;
+
+    const numero = parseInt(valor);
+    if (isNaN(numero) || numero <= 0) return;
+
+    // Ao mudar número de passadas, recalcula profundidade por passada
+    const novaProfundidadePorPassada = config.profundidade / numero;
+    onChange({ ...config, profundidadePorPassada: novaProfundidadePorPassada });
+  };
+
   const handleCheckboxChange = (campo: keyof ConfiguracoesCorte, valor: boolean) => {
     onChange({ ...config, [campo]: valor });
   };
@@ -59,23 +73,41 @@ export function ConfiguracoesCorte({ config, onChange, errorFields = [] }: Confi
         <CardTitle>Configurações do Corte</CardTitle>
       </CardHeader>
       <CardContent className="space-y-2.5">
+        <div className="space-y-1">
+          <div className="flex items-center gap-1">
+            <Label htmlFor="profundidade">Profundidade</Label>
+            <InfoTooltip
+              title={parametrosInfo.profundidade.title}
+              content={parametrosInfo.profundidade.content}
+            />
+          </div>
+          <Input
+            id="profundidade"
+            type="number"
+            value={config.profundidade}
+            onChange={(e) => handleChange("profundidade", e.target.value)}
+            min="0.1"
+            step="1"
+            className={cn(hasError('profundidade') && "border-destructive focus-visible:ring-destructive")}
+          />
+        </div>
+
         <div className="grid grid-cols-2 gap-2.5">
           <div className="space-y-1">
             <div className="flex items-center gap-1">
-              <Label htmlFor="profundidade">Profundidade</Label>
+              <Label htmlFor="numeroPassadas">Nº Passadas</Label>
               <InfoTooltip
-                title={parametrosInfo.profundidade.title}
-                content={parametrosInfo.profundidade.content}
+                title="Número de Passadas"
+                content="Quantidade de vezes que a fresa descerá até atingir a profundidade total. Alterar este valor recalcula automaticamente a profundidade por passada."
               />
             </div>
             <Input
-              id="profundidade"
+              id="numeroPassadas"
               type="number"
-              value={config.profundidade}
-              onChange={(e) => handleChange("profundidade", e.target.value)}
-              min="0.1"
+              value={numeroPassadas}
+              onChange={(e) => handleNumeroPassadasChange(e.target.value)}
+              min="1"
               step="1"
-              className={cn(hasError('profundidade') && "border-destructive focus-visible:ring-destructive")}
             />
           </div>
           <div className="space-y-1">
@@ -100,7 +132,7 @@ export function ConfiguracoesCorte({ config, onChange, errorFields = [] }: Confi
 
         <div className="space-y-1">
           <div className="flex items-center gap-1">
-            <Label htmlFor="espacamento">Espaçamento</Label>
+            <Label htmlFor="espacamento">Espaçamento entre Peças</Label>
             <InfoTooltip
               title={parametrosInfo.espacamento.title}
               content={parametrosInfo.espacamento.content}
@@ -114,6 +146,46 @@ export function ConfiguracoesCorte({ config, onChange, errorFields = [] }: Confi
             min="1"
             step="5"
           />
+        </div>
+
+        <div className="space-y-2">
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="usarMesmoEspacamentoBorda"
+              checked={config.usarMesmoEspacamentoBorda}
+              onCheckedChange={(checked) => handleCheckboxChange("usarMesmoEspacamentoBorda", checked as boolean)}
+            />
+            <Label
+              htmlFor="usarMesmoEspacamentoBorda"
+              className="text-sm font-normal cursor-pointer"
+            >
+              Usar mesmo espaçamento para margem de borda
+            </Label>
+            <InfoTooltip
+              title="Margem de Borda"
+              content="Se marcado, utiliza o mesmo espaçamento entre peças para a distância das bordas da chapa. Se desmarcado, permite configurar margem de borda customizada."
+            />
+          </div>
+
+          {!config.usarMesmoEspacamentoBorda && (
+            <div className="space-y-1 ml-6">
+              <div className="flex items-center gap-1">
+                <Label htmlFor="margemBorda">Margem de Borda (mm)</Label>
+                <InfoTooltip
+                  title="Margem de Borda Customizada"
+                  content="Distância mínima entre as peças e as bordas da chapa. Útil quando precisa de margem maior ou menor que o espaçamento entre peças."
+                />
+              </div>
+              <Input
+                id="margemBorda"
+                type="number"
+                value={config.margemBorda}
+                onChange={(e) => handleChange("margemBorda", e.target.value)}
+                min="0"
+                step="5"
+              />
+            </div>
+          )}
         </div>
 
         <div className="pt-2 border-t">

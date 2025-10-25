@@ -40,6 +40,8 @@ export default function Home() {
     usarRampa: false,
     anguloRampa: 3,
     aplicarRampaEm: 'primeira-passada',
+    usarMesmoEspacamentoBorda: true,
+    margemBorda: 50,
   });
 
   const [configFerramenta, setConfigFerramenta] = useLocalStorage<TConfigFerramenta>('cnc-config-ferramenta', {
@@ -70,16 +72,20 @@ export default function Home() {
 
   // Atualiza posicionamento sempre que algo mudar
   useEffect(() => {
+    // Usa margem de borda customizada se configurado, senão usa espaçamento
+    const margemBorda = configCorte.usarMesmoEspacamentoBorda ? undefined : configCorte.margemBorda;
+
     const resultado = posicionarPecas(
       pecas,
       configChapa.largura,
       configChapa.altura,
       configCorte.espacamento,
-      metodoNesting
+      metodoNesting,
+      margemBorda
     );
     setPecasPosicionadas(resultado.posicionadas);
     setMetricas(resultado.metricas);
-  }, [pecas, configChapa.largura, configChapa.altura, configCorte.espacamento, metodoNesting]);
+  }, [pecas, configChapa.largura, configChapa.altura, configCorte.espacamento, configCorte.usarMesmoEspacamentoBorda, configCorte.margemBorda, metodoNesting]);
 
   // Calcula tempo estimado sempre que parâmetros mudarem
   useEffect(() => {

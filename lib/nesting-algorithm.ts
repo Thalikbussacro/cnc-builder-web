@@ -110,14 +110,19 @@ export function posicionarPecasGreedy(
 
 /**
  * Verifica se uma peça cabe em determinada posição sem colidir com outras peças
+ * @param margemBorda - Margem customizada para bordas (se undefined, usa espacamento)
  */
 export function cabeNoEspaco(
   nova: PecaPosicionada,
   lista: PecaPosicionada[],
   chapaLargura: number,
   chapaAltura: number,
-  espacamento: number
+  espacamento: number,
+  margemBorda?: number
 ): boolean {
+  // Se margemBorda não for especificada, usa o espaçamento padrão
+  const margem = margemBorda !== undefined ? margemBorda : espacamento;
+
   // Verifica se a peça ultrapassa os limites da chapa
   if (nova.x + nova.largura > chapaLargura || nova.y + nova.altura > chapaAltura) {
     return false;
@@ -125,16 +130,17 @@ export function cabeNoEspaco(
 
   // Verifica se a peça respeita o espaçamento mínimo das bordas
   // (como se as bordas fossem "outras peças")
-  if (nova.x < espacamento || nova.y < espacamento) {
+  if (nova.x < margem || nova.y < margem) {
     return false;
   }
 
   // Verifica espaçamento da borda direita e superior
-  if (nova.x + nova.largura + espacamento > chapaLargura ||
-      nova.y + nova.altura + espacamento > chapaAltura) {
+  if (nova.x + nova.largura + margem > chapaLargura ||
+      nova.y + nova.altura + margem > chapaAltura) {
     return false;
   }
 
+  // Verifica colisão com outras peças (usa espacamento entre peças, não margem)
   for (const p of lista) {
     const aEsquerda = nova.x + nova.largura + espacamento <= p.x;
     const aDireita = nova.x >= p.x + p.largura + espacamento;
@@ -223,15 +229,17 @@ export function posicionarPecasGreedy(
   pecas: Peca[],
   chapaLargura: number,
   chapaAltura: number,
-  espacamento: number
+  espacamento: number,
+  margemBorda?: number
 ): ResultadoNesting {
+  const margem = margemBorda !== undefined ? margemBorda : espacamento;
   const pecasOrdenadas = [...pecas].sort((a, b) => {
     return b.largura * b.altura - a.largura * a.altura;
   });
 
   const posicionadas: PecaPosicionada[] = [];
   const naoCouberam: Peca[] = [];
-  const candidatos: Candidato[] = [{ x: espacamento, y: espacamento }];
+  const candidatos: Candidato[] = [{ x: margem, y: margem }];
 
   for (const peca of pecasOrdenadas) {
     let colocado = false;
@@ -249,7 +257,7 @@ export function posicionarPecasGreedy(
         numeroOriginal: peca.numeroOriginal,
       };
 
-      if (cabeNoEspaco(novaPos, posicionadas, chapaLargura, chapaAltura, espacamento)) {
+      if (cabeNoEspaco(novaPos, posicionadas, chapaLargura, chapaAltura, espacamento, margemBorda)) {
         posicionadas.push(novaPos);
 
         candidatos.push({
@@ -298,8 +306,10 @@ export function posicionarPecasShelf(
   pecas: Peca[],
   chapaLargura: number,
   chapaAltura: number,
-  espacamento: number
+  espacamento: number,
+  margemBorda?: number
 ): ResultadoNesting {
+  const margem = margemBorda !== undefined ? margemBorda : espacamento;
   // Ordena peças por altura decrescente (otimização para shelf packing)
   const pecasOrdenadas = [...pecas].sort((a, b) => {
     if (b.altura !== a.altura) return b.altura - a.altura;
@@ -311,9 +321,9 @@ export function posicionarPecasShelf(
   const shelves: Shelf[] = [];
 
   let shelfAtual: Shelf = {
-    y: espacamento,
+    y: margem,
     altura: 0,
-    xAtual: espacamento,
+    xAtual: margem,
   };
 
   for (const peca of pecasOrdenadas) {
@@ -321,11 +331,11 @@ export function posicionarPecasShelf(
 
     // Tenta colocar na shelf atual
     // Verifica se cabe horizontalmente com espaçamento da borda direita
-    if (shelfAtual.xAtual + peca.largura + espacamento <= chapaLargura) {
+    if (shelfAtual.xAtual + peca.largura + margem <= chapaLargura) {
       const yPosicao = shelfAtual.y;
 
       // Verifica se cabe verticalmente com espaçamento da borda superior
-      if (yPosicao + peca.altura + espacamento <= chapaAltura) {
+      if (yPosicao + peca.altura + margem <= chapaAltura) {
         const novaPeca: PecaPosicionada = {
           x: shelfAtual.xAtual,
           y: yPosicao,
@@ -339,7 +349,7 @@ export function posicionarPecasShelf(
         };
 
         // Safety check: valida que não há colisões com peças já posicionadas
-        if (cabeNoEspaco(novaPeca, posicionadas, chapaLargura, chapaAltura, espacamento)) {
+        if (cabeNoEspaco(novaPeca, posicionadas, chapaLargura, chapaAltura, espacamento, margemBorda)) {
           posicionadas.push(novaPeca);
 
           shelfAtual.xAtual += peca.largura + espacamento;
@@ -354,11 +364,11 @@ export function posicionarPecasShelf(
       const novaShelfY = shelfAtual.y + shelfAtual.altura + espacamento;
 
       // Verifica se nova shelf cabe com espaçamento das bordas
-      if (novaShelfY + peca.altura + espacamento <= chapaAltura &&
-          espacamento + peca.largura + espacamento <= chapaLargura) {
+      if (novaShelfY + peca.altura + margem <= chapaAltura &&
+          margem + peca.largura + margem <= chapaLargura) {
 
         const novaPeca: PecaPosicionada = {
-          x: espacamento,
+          x: margem,
           y: novaShelfY,
           largura: peca.largura,
           altura: peca.altura,
@@ -370,13 +380,13 @@ export function posicionarPecasShelf(
         };
 
         // Safety check: valida que não há colisões
-        if (cabeNoEspaco(novaPeca, posicionadas, chapaLargura, chapaAltura, espacamento)) {
+        if (cabeNoEspaco(novaPeca, posicionadas, chapaLargura, chapaAltura, espacamento, margemBorda)) {
           shelves.push(shelfAtual);
 
           shelfAtual = {
             y: novaShelfY,
             altura: peca.altura,
-            xAtual: espacamento + peca.largura + espacamento,
+            xAtual: margem + peca.largura + espacamento,
           };
 
           posicionadas.push(novaPeca);
@@ -417,8 +427,10 @@ export function posicionarPecasGuillotine(
   pecas: Peca[],
   chapaLargura: number,
   chapaAltura: number,
-  espacamento: number
+  espacamento: number,
+  margemBorda?: number
 ): ResultadoNesting {
+  const margem = margemBorda !== undefined ? margemBorda : espacamento;
   // Ordena peças por área decrescente
   const pecasOrdenadas = [...pecas].sort((a, b) => {
     return b.largura * b.altura - a.largura * a.altura;
@@ -429,7 +441,7 @@ export function posicionarPecasGuillotine(
 
   // Lista de retângulos livres disponíveis
   const retangulosLivres: Retangulo[] = [
-    { x: espacamento, y: espacamento, largura: chapaLargura - 2 * espacamento, altura: chapaAltura - 2 * espacamento }
+    { x: margem, y: margem, largura: chapaLargura - 2 * margem, altura: chapaAltura - 2 * margem }
   ];
 
   for (const peca of pecasOrdenadas) {
@@ -544,6 +556,7 @@ export type MetodoNesting = 'greedy' | 'shelf' | 'guillotine';
  * @param chapaAltura - Altura da chapa
  * @param espacamento - Espaçamento mínimo entre peças
  * @param metodo - Método de nesting: 'greedy' | 'shelf' | 'guillotine'
+ * @param margemBorda - Margem customizada para bordas da chapa (se undefined, usa espacamento)
  * @returns Resultado do nesting com métricas de performance
  */
 export function posicionarPecas(
@@ -551,7 +564,8 @@ export function posicionarPecas(
   chapaLargura: number,
   chapaAltura: number,
   espacamento: number,
-  metodo: MetodoNesting = 'greedy'
+  metodo: MetodoNesting = 'greedy',
+  margemBorda?: number
 ): ResultadoNesting & { metricas: { areaUtilizada: number; eficiencia: number; tempo: number } } {
   const inicio = performance.now();
 
@@ -559,14 +573,14 @@ export function posicionarPecas(
 
   switch (metodo) {
     case 'shelf':
-      resultado = posicionarPecasShelf(pecas, chapaLargura, chapaAltura, espacamento);
+      resultado = posicionarPecasShelf(pecas, chapaLargura, chapaAltura, espacamento, margemBorda);
       break;
     case 'guillotine':
-      resultado = posicionarPecasGuillotine(pecas, chapaLargura, chapaAltura, espacamento);
+      resultado = posicionarPecasGuillotine(pecas, chapaLargura, chapaAltura, espacamento, margemBorda);
       break;
     case 'greedy':
     default:
-      resultado = posicionarPecasGreedy(pecas, chapaLargura, chapaAltura, espacamento);
+      resultado = posicionarPecasGreedy(pecas, chapaLargura, chapaAltura, espacamento, margemBorda);
       break;
   }
 
