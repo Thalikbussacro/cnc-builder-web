@@ -17,9 +17,10 @@ import { Button } from "@/components/ui/button";
 import { Menu } from "lucide-react";
 import type { Peca, PecaPosicionada, ConfiguracoesChapa as TConfigChapa, ConfiguracoesCorte as TConfigCorte, ConfiguracoesFerramenta as TConfigFerramenta, FormatoArquivo, VersaoGerador, TempoEstimado } from "@/types";
 import { posicionarPecas, type MetodoNesting } from "@/lib/nesting-algorithm";
-import { gerarGCode, downloadGCode, calcularTempoEstimado } from "@/lib/gcode-generator";
+import { downloadGCode } from "@/lib/gcode-generator";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { validateConfigurations, type ValidationResult, type ValidationField } from "@/lib/validator";
+import { ApiClient } from "@/lib/api-client";
 
 export default function Home() {
   // Estados com localStorage
@@ -64,6 +65,8 @@ export default function Home() {
   const [tempoEstimado, setTempoEstimado] = useState<TempoEstimado | undefined>();
   const [secaoAtiva, setSecaoAtiva] = useLocalStorage<SecaoSidebar>('cnc-secao-ativa', 'chapa');
   const [sidebarMobileOpen, setSidebarMobileOpen] = useState(false);
+  const [carregando, setCarregando] = useState(false);
+  const [erro, setErro] = useState<string | null>(null);
 
   // Estados de validação
   const [validationDialogOpen, setValidationDialogOpen] = useState(false);
@@ -87,26 +90,7 @@ export default function Home() {
     setMetricas(resultado.metricas);
   }, [pecas, configChapa.largura, configChapa.altura, configCorte.espacamento, configCorte.usarMesmoEspacamentoBorda, configCorte.margemBorda, metodoNesting]);
 
-  // Calcula tempo estimado sempre que parâmetros mudarem
-  useEffect(() => {
-    if (pecasPosicionadas.length > 0) {
-      const tempo = calcularTempoEstimado(pecasPosicionadas, configChapa, configCorte);
-      setTempoEstimado(tempo);
-    } else {
-      setTempoEstimado(undefined);
-    }
-  }, [
-    pecasPosicionadas,
-    configChapa.espessura,
-    configCorte.profundidade,
-    configCorte.profundidadePorPassada,
-    configCorte.feedrate,
-    configCorte.plungeRate,
-    configCorte.rapidsSpeed,
-    configCorte.usarRampa,
-    configCorte.anguloRampa,
-    configCorte.aplicarRampaEm
-  ]);
+  // Tempo estimado agora vem da API (calculado junto com o G-code)
 
   // Handler para adicionar peça (aceita uma ou múltiplas)
   const handleAdicionarPeca = (peca: Peca | Peca[]) => {
@@ -138,7 +122,7 @@ export default function Home() {
   };
 
   // Handler para visualizar G-code
-  const handleVisualizarGCode = () => {
+  const handleVisualizarGCode = async () => {
     // Executa validações
     const result = validateConfigurations(
       configChapa,
@@ -161,14 +145,62 @@ export default function Home() {
       return;
     }
 
-    // Tudo OK, abre visualizador
-    setVisualizadorAberto(true);
+    // Tudo OK, gera G-code via API
+    try {
+      setCarregando(true);
+      setErro(null);
+
+      const response = await ApiClient.gerarGCode({
+        pecas,
+        configChapa,
+        configCorte,
+        configFerramenta,
+        metodoNesting,
+        incluirComentarios
+      });
+
+      setGcodeGerado(response.gcode);
+      setTempoEstimado(response.metadata.tempoEstimado);
+      setMetricas(response.metadata.metricas);
+      setVisualizadorAberto(true);
+
+    } catch (error: any) {
+      setErro(error.message || 'Erro ao gerar G-code');
+      console.error('Erro ao gerar G-code:', error);
+    } finally {
+      setCarregando(false);
+    }
   };
 
   // Handler para continuar mesmo com avisos
-  const handleContinueWithWarnings = () => {
+  const handleContinueWithWarnings = async () => {
     setValidationDialogOpen(false);
-    setVisualizadorAberto(true);
+
+    // Gera G-code via API
+    try {
+      setCarregando(true);
+      setErro(null);
+
+      const response = await ApiClient.gerarGCode({
+        pecas,
+        configChapa,
+        configCorte,
+        configFerramenta,
+        metodoNesting,
+        incluirComentarios
+      });
+
+      setGcodeGerado(response.gcode);
+      setTempoEstimado(response.metadata.tempoEstimado);
+      setMetricas(response.metadata.metricas);
+      setVisualizadorAberto(true);
+
+    } catch (error: any) {
+      setErro(error.message || 'Erro ao gerar G-code');
+      console.error('Erro ao gerar G-code:', error);
+    } finally {
+      setCarregando(false);
+    }
   };
 
   // Handler para mudança de versão do gerador
@@ -176,13 +208,35 @@ export default function Home() {
     setVersaoGerador(novaVersao);
   };
 
-  // Atualiza G-code quando versão mudar ou visualizador abrir
+  // Atualiza G-code quando incluirComentarios mudar e visualizador já estiver aberto
   useEffect(() => {
-    if (visualizadorAberto && pecasPosicionadas.length > 0) {
-      const gcode = gerarGCode(pecasPosicionadas, configChapa, configCorte, configFerramenta, versaoGerador, incluirComentarios);
-      setGcodeGerado(gcode);
+    if (visualizadorAberto && pecasPosicionadas.length > 0 && gcodeGerado) {
+      // Regenera G-code via API quando comentários mudarem
+      const regenerarGCode = async () => {
+        try {
+          setCarregando(true);
+          const response = await ApiClient.gerarGCode({
+            pecas,
+            configChapa,
+            configCorte,
+            configFerramenta,
+            metodoNesting,
+            incluirComentarios
+          });
+          setGcodeGerado(response.gcode);
+          setTempoEstimado(response.metadata.tempoEstimado);
+          setMetricas(response.metadata.metricas);
+        } catch (error: any) {
+          setErro(error.message || 'Erro ao gerar G-code');
+          console.error('Erro ao gerar G-code:', error);
+        } finally {
+          setCarregando(false);
+        }
+      };
+      regenerarGCode();
     }
-  }, [visualizadorAberto, versaoGerador, incluirComentarios, pecasPosicionadas, configChapa, configCorte, configFerramenta]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [incluirComentarios]);
 
   // Handler para baixar G-code
   const handleBaixarGCode = (formato: FormatoArquivo) => {
@@ -230,9 +284,18 @@ export default function Home() {
                 onClick={handleVisualizarGCode}
                 variant="default"
                 size="sm"
-                disabled={pecas.length === 0}
+                disabled={pecas.length === 0 || carregando}
               >
-                <span className="hidden md:inline">Baixar/Copiar </span>G-code
+                {carregando ? (
+                  <>
+                    <span className="hidden md:inline">Gerando...</span>
+                    <span className="md:hidden">...</span>
+                  </>
+                ) : (
+                  <>
+                    <span className="hidden md:inline">Baixar/Copiar </span>G-code
+                  </>
+                )}
               </Button>
               <Button
                 onClick={handleLimpar}
@@ -246,6 +309,21 @@ export default function Home() {
               </Button>
             </div>
           </div>
+
+          {/* Mensagem de Erro */}
+          {erro && (
+            <div className="mx-4 mt-4 p-4 bg-red-50 border border-red-200 rounded-md">
+              <p className="text-sm text-red-800">
+                <strong>Erro:</strong> {erro}
+              </p>
+              <button
+                onClick={() => setErro(null)}
+                className="text-xs text-red-600 hover:text-red-800 mt-2 underline"
+              >
+                Fechar
+              </button>
+            </div>
+          )}
 
           {/* Content Area */}
           <div className="flex-1 overflow-hidden">
