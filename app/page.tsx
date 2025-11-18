@@ -14,12 +14,13 @@ import { SeletorNesting } from "@/components/SeletorNesting";
 import { DicionarioGCode } from "@/components/DicionarioGCode";
 import { ValidationDialog } from "@/components/ValidationDialog";
 import { Button } from "@/components/ui/button";
-import { Menu } from "lucide-react";
+import { Menu, Loader2 } from "lucide-react";
 import type { Peca, PecaPosicionada, ConfiguracoesChapa as TConfigChapa, ConfiguracoesCorte as TConfigCorte, ConfiguracoesFerramenta as TConfigFerramenta, FormatoArquivo, VersaoGerador, TempoEstimado } from "@/types";
 import { posicionarPecas, type MetodoNesting } from "@/lib/nesting-algorithm";
 import { gerarGCode, downloadGCode, calcularTempoEstimado } from "@/lib/gcode-generator";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { validateConfigurations, type ValidationResult, type ValidationField } from "@/lib/validator";
+import { ApiClient } from "@/lib/api-client";
 
 export default function Home() {
   // Estados com localStorage
@@ -69,6 +70,10 @@ export default function Home() {
   const [validationDialogOpen, setValidationDialogOpen] = useState(false);
   const [validationResult, setValidationResult] = useState<ValidationResult>({ valid: true, errors: [], warnings: [] });
   const [errorFields, setErrorFields] = useState<ValidationField[]>([]);
+
+  // Estados de API
+  const [carregando, setCarregando] = useState(false);
+  const [erro, setErro] = useState<string | null>(null);
 
   // Atualiza posicionamento sempre que algo mudar
   useEffect(() => {
@@ -138,7 +143,10 @@ export default function Home() {
   };
 
   // Handler para visualizar G-code
-  const handleVisualizarGCode = () => {
+  const handleVisualizarGCode = async () => {
+    // Limpa erros anteriores
+    setErro(null);
+
     // Executa validações
     const result = validateConfigurations(
       configChapa,
@@ -161,14 +169,56 @@ export default function Home() {
       return;
     }
 
-    // Tudo OK, abre visualizador
-    setVisualizadorAberto(true);
+    // Gera G-code via API
+    try {
+      setCarregando(true);
+
+      const response = await ApiClient.gerarGCode({
+        pecas: pecas.filter(p => !p.ignorada),
+        configChapa,
+        configCorte,
+        configFerramenta,
+        metodoNesting,
+        incluirComentarios,
+      });
+
+      setGcodeGerado(response.gcode);
+      setVisualizadorAberto(true);
+    } catch (error) {
+      const mensagemErro = error instanceof Error ? error.message : 'Erro ao gerar G-code';
+      setErro(mensagemErro);
+      console.error('Erro ao gerar G-code:', error);
+    } finally {
+      setCarregando(false);
+    }
   };
 
   // Handler para continuar mesmo com avisos
-  const handleContinueWithWarnings = () => {
+  const handleContinueWithWarnings = async () => {
     setValidationDialogOpen(false);
-    setVisualizadorAberto(true);
+
+    // Gera G-code via API (mesmo com avisos)
+    try {
+      setCarregando(true);
+
+      const response = await ApiClient.gerarGCode({
+        pecas: pecas.filter(p => !p.ignorada),
+        configChapa,
+        configCorte,
+        configFerramenta,
+        metodoNesting,
+        incluirComentarios,
+      });
+
+      setGcodeGerado(response.gcode);
+      setVisualizadorAberto(true);
+    } catch (error) {
+      const mensagemErro = error instanceof Error ? error.message : 'Erro ao gerar G-code';
+      setErro(mensagemErro);
+      console.error('Erro ao gerar G-code:', error);
+    } finally {
+      setCarregando(false);
+    }
   };
 
   // Handler para mudança de versão do gerador
@@ -176,13 +226,7 @@ export default function Home() {
     setVersaoGerador(novaVersao);
   };
 
-  // Atualiza G-code quando versão mudar ou visualizador abrir
-  useEffect(() => {
-    if (visualizadorAberto && pecasPosicionadas.length > 0) {
-      const gcode = gerarGCode(pecasPosicionadas, configChapa, configCorte, configFerramenta, versaoGerador, incluirComentarios);
-      setGcodeGerado(gcode);
-    }
-  }, [visualizadorAberto, versaoGerador, incluirComentarios, pecasPosicionadas, configChapa, configCorte, configFerramenta]);
+  // Nota: G-code agora é gerado via API no handleVisualizarGCode
 
   // Handler para baixar G-code
   const handleBaixarGCode = (formato: FormatoArquivo) => {
@@ -230,8 +274,9 @@ export default function Home() {
                 onClick={handleVisualizarGCode}
                 variant="default"
                 size="sm"
-                disabled={pecas.length === 0}
+                disabled={pecas.length === 0 || carregando}
               >
+                {carregando && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
                 <span className="hidden md:inline">Baixar/Copiar </span>G-code
               </Button>
               <Button
@@ -246,6 +291,19 @@ export default function Home() {
               </Button>
             </div>
           </div>
+
+          {/* Error Message */}
+          {erro && (
+            <div className="mx-4 mt-4 p-3 bg-destructive/10 border border-destructive/20 rounded-md flex items-start gap-2">
+              <span className="text-destructive text-sm flex-1">{erro}</span>
+              <button
+                onClick={() => setErro(null)}
+                className="text-destructive hover:text-destructive/80 font-bold"
+              >
+                ✕
+              </button>
+            </div>
+          )}
 
           {/* Content Area */}
           <div className="flex-1 overflow-hidden">
