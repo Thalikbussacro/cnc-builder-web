@@ -20,7 +20,7 @@ import { posicionarPecas, type MetodoNesting } from "@/lib/nesting-algorithm";
 import { gerarGCode, downloadGCode, calcularTempoEstimado } from "@/lib/gcode-generator";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { useDebounce } from "@/hooks/useDebounce";
-import { validateConfigurations, type ValidationResult, type ValidationField } from "@/lib/validator";
+import type { ValidationResult, ValidationField } from "@/lib/validator";
 import { ApiClient } from "@/lib/api-client";
 
 export default function Home() {
@@ -154,32 +154,34 @@ export default function Home() {
     // Limpa erros anteriores
     setErro(null);
 
-    // Executa validações
-    const result = validateConfigurations(
-      configChapa,
-      configCorte,
-      configFerramenta,
-      pecasPosicionadas
-    );
-
-    // Extrai campos com erro para destacar na UI
-    const fieldsWithErrors: ValidationField[] = [
-      ...result.errors.map(e => e.field),
-      ...result.warnings.map(w => w.field)
-    ];
-    setErrorFields(fieldsWithErrors);
-
-    // Se houver erros ou avisos, mostra dialog
-    if (!result.valid || result.warnings.length > 0) {
-      setValidationResult(result);
-      setValidationDialogOpen(true);
-      return;
-    }
-
-    // Gera G-code via API
     try {
       setCarregando(true);
 
+      // VALIDAÇÃO VIA API (fonte única da verdade)
+      const result = await ApiClient.validate({
+        pecas: pecas.filter(p => !p.ignorada),
+        configChapa,
+        configCorte,
+        configFerramenta,
+        metodoNesting,
+      });
+
+      // Extrai campos com erro para destacar na UI
+      const fieldsWithErrors: ValidationField[] = [
+        ...result.errors.map(e => e.field),
+        ...result.warnings.map(w => w.field)
+      ];
+      setErrorFields(fieldsWithErrors);
+
+      // Se houver erros ou avisos, mostra dialog
+      if (!result.valid || result.warnings.length > 0) {
+        setValidationResult(result);
+        setValidationDialogOpen(true);
+        setCarregando(false);
+        return;
+      }
+
+      // Gera G-code via API (validação já foi feita)
       const response = await ApiClient.gerarGCode({
         pecas: pecas.filter(p => !p.ignorada),
         configChapa,
@@ -194,7 +196,7 @@ export default function Home() {
     } catch (error) {
       const mensagemErro = error instanceof Error ? error.message : 'Erro ao gerar G-code';
       setErro(mensagemErro);
-      console.error('Erro ao gerar G-code:', error);
+      console.error('Erro:', error);
     } finally {
       setCarregando(false);
     }

@@ -1,5 +1,6 @@
 import type { Peca, ConfiguracoesChapa, ConfiguracoesCorte, ConfiguracoesFerramenta, TempoEstimado } from '@/types';
 import type { MetodoNesting } from '@/lib/nesting-algorithm';
+import type { ValidationResult } from '@/lib/validator';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 const DEFAULT_TIMEOUT = 30000; // 30 segundos
@@ -11,6 +12,14 @@ export interface GerarGCodeRequest {
   configFerramenta?: Partial<ConfiguracoesFerramenta>;
   metodoNesting?: MetodoNesting;
   incluirComentarios?: boolean;
+}
+
+export interface ValidateRequest {
+  pecas: Peca[];
+  configChapa?: Partial<ConfiguracoesChapa>;
+  configCorte?: Partial<ConfiguracoesCorte>;
+  configFerramenta?: Partial<ConfiguracoesFerramenta>;
+  metodoNesting?: MetodoNesting;
 }
 
 export interface Metricas {
@@ -138,6 +147,38 @@ export class ApiClient {
       }
 
       // Erro desconhecido
+      throw new Error('Erro ao se comunicar com a API');
+    }
+  }
+
+  /**
+   * Valida configurações sem gerar G-code
+   * Útil para feedback em tempo real no frontend
+   */
+  static async validate(request: ValidateRequest, timeout = 10000): Promise<ValidationResult> {
+    try {
+      const response = await this.fetchWithTimeout(
+        `${API_BASE_URL}/api/gcode/validate`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(request),
+        },
+        timeout
+      );
+
+      if (!response.ok) {
+        throw new Error('Erro ao validar configurações');
+      }
+
+      const data = await response.json();
+      return data as ValidationResult;
+    } catch (error) {
+      if (error instanceof Error) {
+        throw error;
+      }
       throw new Error('Erro ao se comunicar com a API');
     }
   }
