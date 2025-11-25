@@ -17,7 +17,7 @@ import { Button } from "@/components/ui/button";
 import { Menu, Loader2 } from "lucide-react";
 import type { Peca, PecaPosicionada, ConfiguracoesChapa as TConfigChapa, ConfiguracoesCorte as TConfigCorte, ConfiguracoesFerramenta as TConfigFerramenta, FormatoArquivo, VersaoGerador, TempoEstimado } from "@/types";
 import { posicionarPecas, type MetodoNesting } from "@/lib/nesting-algorithm";
-import { gerarGCode, downloadGCode, calcularTempoEstimado } from "@/lib/gcode-generator";
+import { downloadGCode } from "@/lib/gcode-generator";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { useDebounce } from "@/hooks/useDebounce";
 import type { ValidationResult, ValidationField } from "@/lib/validator";
@@ -99,25 +99,52 @@ export default function Home() {
     setMetricas(resultado.metricas);
   }, [pecas, debouncedLargura, debouncedAltura, debouncedEspacamento, configCorte.usarMesmoEspacamentoBorda, debouncedMargemBorda, metodoNesting]);
 
-  // Calcula tempo estimado sempre que parâmetros mudarem
+  // Busca preview de tempo e métricas via API (debounced)
   useEffect(() => {
-    if (pecasPosicionadas.length > 0) {
-      const tempo = calcularTempoEstimado(pecasPosicionadas, configChapa, configCorte);
-      setTempoEstimado(tempo);
-    } else {
+    // Só chama API se houver peças
+    if (pecas.length === 0) {
       setTempoEstimado(undefined);
+      return;
     }
+
+    // Chama API de validação para obter preview
+    const fetchPreview = async () => {
+      try {
+        const result = await ApiClient.validate({
+          pecas: pecas.filter(p => !p.ignorada),
+          configChapa,
+          configCorte,
+          configFerramenta,
+          metodoNesting,
+        });
+
+        // Atualiza tempo e métricas do preview
+        if (result.preview) {
+          setTempoEstimado(result.preview.tempoEstimado);
+          // Métricas já vêm do nesting local, mas poderiam vir da API também
+        }
+      } catch (error) {
+        // Silenciosamente ignora erros de preview (não é crítico)
+        console.warn('Erro ao buscar preview:', error);
+      }
+    };
+
+    fetchPreview();
   }, [
-    pecasPosicionadas,
+    debouncedLargura,
+    debouncedAltura,
+    debouncedEspacamento,
+    debouncedMargemBorda,
     configChapa.espessura,
     configCorte.profundidade,
     configCorte.profundidadePorPassada,
     configCorte.feedrate,
     configCorte.plungeRate,
     configCorte.rapidsSpeed,
-    configCorte.usarRampa,
-    configCorte.anguloRampa,
-    configCorte.aplicarRampaEm
+    configCorte.usarMesmoEspacamentoBorda,
+    configFerramenta.diametro,
+    metodoNesting,
+    pecas,
   ]);
 
   // Handler para adicionar peça (aceita uma ou múltiplas)

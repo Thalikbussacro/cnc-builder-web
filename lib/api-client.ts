@@ -2,6 +2,17 @@ import type { Peca, ConfiguracoesChapa, ConfiguracoesCorte, ConfiguracoesFerrame
 import type { MetodoNesting } from '@/lib/nesting-algorithm';
 import type { ValidationResult } from '@/lib/validator';
 
+export interface ValidationResponse extends ValidationResult {
+  preview?: {
+    tempoEstimado: TempoEstimado;
+    metricas: {
+      areaUtilizada: number;
+      eficiencia: number;
+      tempo: number;
+    };
+  };
+}
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 const DEFAULT_TIMEOUT = 30000; // 30 segundos
 
@@ -152,10 +163,10 @@ export class ApiClient {
   }
 
   /**
-   * Valida configurações sem gerar G-code
+   * Valida configurações e retorna dados de preview
    * Útil para feedback em tempo real no frontend
    */
-  static async validate(request: ValidateRequest, timeout = 10000): Promise<ValidationResult> {
+  static async validate(request: ValidateRequest, timeout = 10000): Promise<ValidationResponse> {
     try {
       const response = await this.fetchWithTimeout(
         `${API_BASE_URL}/api/gcode/validate`,
@@ -174,7 +185,7 @@ export class ApiClient {
       }
 
       const data = await response.json();
-      return data as ValidationResult;
+      return data as ValidationResponse;
     } catch (error) {
       if (error instanceof Error) {
         throw error;
