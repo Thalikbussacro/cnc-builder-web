@@ -1,15 +1,21 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 /**
- * Hook para persistir estado no localStorage
+ * Hook para persistir estado no localStorage com debounce
  * @param key - Chave do localStorage
  * @param initialValue - Valor inicial se não houver nada salvo
+ * @param debounceMs - Delay do debounce em milissegundos (padrão: 500ms)
  * @returns [value, setValue] - Estado e função para atualizar
  */
-export function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T) => void] {
+export function useLocalStorage<T>(
+  key: string,
+  initialValue: T,
+  debounceMs: number = 500
+): [T, (value: T) => void] {
   // Sempre começa com initialValue para evitar mismatch de hidratação
   const [storedValue, setStoredValue] = useState<T>(initialValue);
   const [isHydrated, setIsHydrated] = useState(false);
+  const saveTimerRef = useRef<NodeJS.Timeout>();
 
   // Carrega do localStorage apenas no cliente após hidratação
   useEffect(() => {
@@ -32,18 +38,39 @@ export function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T)
     }
   }, [key]);
 
-  // Função para atualizar o valor
+  // Limpa timer pendente quando componente desmontar
+  useEffect(() => {
+    return () => {
+      if (saveTimerRef.current) {
+        clearTimeout(saveTimerRef.current);
+      }
+    };
+  }, []);
+
+  // Função para atualizar o valor com debounce
   const setValue = (value: T) => {
     try {
-      // Salva no estado
+      // Atualiza estado imediatamente (não debounced)
       setStoredValue(value);
 
-      // Salva no localStorage
+      // Salva no localStorage com debounce
       if (isHydrated) {
-        window.localStorage.setItem(key, JSON.stringify(value));
+        // Cancela timer anterior se existir
+        if (saveTimerRef.current) {
+          clearTimeout(saveTimerRef.current);
+        }
+
+        // Agenda novo save
+        saveTimerRef.current = setTimeout(() => {
+          try {
+            window.localStorage.setItem(key, JSON.stringify(value));
+          } catch (error) {
+            console.warn(`Erro ao salvar ${key} no localStorage:`, error);
+          }
+        }, debounceMs);
       }
     } catch (error) {
-      console.warn(`Erro ao salvar ${key} no localStorage:`, error);
+      console.warn(`Erro ao processar ${key}:`, error);
     }
   };
 

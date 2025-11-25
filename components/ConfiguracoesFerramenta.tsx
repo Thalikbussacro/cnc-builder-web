@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { InfoTooltip } from "@/components/InfoTooltip";
 import { parametrosInfo } from "@/lib/parametros-info";
+import { VALIDATION_RULES } from "@/lib/validation-rules";
 import type { ConfiguracoesFerramenta } from "@/types";
 import type { ValidationField } from "@/lib/validator";
 import { cn } from "@/lib/utils";
@@ -17,8 +18,26 @@ type ConfiguracoesFerramentaProps = {
 
 export function ConfiguracoesFerramenta({ config, onChange, errorFields = [] }: ConfiguracoesFerramentaProps) {
   const hasError = (field: ValidationField) => errorFields.includes(field);
+
   const handleChange = (campo: keyof ConfiguracoesFerramenta, valor: string | number) => {
-    onChange({ ...config, [campo]: valor });
+    // Se valor já é número (vindo do parseInt/parseFloat), usa direto
+    if (typeof valor === 'number') {
+      onChange({ ...config, [campo]: valor });
+      return;
+    }
+
+    // Se é string vazia, mantém o valor anterior (usuário ainda está digitando)
+    if (valor === '') {
+      return;
+    }
+
+    // Tenta converter para número
+    const numero = campo === 'numeroFerramenta' ? parseInt(valor) : parseFloat(valor);
+
+    // Só atualiza se for um número válido
+    if (!isNaN(numero)) {
+      onChange({ ...config, [campo]: numero });
+    }
   };
 
   return (
@@ -40,8 +59,9 @@ export function ConfiguracoesFerramenta({ config, onChange, errorFields = [] }: 
               id="diametro"
               type="number"
               value={config.diametro}
-              onChange={(e) => handleChange("diametro", parseFloat(e.target.value) || 0)}
-              min="0.1"
+              onChange={(e) => handleChange("diametro", e.target.value)}
+              min={VALIDATION_RULES.diametroFresa.min}
+              max={VALIDATION_RULES.diametroFresa.max}
               step="0.5"
               className={cn(hasError('diametroFresa') && "border-destructive focus-visible:ring-destructive")}
             />
@@ -58,7 +78,7 @@ export function ConfiguracoesFerramenta({ config, onChange, errorFields = [] }: 
               id="numeroFerramenta"
               type="number"
               value={config.numeroFerramenta}
-              onChange={(e) => handleChange("numeroFerramenta", parseInt(e.target.value) || 1)}
+              onChange={(e) => handleChange("numeroFerramenta", e.target.value)}
               min="1"
               max="99"
               step="1"

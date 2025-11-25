@@ -19,6 +19,7 @@ import type { Peca, PecaPosicionada, ConfiguracoesChapa as TConfigChapa, Configu
 import { posicionarPecas, type MetodoNesting } from "@/lib/nesting-algorithm";
 import { gerarGCode, downloadGCode, calcularTempoEstimado } from "@/lib/gcode-generator";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
+import { useDebounce } from "@/hooks/useDebounce";
 import { validateConfigurations, type ValidationResult, type ValidationField } from "@/lib/validator";
 import { ApiClient } from "@/lib/api-client";
 
@@ -75,22 +76,28 @@ export default function Home() {
   const [carregando, setCarregando] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
 
-  // Atualiza posicionamento sempre que algo mudar
+  // Debounce para valores que mudam frequentemente durante digitação
+  const debouncedLargura = useDebounce(configChapa.largura, 500);
+  const debouncedAltura = useDebounce(configChapa.altura, 500);
+  const debouncedEspacamento = useDebounce(configCorte.espacamento, 500);
+  const debouncedMargemBorda = useDebounce(configCorte.margemBorda, 500);
+
+  // Atualiza posicionamento após debounce
   useEffect(() => {
     // Usa margem de borda customizada se configurado, senão usa espaçamento
-    const margemBorda = configCorte.usarMesmoEspacamentoBorda ? undefined : configCorte.margemBorda;
+    const margemBorda = configCorte.usarMesmoEspacamentoBorda ? undefined : debouncedMargemBorda;
 
     const resultado = posicionarPecas(
       pecas,
-      configChapa.largura,
-      configChapa.altura,
-      configCorte.espacamento,
+      debouncedLargura,
+      debouncedAltura,
+      debouncedEspacamento,
       metodoNesting,
       margemBorda
     );
     setPecasPosicionadas(resultado.posicionadas);
     setMetricas(resultado.metricas);
-  }, [pecas, configChapa.largura, configChapa.altura, configCorte.espacamento, configCorte.usarMesmoEspacamentoBorda, configCorte.margemBorda, metodoNesting]);
+  }, [pecas, debouncedLargura, debouncedAltura, debouncedEspacamento, configCorte.usarMesmoEspacamentoBorda, debouncedMargemBorda, metodoNesting]);
 
   // Calcula tempo estimado sempre que parâmetros mudarem
   useEffect(() => {

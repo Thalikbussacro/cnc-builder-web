@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { InfoTooltip } from "@/components/InfoTooltip";
 import { parametrosInfo } from "@/lib/parametros-info";
+import { VALIDATION_RULES } from "@/lib/validation-rules";
 import type { ConfiguracoesChapa } from "@/types";
 
 type ConfiguracoesChapaProps = {
@@ -14,8 +15,17 @@ type ConfiguracoesChapaProps = {
 
 export function ConfiguracoesChapa({ config, onChange }: ConfiguracoesChapaProps) {
   const handleChange = (campo: keyof ConfiguracoesChapa, valor: string) => {
-    const numero = parseFloat(valor) || 0;
-    onChange({ ...config, [campo]: numero });
+    // Permite string vazia (usuário ainda está digitando)
+    if (valor === '') {
+      onChange({ ...config, [campo]: 0 });
+      return;
+    }
+
+    const numero = parseFloat(valor);
+    // Só atualiza se for um número válido
+    if (!isNaN(numero)) {
+      onChange({ ...config, [campo]: numero });
+    }
   };
 
   return (
@@ -38,7 +48,8 @@ export function ConfiguracoesChapa({ config, onChange }: ConfiguracoesChapaProps
               type="number"
               value={config.largura}
               onChange={(e) => handleChange("largura", e.target.value)}
-              min="0"
+              min="10"
+              max="10000"
               step="10"
             />
           </div>
@@ -55,7 +66,8 @@ export function ConfiguracoesChapa({ config, onChange }: ConfiguracoesChapaProps
               type="number"
               value={config.altura}
               onChange={(e) => handleChange("altura", e.target.value)}
-              min="0"
+              min="10"
+              max="10000"
               step="10"
             />
           </div>
@@ -73,8 +85,9 @@ export function ConfiguracoesChapa({ config, onChange }: ConfiguracoesChapaProps
             type="number"
             value={config.espessura}
             onChange={(e) => handleChange("espessura", e.target.value)}
-            min="0"
-            step="1"
+            min={VALIDATION_RULES.espessuraChapa.min}
+            max={VALIDATION_RULES.espessuraChapa.max}
+            step="0.5"
           />
         </div>
       </CardContent>

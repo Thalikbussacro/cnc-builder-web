@@ -8,6 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { InfoTooltip } from "@/components/InfoTooltip";
 import { parametrosInfo } from "@/lib/parametros-info";
+import { VALIDATION_RULES } from "@/lib/validation-rules";
 import type { ConfiguracoesCorte, AplicarRampaEm } from "@/types";
 import type { ValidationField } from "@/lib/validator";
 import { cn } from "@/lib/utils";
@@ -19,10 +20,16 @@ type ConfiguracoesCorteProps = {
 };
 
 export function ConfiguracoesCorte({ config, onChange, errorFields = [] }: ConfiguracoesCorteProps) {
+  // Constante para tolerância de ponto flutuante
+  const FLOATING_POINT_TOLERANCE = 0.01;
+
   // Calcula número de passadas baseado na profundidade total e profundidade por passada
   // Usa Math.round com tolerância para evitar erros de arredondamento
   // Ex: 16/5.33 = 3.0018... deve mostrar 3, não 4
-  const numeroPassadas = Math.round(config.profundidade / config.profundidadePorPassada + 0.01) || 1;
+  const numeroPassadas = React.useMemo(
+    () => Math.round(config.profundidade / config.profundidadePorPassada + FLOATING_POINT_TOLERANCE) || 1,
+    [config.profundidade, config.profundidadePorPassada]
+  );
 
   // Estado local para permitir edição do campo de passadas
   const [numeroPassadasTemp, setNumeroPassadasTemp] = React.useState<string>(numeroPassadas.toString());
@@ -107,7 +114,8 @@ export function ConfiguracoesCorte({ config, onChange, errorFields = [] }: Confi
             type="number"
             value={config.profundidade}
             onChange={(e) => handleChange("profundidade", e.target.value)}
-            min="0.1"
+            min={VALIDATION_RULES.profundidade.min}
+            max={VALIDATION_RULES.profundidade.max}
             step="1"
             className={cn(hasError('profundidade') && "border-destructive focus-visible:ring-destructive")}
           />
@@ -144,7 +152,8 @@ export function ConfiguracoesCorte({ config, onChange, errorFields = [] }: Confi
               type="number"
               value={config.profundidadePorPassada}
               onChange={(e) => handleChange("profundidadePorPassada", e.target.value)}
-              min="0.1"
+              min={VALIDATION_RULES.profundidadePorPassada.min}
+              max={VALIDATION_RULES.profundidadePorPassada.max}
               step="0.5"
               className={cn(hasError('profundidadePorPassada') && "border-destructive focus-visible:ring-destructive")}
             />
@@ -164,7 +173,8 @@ export function ConfiguracoesCorte({ config, onChange, errorFields = [] }: Confi
             type="number"
             value={config.espacamento}
             onChange={(e) => handleChange("espacamento", e.target.value)}
-            min="1"
+            min={VALIDATION_RULES.espacamento.min}
+            max={VALIDATION_RULES.espacamento.max}
             step="5"
           />
         </div>
@@ -203,6 +213,7 @@ export function ConfiguracoesCorte({ config, onChange, errorFields = [] }: Confi
                 value={config.margemBorda}
                 onChange={(e) => handleChange("margemBorda", e.target.value)}
                 min="0"
+                max={VALIDATION_RULES.espacamento.max}
                 step="5"
               />
             </div>
@@ -226,8 +237,8 @@ export function ConfiguracoesCorte({ config, onChange, errorFields = [] }: Confi
                 type="number"
                 value={config.feedrate}
                 onChange={(e) => handleChange("feedrate", e.target.value)}
-                min="100"
-                max="5000"
+                min={VALIDATION_RULES.feedrate.min}
+                max={VALIDATION_RULES.feedrate.max}
                 step="100"
                 className={cn(hasError('feedrate') && "border-destructive focus-visible:ring-destructive")}
               />
@@ -245,8 +256,8 @@ export function ConfiguracoesCorte({ config, onChange, errorFields = [] }: Confi
                 type="number"
                 value={config.plungeRate}
                 onChange={(e) => handleChange("plungeRate", e.target.value)}
-                min="50"
-                max="2000"
+                min={VALIDATION_RULES.plungeRate.min}
+                max={VALIDATION_RULES.plungeRate.max}
                 step="50"
                 className={cn(hasError('plungeRate') && "border-destructive focus-visible:ring-destructive")}
               />
@@ -266,8 +277,8 @@ export function ConfiguracoesCorte({ config, onChange, errorFields = [] }: Confi
               type="number"
               value={config.rapidsSpeed}
               onChange={(e) => handleChange("rapidsSpeed", e.target.value)}
-              min="500"
-              max="10000"
+              min={VALIDATION_RULES.rapidsSpeed.min}
+              max={VALIDATION_RULES.rapidsSpeed.max}
               step="100"
               className={cn(hasError('rapidsSpeed') && "border-destructive focus-visible:ring-destructive")}
             />
@@ -286,8 +297,8 @@ export function ConfiguracoesCorte({ config, onChange, errorFields = [] }: Confi
               type="number"
               value={config.spindleSpeed}
               onChange={(e) => handleChange("spindleSpeed", e.target.value)}
-              min="5000"
-              max="30000"
+              min={VALIDATION_RULES.spindleSpeed.min}
+              max={VALIDATION_RULES.spindleSpeed.max}
               step="1000"
               className={cn(hasError('spindleSpeed') && "border-destructive focus-visible:ring-destructive")}
             />
@@ -367,8 +378,8 @@ export function ConfiguracoesCorte({ config, onChange, errorFields = [] }: Confi
                     type="number"
                     value={config.anguloRampa}
                     onChange={(e) => handleChange("anguloRampa", e.target.value)}
-                    min="2"
-                    max="5"
+                    min={VALIDATION_RULES.anguloRampa.min}
+                    max={VALIDATION_RULES.anguloRampa.max}
                     step="0.5"
                     className={cn(hasError('anguloRampa') && "border-destructive focus-visible:ring-destructive")}
                   />
