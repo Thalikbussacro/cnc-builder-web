@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Maximize2 } from "lucide-react";
+import { Maximize2, Loader2 } from "lucide-react";
 import { PreviewFullscreen } from "@/components/PreviewFullscreen";
 import type { PecaPosicionada, TempoEstimado } from "@/types";
 import { formatarTempo } from "@/lib/gcode-generator";
@@ -36,6 +36,7 @@ type PreviewCanvasProps = {
   chapaAltura: number;
   pecasPosicionadas: PecaPosicionada[];
   tempoEstimado?: TempoEstimado;
+  carregando?: boolean;
 };
 
 // Cores para peças - paleta terrosa/quente profissional v2
@@ -58,6 +59,7 @@ export function PreviewCanvas({
   chapaAltura,
   pecasPosicionadas,
   tempoEstimado,
+  carregando = false,
 }: PreviewCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -300,7 +302,7 @@ export function PreviewCanvas({
             )}
           </div>
         </CardHeader>
-        <CardContent className="p-2 pb-3">
+        <CardContent className="p-2 pb-3 relative">
           <div className="flex items-center justify-center bg-slate-100 dark:bg-neutral-900 rounded-lg p-1.5">
             <canvas
               ref={canvasRef}
@@ -310,6 +312,16 @@ export function PreviewCanvas({
               style={{ backgroundColor: isDark ? "#1a1a1a" : "#f5f5f5" }}
             />
           </div>
+
+          {/* Overlay de loading */}
+          {carregando && (
+            <div className="absolute inset-0 flex items-center justify-center bg-background/60 backdrop-blur-sm rounded-lg">
+              <div className="flex flex-col items-center gap-2">
+                <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                <span className="text-xs text-muted-foreground">Atualizando preview...</span>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
 

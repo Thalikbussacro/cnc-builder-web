@@ -16,7 +16,7 @@ import { ValidationDialog } from "@/components/ValidationDialog";
 import { Button } from "@/components/ui/button";
 import { Menu, Loader2 } from "lucide-react";
 import type { Peca, PecaPosicionada, ConfiguracoesChapa as TConfigChapa, ConfiguracoesCorte as TConfigCorte, ConfiguracoesFerramenta as TConfigFerramenta, FormatoArquivo, VersaoGerador, TempoEstimado } from "@/types";
-import { posicionarPecas, type MetodoNesting } from "@/lib/nesting-algorithm";
+import { type MetodoNesting } from "@/lib/nesting-algorithm";
 import { downloadGCode } from "@/lib/gcode-generator";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { useDebounce } from "@/hooks/useDebounce";
@@ -74,6 +74,7 @@ export default function Home() {
 
   // Estados de API
   const [carregando, setCarregando] = useState(false);
+  const [carregandoPreview, setCarregandoPreview] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
 
   // Debounce para valores que mudam frequentemente durante digitação
@@ -82,32 +83,21 @@ export default function Home() {
   const debouncedEspacamento = useDebounce(configCorte.espacamento, 500);
   const debouncedMargemBorda = useDebounce(configCorte.margemBorda, 500);
 
-  // Atualiza posicionamento após debounce
+  // Busca preview completo (nesting + tempo + métricas) via API
   useEffect(() => {
-    // Usa margem de borda customizada se configurado, senão usa espaçamento
-    const margemBorda = configCorte.usarMesmoEspacamentoBorda ? undefined : debouncedMargemBorda;
-
-    const resultado = posicionarPecas(
-      pecas,
-      debouncedLargura,
-      debouncedAltura,
-      debouncedEspacamento,
-      metodoNesting,
-      margemBorda
-    );
-    setPecasPosicionadas(resultado.posicionadas);
-    setMetricas(resultado.metricas);
-  }, [pecas, debouncedLargura, debouncedAltura, debouncedEspacamento, configCorte.usarMesmoEspacamentoBorda, debouncedMargemBorda, metodoNesting]);
-
-  // Busca preview de tempo e métricas via API (debounced)
-  useEffect(() => {
-    // Só chama API se houver peças
+    // Limpa preview se não houver peças
     if (pecas.length === 0) {
+      setPecasPosicionadas([]);
+      setMetricas(undefined);
       setTempoEstimado(undefined);
+      setCarregandoPreview(false);
       return;
     }
 
-    // Chama API de validação para obter preview
+    // Marca como carregando
+    setCarregandoPreview(true);
+
+    // Chama API de validação para obter preview completo
     const fetchPreview = async () => {
       try {
         const result = await ApiClient.validate({
@@ -118,14 +108,21 @@ export default function Home() {
           metodoNesting,
         });
 
-        // Atualiza tempo e métricas do preview
+        // Atualiza preview com dados da API (fonte única da verdade)
         if (result.preview) {
+          setPecasPosicionadas(result.preview.pecasPosicionadas);
+          setMetricas(result.preview.metricas);
           setTempoEstimado(result.preview.tempoEstimado);
-          // Métricas já vêm do nesting local, mas poderiam vir da API também
         }
       } catch (error) {
         // Silenciosamente ignora erros de preview (não é crítico)
         console.warn('Erro ao buscar preview:', error);
+        // Limpa preview em caso de erro
+        setPecasPosicionadas([]);
+        setMetricas(undefined);
+        setTempoEstimado(undefined);
+      } finally {
+        setCarregandoPreview(false);
       }
     };
 
@@ -392,6 +389,7 @@ export default function Home() {
                   chapaAltura={configChapa.altura}
                   pecasPosicionadas={pecasPosicionadas}
                   tempoEstimado={tempoEstimado}
+                  carregando={carregandoPreview}
                 />
                 <ListaPecas pecas={pecas} onRemover={handleRemoverPeca} onToggleIgnorar={handleToggleIgnorar} />
               </div>
