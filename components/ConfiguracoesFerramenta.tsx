@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { InfoTooltip } from "@/components/InfoTooltip";
+import { SanitizationAlert } from "@/components/SanitizationAlert";
 import { parametrosInfo } from "@/lib/parametros-info";
 import { VALIDATION_RULES } from "@/lib/validation-rules";
 import type { ConfiguracoesFerramenta } from "@/types";
@@ -81,6 +82,10 @@ export function ConfiguracoesFerramenta({ config, onChange, errorFields = [] }: 
             {diametroInput.hasError && diametroInput.errorMessage && (
               <p className="text-xs text-destructive mt-1">{diametroInput.errorMessage}</p>
             )}
+            <SanitizationAlert
+              alert={diametroInput.sanitizationAlert}
+              onDismiss={diametroInput.dismissSanitizationAlert}
+            />
           </div>
           <div className="space-y-1">
             <div className="flex items-center gap-1">
@@ -104,6 +109,10 @@ export function ConfiguracoesFerramenta({ config, onChange, errorFields = [] }: 
             {numeroFerramentaInput.hasError && numeroFerramentaInput.errorMessage && (
               <p className="text-xs text-destructive mt-1">{numeroFerramentaInput.errorMessage}</p>
             )}
+            <SanitizationAlert
+              alert={numeroFerramentaInput.sanitizationAlert}
+              onDismiss={numeroFerramentaInput.dismissSanitizationAlert}
+            />
           </div>
         </div>
       </CardContent>

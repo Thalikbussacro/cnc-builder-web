@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { InfoTooltip } from "@/components/InfoTooltip";
+import { SanitizationAlert } from "@/components/SanitizationAlert";
 import { parametrosInfo } from "@/lib/parametros-info";
 import { VALIDATION_RULES } from "@/lib/validation-rules";
 import type { ConfiguracoesCorte, AplicarRampaEm } from "@/types";
@@ -236,6 +237,10 @@ export function ConfiguracoesCorte({ config, onChange, errorFields = [] }: Confi
           {profundidadeInput.hasError && profundidadeInput.errorMessage && (
             <p className="text-xs text-destructive mt-1">{profundidadeInput.errorMessage}</p>
           )}
+          <SanitizationAlert
+            alert={profundidadeInput.sanitizationAlert}
+            onDismiss={profundidadeInput.dismissSanitizationAlert}
+          />
         </div>
 
         <div className="grid grid-cols-2 gap-2.5">
@@ -278,6 +283,10 @@ export function ConfiguracoesCorte({ config, onChange, errorFields = [] }: Confi
             {profundidadePorPassadaInput.hasError && profundidadePorPassadaInput.errorMessage && (
               <p className="text-xs text-destructive mt-1">{profundidadePorPassadaInput.errorMessage}</p>
             )}
+            <SanitizationAlert
+              alert={profundidadePorPassadaInput.sanitizationAlert}
+              onDismiss={profundidadePorPassadaInput.dismissSanitizationAlert}
+            />
           </div>
         </div>
 
@@ -303,6 +312,10 @@ export function ConfiguracoesCorte({ config, onChange, errorFields = [] }: Confi
           {espacamentoInput.hasError && espacamentoInput.errorMessage && (
             <p className="text-xs text-destructive mt-1">{espacamentoInput.errorMessage}</p>
           )}
+          <SanitizationAlert
+            alert={espacamentoInput.sanitizationAlert}
+            onDismiss={espacamentoInput.dismissSanitizationAlert}
+          />
         </div>
 
         <div className="space-y-2">
@@ -347,6 +360,10 @@ export function ConfiguracoesCorte({ config, onChange, errorFields = [] }: Confi
               {margemBordaInput.hasError && margemBordaInput.errorMessage && (
                 <p className="text-xs text-destructive mt-1">{margemBordaInput.errorMessage}</p>
               )}
+              <SanitizationAlert
+                alert={margemBordaInput.sanitizationAlert}
+                onDismiss={margemBordaInput.dismissSanitizationAlert}
+              />
             </div>
           )}
         </div>
@@ -377,6 +394,10 @@ export function ConfiguracoesCorte({ config, onChange, errorFields = [] }: Confi
               {feedrateInput.hasError && feedrateInput.errorMessage && (
                 <p className="text-xs text-destructive mt-1">{feedrateInput.errorMessage}</p>
               )}
+              <SanitizationAlert
+                alert={feedrateInput.sanitizationAlert}
+                onDismiss={feedrateInput.dismissSanitizationAlert}
+              />
             </div>
             <div className="space-y-1">
               <div className="flex items-center gap-1">
@@ -400,6 +421,10 @@ export function ConfiguracoesCorte({ config, onChange, errorFields = [] }: Confi
               {plungeRateInput.hasError && plungeRateInput.errorMessage && (
                 <p className="text-xs text-destructive mt-1">{plungeRateInput.errorMessage}</p>
               )}
+              <SanitizationAlert
+                alert={plungeRateInput.sanitizationAlert}
+                onDismiss={plungeRateInput.dismissSanitizationAlert}
+              />
             </div>
           </div>
 
@@ -425,6 +450,10 @@ export function ConfiguracoesCorte({ config, onChange, errorFields = [] }: Confi
             {rapidsSpeedInput.hasError && rapidsSpeedInput.errorMessage && (
               <p className="text-xs text-destructive mt-1">{rapidsSpeedInput.errorMessage}</p>
             )}
+            <SanitizationAlert
+              alert={rapidsSpeedInput.sanitizationAlert}
+              onDismiss={rapidsSpeedInput.dismissSanitizationAlert}
+            />
           </div>
 
           <div className="space-y-1 mt-2">
@@ -449,6 +478,10 @@ export function ConfiguracoesCorte({ config, onChange, errorFields = [] }: Confi
             {spindleSpeedInput.hasError && spindleSpeedInput.errorMessage && (
               <p className="text-xs text-destructive mt-1">{spindleSpeedInput.errorMessage}</p>
             )}
+            <SanitizationAlert
+              alert={spindleSpeedInput.sanitizationAlert}
+              onDismiss={spindleSpeedInput.dismissSanitizationAlert}
+            />
           </div>
 
           <div className="text-xs text-muted-foreground mt-2 p-2 bg-muted rounded">
@@ -534,6 +567,10 @@ export function ConfiguracoesCorte({ config, onChange, errorFields = [] }: Confi
                   {anguloRampaInput.hasError && anguloRampaInput.errorMessage && (
                     <p className="text-xs text-destructive mt-1">{anguloRampaInput.errorMessage}</p>
                   )}
+                  <SanitizationAlert
+                    alert={anguloRampaInput.sanitizationAlert}
+                    onDismiss={anguloRampaInput.dismissSanitizationAlert}
+                  />
                   <div className="text-xs text-muted-foreground mt-1 p-2 bg-muted rounded">
                     Recomendado: 3° (equilíbrio ideal). Mínimo: 2° (mais suave). Máximo: 5° (mais rápido)
                   </div>

@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { InfoTooltip } from "@/components/InfoTooltip";
+import { SanitizationAlert } from "@/components/SanitizationAlert";
 import { parametrosInfo } from "@/lib/parametros-info";
 import type { ConfiguracoesChapa } from "@/types";
 import { useValidatedInput } from "@/hooks/useValidatedInput";
@@ -92,6 +93,10 @@ export function ConfiguracoesChapa({ config, onChange }: ConfiguracoesChapaProps
             {largura.hasError && largura.errorMessage && (
               <p className="text-xs text-destructive mt-1">{largura.errorMessage}</p>
             )}
+            <SanitizationAlert
+              alert={largura.sanitizationAlert}
+              onDismiss={largura.dismissSanitizationAlert}
+            />
           </div>
           <div className="space-y-1">
             <div className="flex items-center gap-1">
@@ -113,6 +118,10 @@ export function ConfiguracoesChapa({ config, onChange }: ConfiguracoesChapaProps
             {altura.hasError && altura.errorMessage && (
               <p className="text-xs text-destructive mt-1">{altura.errorMessage}</p>
             )}
+            <SanitizationAlert
+              alert={altura.sanitizationAlert}
+              onDismiss={altura.dismissSanitizationAlert}
+            />
           </div>
         </div>
         <div className="space-y-1">
@@ -135,6 +144,10 @@ export function ConfiguracoesChapa({ config, onChange }: ConfiguracoesChapaProps
           {espessura.hasError && espessura.errorMessage && (
             <p className="text-xs text-destructive mt-1">{espessura.errorMessage}</p>
           )}
+          <SanitizationAlert
+            alert={espessura.sanitizationAlert}
+            onDismiss={espessura.dismissSanitizationAlert}
+          />
         </div>
       </CardContent>
     </Card>

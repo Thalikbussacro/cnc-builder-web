@@ -17,6 +17,13 @@ import { validateField, sanitizeValue, type FieldValidationResult, VALIDATION_RU
  * @param fieldName - Nome do campo para validação
  * @returns Estado e handlers para o input
  */
+export type SanitizationAlert = {
+  show: boolean;
+  message: string;
+  originalValue: number;
+  sanitizedValue: number;
+};
+
 export function useValidatedInput(
   value: number,
   onChange: (value: number) => void,
@@ -31,6 +38,14 @@ export function useValidatedInput(
   const [hasError, setHasError] = useState(!initialValidation.valid);
   const [errorMessage, setErrorMessage] = useState(initialValidation.error || '');
   const [isTouched, setIsTouched] = useState(false);
+
+  // Estado para alerta de sanitização
+  const [sanitizationAlert, setSanitizationAlert] = useState<SanitizationAlert>({
+    show: false,
+    message: '',
+    originalValue: 0,
+    sanitizedValue: 0,
+  });
 
   // Sincroniza com valor externo (quando muda por outra fonte)
   useEffect(() => {
@@ -75,6 +90,29 @@ export function useValidatedInput(
     // SEMPRE SANITIZA antes de salvar (proteção contra valores absurdos)
     const sanitizedValue = sanitizeValue(fieldName, numValue);
 
+    // Detecta se houve sanitização (valor foi alterado)
+    const wasSanitized = numValue !== sanitizedValue && numValue !== 0;
+
+    if (wasSanitized) {
+      // Busca os limites do campo para mensagem mais informativa
+      const rules = VALIDATION_RULES[fieldName];
+      let limitInfo = '';
+
+      if ('min' in rules && sanitizedValue === rules.min) {
+        limitInfo = `mínimo: ${rules.min}`;
+      } else if ('max' in rules && sanitizedValue === rules.max) {
+        limitInfo = `máximo: ${rules.max}`;
+      }
+
+      // Mostra alerta de sanitização
+      setSanitizationAlert({
+        show: true,
+        message: `Valor ajustado automaticamente para ${sanitizedValue}${limitInfo ? ` (${limitInfo})` : ''}`,
+        originalValue: numValue,
+        sanitizedValue: sanitizedValue,
+      });
+    }
+
     if (!validation.valid) {
       // Campo inválido/vazio: MOSTRA ERRO mas SALVA VALOR SANITIZADO
       setHasError(true);
@@ -91,11 +129,23 @@ export function useValidatedInput(
     onChange(sanitizedValue);
   }, [inputValue, fieldName, onChange]);
 
+  // Handler para fechar o alerta de sanitização
+  const dismissSanitizationAlert = useCallback(() => {
+    setSanitizationAlert({
+      show: false,
+      message: '',
+      originalValue: 0,
+      sanitizedValue: 0,
+    });
+  }, []);
+
   return {
     inputValue,
     hasError,
     errorMessage,
     handleChange,
     handleBlur,
+    sanitizationAlert,
+    dismissSanitizationAlert,
   };
 }
