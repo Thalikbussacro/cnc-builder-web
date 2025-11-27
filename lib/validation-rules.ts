@@ -104,6 +104,14 @@ export const VALIDATION_RULES = {
   },
 
   // ========================================================================
+  // NÚMERO DA FERRAMENTA
+  // ========================================================================
+  numeroFerramenta: {
+    min: 1,             // Número mínimo
+    max: 99,            // Número máximo (padrão CNC)
+  },
+
+  // ========================================================================
   // ESPESSURA DA CHAPA
   // ========================================================================
   espessuraChapa: {
@@ -111,6 +119,27 @@ export const VALIDATION_RULES = {
     max: 50,            // mm - Máximo razoável
     recomendadoMin: 3,  // mm - Mínimo recomendado
     recomendadoMax: 30, // mm - Máximo recomendado
+  },
+
+  // ========================================================================
+  // DIMENSÕES DA CHAPA
+  // ========================================================================
+  chapaLargura: {
+    min: 10,            // mm - Mínimo técnico
+    max: 10000,         // mm - Máximo razoável (10 metros)
+  },
+
+  chapaAltura: {
+    min: 10,            // mm - Mínimo técnico
+    max: 10000,         // mm - Máximo razoável (10 metros)
+  },
+
+  // ========================================================================
+  // MARGEM DE BORDA
+  // ========================================================================
+  margemBorda: {
+    min: 0,             // mm - Pode ser zero
+    max: 500,           // mm - Máximo razoável
   },
 } as const;
 
@@ -139,3 +168,92 @@ export const VALIDATION_MESSAGES = {
   anguloRampaAgressivo: 'Ângulo da rampa agressivo (pode estressar a ferramenta)',
   algumasPecasPequenasParaRampa: 'Algumas peças usarão mergulho vertical (tamanho insuficiente para rampa)',
 } as const;
+
+/**
+ * Tipo para resultado de validação de campo individual
+ */
+export type FieldValidationResult = {
+  valid: boolean;
+  error?: string;
+};
+
+/**
+ * Valida um campo individual contra suas regras
+ * @param fieldName - Nome do campo (chave em VALIDATION_RULES)
+ * @param value - Valor a ser validado
+ * @returns Resultado da validação com mensagem de erro se inválido
+ */
+export function validateField(
+  fieldName: keyof typeof VALIDATION_RULES,
+  value: number | string | null | undefined
+): FieldValidationResult {
+  const rules = VALIDATION_RULES[fieldName];
+
+  // Valores vazios SEMPRE são inválidos
+  if (value === null || value === undefined || value === '') {
+    return {
+      valid: false,
+      error: 'Campo obrigatório'
+    };
+  }
+
+  // Converte para número se necessário
+  const numValue = typeof value === 'string' ? parseFloat(value) : value;
+
+  // Verifica se é um número válido
+  if (isNaN(numValue)) {
+    return {
+      valid: false,
+      error: 'Valor inválido'
+    };
+  }
+
+  // Valida mínimo
+  if ('min' in rules && numValue < rules.min) {
+    return {
+      valid: false,
+      error: `Valor mínimo: ${rules.min}`
+    };
+  }
+
+  // Valida máximo
+  if ('max' in rules && numValue > rules.max) {
+    return {
+      valid: false,
+      error: `Valor máximo: ${rules.max}`
+    };
+  }
+
+  return { valid: true };
+}
+
+/**
+ * Sanitiza um valor numérico para ficar dentro dos limites permitidos
+ * IMPORTANTE: Use isso antes de enviar dados para API para evitar travamentos
+ * @param fieldName - Nome do campo (chave em VALIDATION_RULES)
+ * @param value - Valor a ser sanitizado
+ * @returns Valor sanitizado (limitado ao range permitido)
+ */
+export function sanitizeValue(
+  fieldName: keyof typeof VALIDATION_RULES,
+  value: number
+): number {
+  const rules = VALIDATION_RULES[fieldName];
+
+  // Trata NaN como 0
+  if (isNaN(value)) {
+    return 0;
+  }
+
+  // Limita ao mínimo
+  if ('min' in rules && value < rules.min) {
+    return rules.min;
+  }
+
+  // Limita ao máximo
+  if ('max' in rules && value > rules.max) {
+    return rules.max;
+  }
+
+  return value;
+}

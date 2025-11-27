@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,6 +13,8 @@ import { VALIDATION_RULES } from "@/lib/validation-rules";
 import type { ConfiguracoesCorte, AplicarRampaEm } from "@/types";
 import type { ValidationField } from "@/lib/validator";
 import { cn } from "@/lib/utils";
+import { useValidatedInput } from "@/hooks/useValidatedInput";
+import { useValidationContext } from "@/contexts/ValidationContext";
 
 type ConfiguracoesCorteProps = {
   config: ConfiguracoesCorte;
@@ -20,16 +23,25 @@ type ConfiguracoesCorteProps = {
 };
 
 export function ConfiguracoesCorte({ config, onChange, errorFields = [] }: ConfiguracoesCorteProps) {
+  const { registerError, clearError } = useValidationContext();
+
   // Constante para tolerância de ponto flutuante
   const FLOATING_POINT_TOLERANCE = 0.01;
 
   // Calcula número de passadas baseado na profundidade total e profundidade por passada
   // Usa Math.round com tolerância para evitar erros de arredondamento
   // Ex: 16/5.33 = 3.0018... deve mostrar 3, não 4
-  const numeroPassadas = React.useMemo(
-    () => Math.round(config.profundidade / config.profundidadePorPassada + FLOATING_POINT_TOLERANCE) || 1,
-    [config.profundidade, config.profundidadePorPassada]
-  );
+  const numeroPassadas = React.useMemo(() => {
+    // Se algum valor for inválido (0, negativo, NaN, Infinity), retorna 1
+    if (!config.profundidade || !config.profundidadePorPassada ||
+        config.profundidade <= 0 || config.profundidadePorPassada <= 0 ||
+        !isFinite(config.profundidade) || !isFinite(config.profundidadePorPassada)) {
+      return 1;
+    }
+    const resultado = Math.round(config.profundidade / config.profundidadePorPassada + FLOATING_POINT_TOLERANCE);
+    // Garante que seja no mínimo 1 e finito
+    return (resultado > 0 && isFinite(resultado)) ? resultado : 1;
+  }, [config.profundidade, config.profundidadePorPassada]);
 
   // Estado local para permitir edição do campo de passadas
   const [numeroPassadasTemp, setNumeroPassadasTemp] = React.useState<string>(numeroPassadas.toString());
@@ -39,30 +51,133 @@ export function ConfiguracoesCorte({ config, onChange, errorFields = [] }: Confi
     setNumeroPassadasTemp(numeroPassadas.toString());
   }, [numeroPassadas]);
 
-  const handleChange = (campo: keyof ConfiguracoesCorte, valor: string) => {
-    // Permite string vazia temporariamente (enquanto usuário digita)
-    if (valor === '') {
-      onChange({ ...config, [campo]: 0 });
-      return;
-    }
+  // Validação de campos
+  const profundidadeInput = useValidatedInput(
+    config.profundidade,
+    (value) => onChange({ ...config, profundidade: value }),
+    'profundidade'
+  );
 
-    const numero = parseFloat(valor);
+  const profundidadePorPassadaInput = useValidatedInput(
+    config.profundidadePorPassada,
+    (value) => onChange({ ...config, profundidadePorPassada: value }),
+    'profundidadePorPassada'
+  );
 
-    // Validações específicas por campo
-    if (campo === 'profundidade' || campo === 'profundidadePorPassada') {
-      // Profundidades não podem ser zero ou negativas
-      if (isNaN(numero) || numero <= 0) {
-        return; // Ignora valor inválido
-      }
+  const espacamentoInput = useValidatedInput(
+    config.espacamento,
+    (value) => onChange({ ...config, espacamento: value }),
+    'espacamento'
+  );
+
+  const margemBordaInput = useValidatedInput(
+    config.margemBorda,
+    (value) => onChange({ ...config, margemBorda: value }),
+    'margemBorda'
+  );
+
+  const feedrateInput = useValidatedInput(
+    config.feedrate,
+    (value) => onChange({ ...config, feedrate: value }),
+    'feedrate'
+  );
+
+  const plungeRateInput = useValidatedInput(
+    config.plungeRate,
+    (value) => onChange({ ...config, plungeRate: value }),
+    'plungeRate'
+  );
+
+  const rapidsSpeedInput = useValidatedInput(
+    config.rapidsSpeed,
+    (value) => onChange({ ...config, rapidsSpeed: value }),
+    'rapidsSpeed'
+  );
+
+  const spindleSpeedInput = useValidatedInput(
+    config.spindleSpeed,
+    (value) => onChange({ ...config, spindleSpeed: value }),
+    'spindleSpeed'
+  );
+
+  const anguloRampaInput = useValidatedInput(
+    config.anguloRampa,
+    (value) => onChange({ ...config, anguloRampa: value }),
+    'anguloRampa'
+  );
+
+  // Registra/limpa erros no contexto global
+  useEffect(() => {
+    if (profundidadeInput.hasError) {
+      registerError('corte', 'profundidade');
     } else {
-      // Outros campos podem ser zero, mas não negativos
-      if (isNaN(numero) || numero < 0) {
-        return; // Ignora valor inválido
-      }
+      clearError('corte', 'profundidade');
     }
+  }, [profundidadeInput.hasError, registerError, clearError]);
 
-    onChange({ ...config, [campo]: numero });
-  };
+  useEffect(() => {
+    if (profundidadePorPassadaInput.hasError) {
+      registerError('corte', 'profundidadePorPassada');
+    } else {
+      clearError('corte', 'profundidadePorPassada');
+    }
+  }, [profundidadePorPassadaInput.hasError, registerError, clearError]);
+
+  useEffect(() => {
+    if (espacamentoInput.hasError) {
+      registerError('corte', 'espacamento');
+    } else {
+      clearError('corte', 'espacamento');
+    }
+  }, [espacamentoInput.hasError, registerError, clearError]);
+
+  useEffect(() => {
+    if (margemBordaInput.hasError) {
+      registerError('corte', 'margemBorda');
+    } else {
+      clearError('corte', 'margemBorda');
+    }
+  }, [margemBordaInput.hasError, registerError, clearError]);
+
+  useEffect(() => {
+    if (feedrateInput.hasError) {
+      registerError('corte', 'feedrate');
+    } else {
+      clearError('corte', 'feedrate');
+    }
+  }, [feedrateInput.hasError, registerError, clearError]);
+
+  useEffect(() => {
+    if (plungeRateInput.hasError) {
+      registerError('corte', 'plungeRate');
+    } else {
+      clearError('corte', 'plungeRate');
+    }
+  }, [plungeRateInput.hasError, registerError, clearError]);
+
+  useEffect(() => {
+    if (rapidsSpeedInput.hasError) {
+      registerError('corte', 'rapidsSpeed');
+    } else {
+      clearError('corte', 'rapidsSpeed');
+    }
+  }, [rapidsSpeedInput.hasError, registerError, clearError]);
+
+  useEffect(() => {
+    if (spindleSpeedInput.hasError) {
+      registerError('corte', 'spindleSpeed');
+    } else {
+      clearError('corte', 'spindleSpeed');
+    }
+  }, [spindleSpeedInput.hasError, registerError, clearError]);
+
+  useEffect(() => {
+    if (anguloRampaInput.hasError) {
+      registerError('corte', 'anguloRampa');
+    } else {
+      clearError('corte', 'anguloRampa');
+    }
+  }, [anguloRampaInput.hasError, registerError, clearError]);
 
   const handleNumeroPassadasChange = (valor: string) => {
     // Atualiza estado temporário (permite digitar livremente)
@@ -93,8 +208,6 @@ export function ConfiguracoesCorte({ config, onChange, errorFields = [] }: Confi
     onChange({ ...config, [campo]: valor });
   };
 
-  const hasError = (field: ValidationField) => errorFields.includes(field);
-
   return (
     <Card>
       <CardHeader>
@@ -112,13 +225,17 @@ export function ConfiguracoesCorte({ config, onChange, errorFields = [] }: Confi
           <Input
             id="profundidade"
             type="number"
-            value={config.profundidade}
-            onChange={(e) => handleChange("profundidade", e.target.value)}
+            value={profundidadeInput.inputValue}
+            onChange={profundidadeInput.handleChange}
+            onBlur={profundidadeInput.handleBlur}
             min={VALIDATION_RULES.profundidade.min}
             max={VALIDATION_RULES.profundidade.max}
             step="1"
-            className={cn(hasError('profundidade') && "border-destructive focus-visible:ring-destructive")}
+            className={cn(profundidadeInput.hasError && "border-destructive focus-visible:ring-destructive")}
           />
+          {profundidadeInput.hasError && profundidadeInput.errorMessage && (
+            <p className="text-xs text-destructive mt-1">{profundidadeInput.errorMessage}</p>
+          )}
         </div>
 
         <div className="grid grid-cols-2 gap-2.5">
@@ -150,13 +267,17 @@ export function ConfiguracoesCorte({ config, onChange, errorFields = [] }: Confi
             <Input
               id="profundidadePorPassada"
               type="number"
-              value={config.profundidadePorPassada}
-              onChange={(e) => handleChange("profundidadePorPassada", e.target.value)}
+              value={profundidadePorPassadaInput.inputValue}
+              onChange={profundidadePorPassadaInput.handleChange}
+              onBlur={profundidadePorPassadaInput.handleBlur}
               min={VALIDATION_RULES.profundidadePorPassada.min}
               max={VALIDATION_RULES.profundidadePorPassada.max}
               step="0.5"
-              className={cn(hasError('profundidadePorPassada') && "border-destructive focus-visible:ring-destructive")}
+              className={cn(profundidadePorPassadaInput.hasError && "border-destructive focus-visible:ring-destructive")}
             />
+            {profundidadePorPassadaInput.hasError && profundidadePorPassadaInput.errorMessage && (
+              <p className="text-xs text-destructive mt-1">{profundidadePorPassadaInput.errorMessage}</p>
+            )}
           </div>
         </div>
 
@@ -171,12 +292,17 @@ export function ConfiguracoesCorte({ config, onChange, errorFields = [] }: Confi
           <Input
             id="espacamento"
             type="number"
-            value={config.espacamento}
-            onChange={(e) => handleChange("espacamento", e.target.value)}
+            value={espacamentoInput.inputValue}
+            onChange={espacamentoInput.handleChange}
+            onBlur={espacamentoInput.handleBlur}
             min={VALIDATION_RULES.espacamento.min}
             max={VALIDATION_RULES.espacamento.max}
             step="5"
+            className={cn(espacamentoInput.hasError && "border-destructive focus-visible:ring-destructive")}
           />
+          {espacamentoInput.hasError && espacamentoInput.errorMessage && (
+            <p className="text-xs text-destructive mt-1">{espacamentoInput.errorMessage}</p>
+          )}
         </div>
 
         <div className="space-y-2">
@@ -210,12 +336,17 @@ export function ConfiguracoesCorte({ config, onChange, errorFields = [] }: Confi
               <Input
                 id="margemBorda"
                 type="number"
-                value={config.margemBorda}
-                onChange={(e) => handleChange("margemBorda", e.target.value)}
+                value={margemBordaInput.inputValue}
+                onChange={margemBordaInput.handleChange}
+                onBlur={margemBordaInput.handleBlur}
                 min="0"
                 max={VALIDATION_RULES.espacamento.max}
                 step="5"
+                className={cn(margemBordaInput.hasError && "border-destructive focus-visible:ring-destructive")}
               />
+              {margemBordaInput.hasError && margemBordaInput.errorMessage && (
+                <p className="text-xs text-destructive mt-1">{margemBordaInput.errorMessage}</p>
+              )}
             </div>
           )}
         </div>
@@ -235,13 +366,17 @@ export function ConfiguracoesCorte({ config, onChange, errorFields = [] }: Confi
               <Input
                 id="feedrate"
                 type="number"
-                value={config.feedrate}
-                onChange={(e) => handleChange("feedrate", e.target.value)}
+                value={feedrateInput.inputValue}
+                onChange={feedrateInput.handleChange}
+                onBlur={feedrateInput.handleBlur}
                 min={VALIDATION_RULES.feedrate.min}
                 max={VALIDATION_RULES.feedrate.max}
                 step="100"
-                className={cn(hasError('feedrate') && "border-destructive focus-visible:ring-destructive")}
+                className={cn(feedrateInput.hasError && "border-destructive focus-visible:ring-destructive")}
               />
+              {feedrateInput.hasError && feedrateInput.errorMessage && (
+                <p className="text-xs text-destructive mt-1">{feedrateInput.errorMessage}</p>
+              )}
             </div>
             <div className="space-y-1">
               <div className="flex items-center gap-1">
@@ -254,13 +389,17 @@ export function ConfiguracoesCorte({ config, onChange, errorFields = [] }: Confi
               <Input
                 id="plungeRate"
                 type="number"
-                value={config.plungeRate}
-                onChange={(e) => handleChange("plungeRate", e.target.value)}
+                value={plungeRateInput.inputValue}
+                onChange={plungeRateInput.handleChange}
+                onBlur={plungeRateInput.handleBlur}
                 min={VALIDATION_RULES.plungeRate.min}
                 max={VALIDATION_RULES.plungeRate.max}
                 step="50"
-                className={cn(hasError('plungeRate') && "border-destructive focus-visible:ring-destructive")}
+                className={cn(plungeRateInput.hasError && "border-destructive focus-visible:ring-destructive")}
               />
+              {plungeRateInput.hasError && plungeRateInput.errorMessage && (
+                <p className="text-xs text-destructive mt-1">{plungeRateInput.errorMessage}</p>
+              )}
             </div>
           </div>
 
@@ -275,13 +414,17 @@ export function ConfiguracoesCorte({ config, onChange, errorFields = [] }: Confi
             <Input
               id="rapidsSpeed"
               type="number"
-              value={config.rapidsSpeed}
-              onChange={(e) => handleChange("rapidsSpeed", e.target.value)}
+              value={rapidsSpeedInput.inputValue}
+              onChange={rapidsSpeedInput.handleChange}
+              onBlur={rapidsSpeedInput.handleBlur}
               min={VALIDATION_RULES.rapidsSpeed.min}
               max={VALIDATION_RULES.rapidsSpeed.max}
               step="100"
-              className={cn(hasError('rapidsSpeed') && "border-destructive focus-visible:ring-destructive")}
+              className={cn(rapidsSpeedInput.hasError && "border-destructive focus-visible:ring-destructive")}
             />
+            {rapidsSpeedInput.hasError && rapidsSpeedInput.errorMessage && (
+              <p className="text-xs text-destructive mt-1">{rapidsSpeedInput.errorMessage}</p>
+            )}
           </div>
 
           <div className="space-y-1 mt-2">
@@ -295,13 +438,17 @@ export function ConfiguracoesCorte({ config, onChange, errorFields = [] }: Confi
             <Input
               id="spindleSpeed"
               type="number"
-              value={config.spindleSpeed}
-              onChange={(e) => handleChange("spindleSpeed", e.target.value)}
+              value={spindleSpeedInput.inputValue}
+              onChange={spindleSpeedInput.handleChange}
+              onBlur={spindleSpeedInput.handleBlur}
               min={VALIDATION_RULES.spindleSpeed.min}
               max={VALIDATION_RULES.spindleSpeed.max}
               step="1000"
-              className={cn(hasError('spindleSpeed') && "border-destructive focus-visible:ring-destructive")}
+              className={cn(spindleSpeedInput.hasError && "border-destructive focus-visible:ring-destructive")}
             />
+            {spindleSpeedInput.hasError && spindleSpeedInput.errorMessage && (
+              <p className="text-xs text-destructive mt-1">{spindleSpeedInput.errorMessage}</p>
+            )}
           </div>
 
           <div className="text-xs text-muted-foreground mt-2 p-2 bg-muted rounded">
@@ -376,13 +523,17 @@ export function ConfiguracoesCorte({ config, onChange, errorFields = [] }: Confi
                   <Input
                     id="anguloRampa"
                     type="number"
-                    value={config.anguloRampa}
-                    onChange={(e) => handleChange("anguloRampa", e.target.value)}
+                    value={anguloRampaInput.inputValue}
+                    onChange={anguloRampaInput.handleChange}
+                    onBlur={anguloRampaInput.handleBlur}
                     min={VALIDATION_RULES.anguloRampa.min}
                     max={VALIDATION_RULES.anguloRampa.max}
                     step="0.5"
-                    className={cn(hasError('anguloRampa') && "border-destructive focus-visible:ring-destructive")}
+                    className={cn(anguloRampaInput.hasError && "border-destructive focus-visible:ring-destructive")}
                   />
+                  {anguloRampaInput.hasError && anguloRampaInput.errorMessage && (
+                    <p className="text-xs text-destructive mt-1">{anguloRampaInput.errorMessage}</p>
+                  )}
                   <div className="text-xs text-muted-foreground mt-1 p-2 bg-muted rounded">
                     Recomendado: 3° (equilíbrio ideal). Mínimo: 2° (mais suave). Máximo: 5° (mais rápido)
                   </div>

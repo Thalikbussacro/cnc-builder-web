@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,6 +10,8 @@ import { VALIDATION_RULES } from "@/lib/validation-rules";
 import type { ConfiguracoesFerramenta } from "@/types";
 import type { ValidationField } from "@/lib/validator";
 import { cn } from "@/lib/utils";
+import { useValidatedInput } from "@/hooks/useValidatedInput";
+import { useValidationContext } from "@/contexts/ValidationContext";
 
 type ConfiguracoesFerramentaProps = {
   config: ConfiguracoesFerramenta;
@@ -17,28 +20,37 @@ type ConfiguracoesFerramentaProps = {
 };
 
 export function ConfiguracoesFerramenta({ config, onChange, errorFields = [] }: ConfiguracoesFerramentaProps) {
-  const hasError = (field: ValidationField) => errorFields.includes(field);
+  const { registerError, clearError } = useValidationContext();
 
-  const handleChange = (campo: keyof ConfiguracoesFerramenta, valor: string | number) => {
-    // Se valor já é número (vindo do parseInt/parseFloat), usa direto
-    if (typeof valor === 'number') {
-      onChange({ ...config, [campo]: valor });
-      return;
+  // Validação de campos
+  const diametroInput = useValidatedInput(
+    config.diametro,
+    (value) => onChange({ ...config, diametro: value }),
+    'diametroFresa'
+  );
+
+  const numeroFerramentaInput = useValidatedInput(
+    config.numeroFerramenta,
+    (value) => onChange({ ...config, numeroFerramenta: value }),
+    'numeroFerramenta'
+  );
+
+  // Registra/limpa erros no contexto global
+  useEffect(() => {
+    if (diametroInput.hasError) {
+      registerError('ferramenta', 'diametro');
+    } else {
+      clearError('ferramenta', 'diametro');
     }
+  }, [diametroInput.hasError, registerError, clearError]);
 
-    // Se é string vazia, mantém o valor anterior (usuário ainda está digitando)
-    if (valor === '') {
-      return;
+  useEffect(() => {
+    if (numeroFerramentaInput.hasError) {
+      registerError('ferramenta', 'numeroFerramenta');
+    } else {
+      clearError('ferramenta', 'numeroFerramenta');
     }
-
-    // Tenta converter para número
-    const numero = campo === 'numeroFerramenta' ? parseInt(valor) : parseFloat(valor);
-
-    // Só atualiza se for um número válido
-    if (!isNaN(numero)) {
-      onChange({ ...config, [campo]: numero });
-    }
-  };
+  }, [numeroFerramentaInput.hasError, registerError, clearError]);
 
   return (
     <Card>
@@ -58,13 +70,17 @@ export function ConfiguracoesFerramenta({ config, onChange, errorFields = [] }: 
             <Input
               id="diametro"
               type="number"
-              value={config.diametro}
-              onChange={(e) => handleChange("diametro", e.target.value)}
+              value={diametroInput.inputValue}
+              onChange={diametroInput.handleChange}
+              onBlur={diametroInput.handleBlur}
               min={VALIDATION_RULES.diametroFresa.min}
               max={VALIDATION_RULES.diametroFresa.max}
               step="0.5"
-              className={cn(hasError('diametroFresa') && "border-destructive focus-visible:ring-destructive")}
+              className={cn(diametroInput.hasError && "border-destructive focus-visible:ring-destructive")}
             />
+            {diametroInput.hasError && diametroInput.errorMessage && (
+              <p className="text-xs text-destructive mt-1">{diametroInput.errorMessage}</p>
+            )}
           </div>
           <div className="space-y-1">
             <div className="flex items-center gap-1">
@@ -77,12 +93,17 @@ export function ConfiguracoesFerramenta({ config, onChange, errorFields = [] }: 
             <Input
               id="numeroFerramenta"
               type="number"
-              value={config.numeroFerramenta}
-              onChange={(e) => handleChange("numeroFerramenta", e.target.value)}
-              min="1"
-              max="99"
+              value={numeroFerramentaInput.inputValue}
+              onChange={numeroFerramentaInput.handleChange}
+              onBlur={numeroFerramentaInput.handleBlur}
+              min={VALIDATION_RULES.numeroFerramenta.min}
+              max={VALIDATION_RULES.numeroFerramenta.max}
               step="1"
+              className={cn(numeroFerramentaInput.hasError && "border-destructive focus-visible:ring-destructive")}
             />
+            {numeroFerramentaInput.hasError && numeroFerramentaInput.errorMessage && (
+              <p className="text-xs text-destructive mt-1">{numeroFerramentaInput.errorMessage}</p>
+            )}
           </div>
         </div>
       </CardContent>

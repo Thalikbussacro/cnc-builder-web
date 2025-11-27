@@ -22,8 +22,12 @@ import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { useDebounce } from "@/hooks/useDebounce";
 import type { ValidationResult, ValidationField } from "@/lib/validator";
 import { ApiClient } from "@/lib/api-client";
+import { sanitizeValue } from "@/lib/validation-rules";
+import { useValidationContext } from "@/contexts/ValidationContext";
 
 export default function Home() {
+  const { hasErrors } = useValidationContext();
+
   // Estados com localStorage
   const [configChapa, setConfigChapa] = useLocalStorage<TConfigChapa>('cnc-config-chapa', {
     largura: 2850,
@@ -100,11 +104,36 @@ export default function Home() {
     // Chama API de validação para obter preview completo
     const fetchPreview = async () => {
       try {
+        // SANITIZA valores antes de enviar para API (evita travamentos com valores absurdos)
+        const configChapaSanitizada = {
+          largura: sanitizeValue('chapaLargura', configChapa.largura),
+          altura: sanitizeValue('chapaAltura', configChapa.altura),
+          espessura: sanitizeValue('espessuraChapa', configChapa.espessura),
+        };
+
+        const configCorteSanitizada = {
+          ...configCorte,
+          profundidade: sanitizeValue('profundidade', configCorte.profundidade),
+          profundidadePorPassada: sanitizeValue('profundidadePorPassada', configCorte.profundidadePorPassada),
+          espacamento: sanitizeValue('espacamento', configCorte.espacamento),
+          margemBorda: sanitizeValue('margemBorda', configCorte.margemBorda),
+          feedrate: sanitizeValue('feedrate', configCorte.feedrate),
+          plungeRate: sanitizeValue('plungeRate', configCorte.plungeRate),
+          rapidsSpeed: sanitizeValue('rapidsSpeed', configCorte.rapidsSpeed),
+          spindleSpeed: sanitizeValue('spindleSpeed', configCorte.spindleSpeed),
+          anguloRampa: sanitizeValue('anguloRampa', configCorte.anguloRampa),
+        };
+
+        const configFerramentaSanitizada = {
+          diametro: sanitizeValue('diametroFresa', configFerramenta.diametro),
+          numeroFerramenta: configFerramenta.numeroFerramenta,
+        };
+
         const result = await ApiClient.validate({
           pecas: pecas.filter(p => !p.ignorada),
-          configChapa,
-          configCorte,
-          configFerramenta,
+          configChapa: configChapaSanitizada,
+          configCorte: configCorteSanitizada,
+          configFerramenta: configFerramentaSanitizada,
           metodoNesting,
         });
 
@@ -175,18 +204,49 @@ export default function Home() {
 
   // Handler para visualizar G-code
   const handleVisualizarGCode = async () => {
+    // BLOQUEIA se houver erros de validação nos campos
+    if (hasErrors()) {
+      setErro('Corrija os erros nos campos destacados antes de gerar o G-code');
+      return;
+    }
+
     // Limpa erros anteriores
     setErro(null);
 
     try {
       setCarregando(true);
 
+      // SANITIZA valores antes de enviar para API (evita travamentos com valores absurdos)
+      const configChapaSanitizada = {
+        largura: sanitizeValue('chapaLargura', configChapa.largura),
+        altura: sanitizeValue('chapaAltura', configChapa.altura),
+        espessura: sanitizeValue('espessuraChapa', configChapa.espessura),
+      };
+
+      const configCorteSanitizada = {
+        ...configCorte,
+        profundidade: sanitizeValue('profundidade', configCorte.profundidade),
+        profundidadePorPassada: sanitizeValue('profundidadePorPassada', configCorte.profundidadePorPassada),
+        espacamento: sanitizeValue('espacamento', configCorte.espacamento),
+        margemBorda: sanitizeValue('margemBorda', configCorte.margemBorda),
+        feedrate: sanitizeValue('feedrate', configCorte.feedrate),
+        plungeRate: sanitizeValue('plungeRate', configCorte.plungeRate),
+        rapidsSpeed: sanitizeValue('rapidsSpeed', configCorte.rapidsSpeed),
+        spindleSpeed: sanitizeValue('spindleSpeed', configCorte.spindleSpeed),
+        anguloRampa: sanitizeValue('anguloRampa', configCorte.anguloRampa),
+      };
+
+      const configFerramentaSanitizada = {
+        diametro: sanitizeValue('diametroFresa', configFerramenta.diametro),
+        numeroFerramenta: configFerramenta.numeroFerramenta,
+      };
+
       // VALIDAÇÃO VIA API (fonte única da verdade)
       const result = await ApiClient.validate({
         pecas: pecas.filter(p => !p.ignorada),
-        configChapa,
-        configCorte,
-        configFerramenta,
+        configChapa: configChapaSanitizada,
+        configCorte: configCorteSanitizada,
+        configFerramenta: configFerramentaSanitizada,
         metodoNesting,
       });
 
@@ -208,9 +268,9 @@ export default function Home() {
       // Gera G-code via API (validação já foi feita)
       const response = await ApiClient.gerarGCode({
         pecas: pecas.filter(p => !p.ignorada),
-        configChapa,
-        configCorte,
-        configFerramenta,
+        configChapa: configChapaSanitizada,
+        configCorte: configCorteSanitizada,
+        configFerramenta: configFerramentaSanitizada,
         metodoNesting,
         incluirComentarios,
       });
@@ -234,11 +294,36 @@ export default function Home() {
     try {
       setCarregando(true);
 
+      // SANITIZA valores antes de enviar para API (evita travamentos com valores absurdos)
+      const configChapaSanitizada = {
+        largura: sanitizeValue('chapaLargura', configChapa.largura),
+        altura: sanitizeValue('chapaAltura', configChapa.altura),
+        espessura: sanitizeValue('espessuraChapa', configChapa.espessura),
+      };
+
+      const configCorteSanitizada = {
+        ...configCorte,
+        profundidade: sanitizeValue('profundidade', configCorte.profundidade),
+        profundidadePorPassada: sanitizeValue('profundidadePorPassada', configCorte.profundidadePorPassada),
+        espacamento: sanitizeValue('espacamento', configCorte.espacamento),
+        margemBorda: sanitizeValue('margemBorda', configCorte.margemBorda),
+        feedrate: sanitizeValue('feedrate', configCorte.feedrate),
+        plungeRate: sanitizeValue('plungeRate', configCorte.plungeRate),
+        rapidsSpeed: sanitizeValue('rapidsSpeed', configCorte.rapidsSpeed),
+        spindleSpeed: sanitizeValue('spindleSpeed', configCorte.spindleSpeed),
+        anguloRampa: sanitizeValue('anguloRampa', configCorte.anguloRampa),
+      };
+
+      const configFerramentaSanitizada = {
+        diametro: sanitizeValue('diametroFresa', configFerramenta.diametro),
+        numeroFerramenta: configFerramenta.numeroFerramenta,
+      };
+
       const response = await ApiClient.gerarGCode({
         pecas: pecas.filter(p => !p.ignorada),
-        configChapa,
-        configCorte,
-        configFerramenta,
+        configChapa: configChapaSanitizada,
+        configCorte: configCorteSanitizada,
+        configFerramenta: configFerramentaSanitizada,
         metodoNesting,
         incluirComentarios,
       });
@@ -307,7 +392,8 @@ export default function Home() {
                 onClick={handleVisualizarGCode}
                 variant="default"
                 size="sm"
-                disabled={pecas.length === 0 || carregando}
+                disabled={pecas.length === 0 || carregando || hasErrors()}
+                title={hasErrors() ? "Corrija os erros nos campos antes de gerar o G-code" : undefined}
               >
                 {carregando && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
                 <span className="hidden md:inline">Baixar/Copiar </span>G-code

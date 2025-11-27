@@ -1,10 +1,11 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { Settings, Scissors, Wrench, Package, PlusCircle, Menu, X, ChevronLeft, ChevronRight } from "lucide-react";
+import { Settings, Scissors, Wrench, Package, PlusCircle, Menu, X, ChevronLeft, ChevronRight, AlertCircle } from "lucide-react";
 import { Button } from "./ui/button";
 import { useState } from "react";
 import dynamic from "next/dynamic";
+import { useValidationContext } from "@/contexts/ValidationContext";
 
 const ThemeToggle = dynamic(() => import("./ThemeToggle").then(mod => ({ default: mod.ThemeToggle })), {
   ssr: false,
@@ -56,6 +57,7 @@ const configuracoes = [
 
 export function Sidebar({ secaoAtiva, onSecaoChange, mobileOpen, onMobileOpenChange }: SidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
+  const { tabHasErrors } = useValidationContext();
 
   const handleSecaoClick = (secao: SecaoSidebar) => {
     onSecaoChange(secao);
@@ -65,6 +67,7 @@ export function Sidebar({ secaoAtiva, onSecaoChange, mobileOpen, onMobileOpenCha
   const renderSecaoButton = (secao: typeof secaoAdicionar | typeof configuracoes[0]) => {
     const Icon = secao.icon;
     const isActive = secaoAtiva === secao.id;
+    const hasErrors = secao.id !== 'adicionar-peca' && secao.id !== 'nesting' && tabHasErrors(secao.id as 'chapa' | 'corte' | 'ferramenta');
 
     return (
       <button
@@ -77,10 +80,20 @@ export function Sidebar({ secaoAtiva, onSecaoChange, mobileOpen, onMobileOpenCha
         )}
         title={collapsed ? secao.label : undefined}
       >
-        <Icon className="h-5 w-5 flex-shrink-0" />
+        <div className="relative">
+          <Icon className="h-5 w-5 flex-shrink-0" />
+          {hasErrors && (
+            <div className="absolute -top-1 -right-1 h-2.5 w-2.5 bg-destructive rounded-full ring-2 ring-background" />
+          )}
+        </div>
         {!collapsed && (
           <div className="flex flex-col flex-1 min-w-0">
-            <span className="font-medium text-sm">{secao.label}</span>
+            <div className="flex items-center gap-1.5">
+              <span className="font-medium text-sm">{secao.label}</span>
+              {hasErrors && (
+                <AlertCircle className="h-3.5 w-3.5 text-destructive flex-shrink-0" />
+              )}
+            </div>
             <span className={cn(
               "text-xs truncate",
               isActive ? "text-primary-foreground/80" : "text-muted-foreground"
