@@ -1,19 +1,19 @@
 import { useState, useEffect, useCallback } from 'react';
-import { validateField, type FieldValidationResult, VALIDATION_RULES } from '@/lib/validation-rules';
+import { validateField, sanitizeValue, type FieldValidationResult, VALIDATION_RULES } from '@/lib/validation-rules';
 
 /**
  * Hook para inputs validados com comportamento CONSISTENTE
  *
  * Comportamento UNIFORME para TODOS os campos:
  * - onChange: Permite digitar livremente (inclusive apagar tudo)
- * - onBlur: Valida e mostra erro, mas SALVA o valor mesmo se inválido
- * - Valores vazios SÃO salvos e mostram erro
- * - Valores inválidos SÃO salvos e mostram erro
- * - NÃO sanitiza automaticamente
- * - Usuário deve corrigir manualmente
+ * - onBlur: Valida e mostra erro, SANITIZA e salva valor seguro
+ * - Valores vazios são salvos como 0 e mostram erro
+ * - Valores fora do range são SANITIZADOS (limitados ao min/max) mas mostram erro
+ * - Valores absurdos NUNCA entram no estado (proteção contra travamentos)
+ * - Usuário vê o erro mas o sistema fica protegido
  *
  * @param value - Valor atual do campo
- * @param onChange - Callback para propagar TODAS as mudanças (válidas ou não)
+ * @param onChange - Callback para propagar mudanças
  * @param fieldName - Nome do campo para validação
  * @returns Estado e handlers para o input
  */
@@ -58,44 +58,37 @@ export function useValidatedInput(
     }
   }, [hasError]);
 
-  // Handler para onBlur: Valida e mostra erro, MAS SALVA MESMO ASSIM
+  // Handler para onBlur: Valida e mostra erro, SANITIZA e salva valor seguro
   const handleBlur = useCallback(() => {
     setIsTouched(false);
 
     // Valida o campo
     const validation = validateField(fieldName, inputValue);
 
+    // Converte para número (ou 0 se vazio/inválido)
+    let numValue = 0;
+    if (inputValue !== '' && inputValue !== null && inputValue !== undefined) {
+      const parsed = parseFloat(inputValue);
+      numValue = !isNaN(parsed) ? parsed : 0;
+    }
+
+    // SEMPRE SANITIZA antes de salvar (proteção contra valores absurdos)
+    const sanitizedValue = sanitizeValue(fieldName, numValue);
+
     if (!validation.valid) {
-      // Campo inválido/vazio: MOSTRA ERRO mas SALVA o valor mesmo assim
+      // Campo inválido/vazio: MOSTRA ERRO mas SALVA VALOR SANITIZADO
       setHasError(true);
       setErrorMessage(validation.error || 'Valor inválido');
 
-      // SALVA o valor inválido/vazio (SEM sanitizar)
-      if (inputValue === '' || inputValue === null || inputValue === undefined) {
-        // Salva 0 para campo vazio (mas mantém erro)
-        onChange(0);
-      } else {
-        const numValue = parseFloat(inputValue);
-        if (!isNaN(numValue)) {
-          // Salva o número (mesmo que fora do range)
-          onChange(numValue);
-        } else {
-          // Valor não numérico: salva 0 (mas mantém erro)
-          onChange(0);
-        }
-      }
+      // Salva valor sanitizado (NUNCA salva valores absurdos)
+      onChange(sanitizedValue);
       return;
     }
 
-    // Campo válido: limpa erro e salva
+    // Campo válido: limpa erro e salva valor sanitizado
     setHasError(false);
     setErrorMessage('');
-
-    // Converte para número e propaga
-    const numValue = parseFloat(inputValue);
-    if (!isNaN(numValue)) {
-      onChange(numValue);
-    }
+    onChange(sanitizedValue);
   }, [inputValue, fieldName, onChange]);
 
   return {
