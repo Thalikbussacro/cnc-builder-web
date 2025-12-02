@@ -74,9 +74,9 @@ export function ConfiguracoesFerramenta({ config, onChange, errorFields = [] }: 
               value={diametroInput.inputValue}
               onChange={diametroInput.handleChange}
               onBlur={diametroInput.handleBlur}
-              min={VALIDATION_RULES.diametroFresa.min}
+              min="1"
               max={VALIDATION_RULES.diametroFresa.max}
-              step="0.5"
+              step="1"
               className={cn(diametroInput.hasError && "border-destructive focus-visible:ring-destructive")}
             />
             {diametroInput.hasError && diametroInput.errorMessage && (

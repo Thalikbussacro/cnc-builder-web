@@ -47,6 +47,15 @@ export function ConfiguracoesCorte({ config, onChange, errorFields = [] }: Confi
   // Estado local para permitir edição do campo de passadas
   const [numeroPassadasTemp, setNumeroPassadasTemp] = React.useState<string>(numeroPassadas.toString());
 
+  // Estado para alerta de sanitização do campo de passadas
+  const [passadasSanitizationAlert, setPassadasSanitizationAlert] = React.useState<{
+    show: boolean;
+    message: string;
+  }>({
+    show: false,
+    message: '',
+  });
+
   // Atualiza o valor temporário quando o cálculo mudar (usuário mudou prof. ou prof./passada)
   React.useEffect(() => {
     setNumeroPassadasTemp(numeroPassadas.toString());
@@ -180,25 +189,54 @@ export function ConfiguracoesCorte({ config, onChange, errorFields = [] }: Confi
     }
   }, [anguloRampaInput.hasError, registerError, clearError]);
 
+  // Força usarRampa para false enquanto recurso está desabilitado (em desenvolvimento)
+  useEffect(() => {
+    if (config.usarRampa) {
+      onChange({ ...config, usarRampa: false });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const handleNumeroPassadasChange = (valor: string) => {
     // Atualiza estado temporário (permite digitar livremente)
     setNumeroPassadasTemp(valor);
+  };
 
-    // Permite string vazia temporariamente (enquanto usuário digita)
-    if (valor === '') {
-      return;
+  const handleNumeroPassadasBlur = () => {
+    // Converte para número (ou 0 se vazio/inválido)
+    let numValue = 0;
+    if (numeroPassadasTemp !== '' && numeroPassadasTemp !== null && numeroPassadasTemp !== undefined) {
+      const parsed = parseInt(numeroPassadasTemp);
+      numValue = !isNaN(parsed) ? parsed : 0;
     }
 
-    const numero = parseInt(valor);
+    // SEMPRE SANITIZA antes de salvar (mínimo 1, máximo 100)
+    const sanitizedValue = Math.max(1, Math.min(100, numValue));
 
-    // Só valida se for um número válido e maior que zero
-    if (isNaN(numero) || numero <= 0) {
-      return; // Ignora valores inválidos mas mantém no campo
+    // Detecta se houve sanitização (campo estava vazio OU valor foi alterado)
+    const wasSanitized = (numeroPassadasTemp === '' || numeroPassadasTemp === null || numeroPassadasTemp === undefined) || numValue !== sanitizedValue;
+
+    if (wasSanitized) {
+      // Mostra alerta de sanitização
+      setPassadasSanitizationAlert({
+        show: true,
+        message: `Valor ajustado automaticamente para ${sanitizedValue} (mínimo: 1)`,
+      });
     }
+
+    // Atualiza o campo visualmente com valor sanitizado
+    setNumeroPassadasTemp(sanitizedValue.toString());
 
     // Ao mudar número de passadas, recalcula profundidade por passada
-    const novaProfundidadePorPassada = Math.round((config.profundidade / numero) * 100) / 100;
+    const novaProfundidadePorPassada = Math.round((config.profundidade / sanitizedValue) * 100) / 100;
     onChange({ ...config, profundidadePorPassada: novaProfundidadePorPassada });
+  };
+
+  const dismissPassadasSanitizationAlert = () => {
+    setPassadasSanitizationAlert({
+      show: false,
+      message: '',
+    });
   };
 
   const handleCheckboxChange = (campo: keyof ConfiguracoesCorte, valor: boolean) => {
@@ -229,7 +267,7 @@ export function ConfiguracoesCorte({ config, onChange, errorFields = [] }: Confi
             value={profundidadeInput.inputValue}
             onChange={profundidadeInput.handleChange}
             onBlur={profundidadeInput.handleBlur}
-            min={VALIDATION_RULES.profundidade.min}
+            min="1"
             max={VALIDATION_RULES.profundidade.max}
             step="1"
             className={cn(profundidadeInput.hasError && "border-destructive focus-visible:ring-destructive")}
@@ -257,8 +295,18 @@ export function ConfiguracoesCorte({ config, onChange, errorFields = [] }: Confi
               type="number"
               value={numeroPassadasTemp}
               onChange={(e) => handleNumeroPassadasChange(e.target.value)}
+              onBlur={handleNumeroPassadasBlur}
               min="1"
               step="1"
+            />
+            <SanitizationAlert
+              alert={{
+                show: passadasSanitizationAlert.show,
+                message: passadasSanitizationAlert.message,
+                originalValue: 0,
+                sanitizedValue: 0,
+              }}
+              onDismiss={dismissPassadasSanitizationAlert}
             />
           </div>
           <div className="space-y-1">
@@ -275,9 +323,9 @@ export function ConfiguracoesCorte({ config, onChange, errorFields = [] }: Confi
               value={profundidadePorPassadaInput.inputValue}
               onChange={profundidadePorPassadaInput.handleChange}
               onBlur={profundidadePorPassadaInput.handleBlur}
-              min={VALIDATION_RULES.profundidadePorPassada.min}
+              min="1"
               max={VALIDATION_RULES.profundidadePorPassada.max}
-              step="0.5"
+              step="1"
               className={cn(profundidadePorPassadaInput.hasError && "border-destructive focus-visible:ring-destructive")}
             />
             {profundidadePorPassadaInput.hasError && profundidadePorPassadaInput.errorMessage && (
@@ -304,9 +352,9 @@ export function ConfiguracoesCorte({ config, onChange, errorFields = [] }: Confi
             value={espacamentoInput.inputValue}
             onChange={espacamentoInput.handleChange}
             onBlur={espacamentoInput.handleBlur}
-            min={VALIDATION_RULES.espacamento.min}
+            min="0"
             max={VALIDATION_RULES.espacamento.max}
-            step="5"
+            step="1"
             className={cn(espacamentoInput.hasError && "border-destructive focus-visible:ring-destructive")}
           />
           {espacamentoInput.hasError && espacamentoInput.errorMessage && (
@@ -354,7 +402,7 @@ export function ConfiguracoesCorte({ config, onChange, errorFields = [] }: Confi
                 onBlur={margemBordaInput.handleBlur}
                 min="0"
                 max={VALIDATION_RULES.espacamento.max}
-                step="5"
+                step="1"
                 className={cn(margemBordaInput.hasError && "border-destructive focus-visible:ring-destructive")}
               />
               {margemBordaInput.hasError && margemBordaInput.errorMessage && (
@@ -496,7 +544,7 @@ export function ConfiguracoesCorte({ config, onChange, errorFields = [] }: Confi
             <div className="flex items-center space-x-2">
               <Checkbox
                 id="usarRampa"
-                checked={false}
+                checked={config.usarRampa}
                 disabled={true}
                 onCheckedChange={(checked) => handleCheckboxChange("usarRampa", checked as boolean)}
               />

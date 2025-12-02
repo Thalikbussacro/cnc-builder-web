@@ -138,7 +138,8 @@ export function ConfiguracoesChapa({ config, onChange }: ConfiguracoesChapaProps
             value={espessura.inputValue}
             onChange={espessura.handleChange}
             onBlur={espessura.handleBlur}
-            step="0.5"
+            min="1"
+            step="1"
             className={cn(espessura.hasError && "border-destructive focus-visible:ring-destructive")}
           />
           {espessura.hasError && espessura.errorMessage && (

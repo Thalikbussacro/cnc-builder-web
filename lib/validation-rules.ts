@@ -10,7 +10,7 @@ export const VALIDATION_RULES = {
   // PROFUNDIDADE
   // ========================================================================
   profundidade: {
-    min: 0.1,           // mm - Mínimo técnico
+    min: 1,             // mm - Mínimo: 1mm
     max: 50,            // mm - Máximo razoável para CNC comum
     recomendadoMin: 1,  // mm - Mínimo recomendado
     recomendadoMax: 30, // mm - Máximo recomendado
@@ -20,10 +20,10 @@ export const VALIDATION_RULES = {
   // PROFUNDIDADE POR PASSADA
   // ========================================================================
   profundidadePorPassada: {
-    min: 0.1,           // mm - Mínimo técnico
+    min: 1,             // mm - Mínimo: 1mm
     max: 10,            // mm - Máximo razoável
-    recomendadoMin: 0.5,  // mm - Mínimo recomendado
-    recomendadoMax: 5,    // mm - Máximo recomendado (depende do material)
+    recomendadoMin: 1,  // mm - Mínimo recomendado
+    recomendadoMax: 5,  // mm - Máximo recomendado (depende do material)
     // Relação com diâmetro da fresa (profundidade < X% do diâmetro)
     maxPercentualDiametro: 50, // % - Avisar se > 50% do diâmetro
   },
@@ -85,7 +85,7 @@ export const VALIDATION_RULES = {
   // ÂNGULO DA RAMPA
   // ========================================================================
   anguloRampa: {
-    min: 1,             // graus - Mínimo técnico
+    min: 1,             // graus - Mínimo: 1 grau
     max: 10,            // graus - Máximo razoável
     recomendadoMin: 2,  // graus - Mínimo recomendado (conservador)
     recomendadoMax: 5,  // graus - Máximo recomendado (equilibrado)
@@ -97,7 +97,7 @@ export const VALIDATION_RULES = {
   // DIÂMETRO DA FRESA
   // ========================================================================
   diametroFresa: {
-    min: 1,             // mm - Mínimo técnico
+    min: 1,             // mm - Mínimo: 1mm
     max: 25,            // mm - Máximo razoável
     recomendadoMin: 3,  // mm - Mínimo recomendado
     recomendadoMax: 12, // mm - Máximo recomendado
@@ -115,7 +115,7 @@ export const VALIDATION_RULES = {
   // ESPESSURA DA CHAPA
   // ========================================================================
   espessuraChapa: {
-    min: 0.5,           // mm - Mínimo técnico
+    min: 1,             // mm - Mínimo: 1mm
     max: 50,            // mm - Máximo razoável
     recomendadoMin: 3,  // mm - Mínimo recomendado
     recomendadoMax: 30, // mm - Máximo recomendado
@@ -140,6 +140,14 @@ export const VALIDATION_RULES = {
   margemBorda: {
     min: 0,             // mm - Pode ser zero
     max: 500,           // mm - Máximo razoável
+  },
+
+  // ========================================================================
+  // NÚMERO DE PASSADAS
+  // ========================================================================
+  numeroPassadas: {
+    min: 1,             // Mínimo: 1 passada
+    max: 100,           // Máximo razoável: 100 passadas
   },
 } as const;
 
@@ -240,9 +248,9 @@ export function sanitizeValue(
 ): number {
   const rules = VALIDATION_RULES[fieldName];
 
-  // Trata NaN como 0
-  if (isNaN(value)) {
-    return 0;
+  // Trata NaN ou valores inválidos usando o mínimo do campo
+  if (isNaN(value) || !isFinite(value)) {
+    return 'min' in rules ? rules.min : 0;
   }
 
   // Limita ao mínimo

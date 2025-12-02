@@ -51,14 +51,9 @@ export function useValidatedInput(
   useEffect(() => {
     // Só atualiza se não estiver com foco/editando
     if (!isTouched) {
-      // Se valor é 0 e tinha erro de campo vazio, mantém vazio visualmente
-      if (value === 0 && hasError && inputValue === '') {
-        setInputValue('');
-      } else {
-        setInputValue(value.toString());
-      }
+      setInputValue(value.toString());
     }
-  }, [value, isTouched, hasError, inputValue]);
+  }, [value, isTouched]);
 
   // Handler para onChange: Permite digitar livremente
   const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -77,9 +72,6 @@ export function useValidatedInput(
   const handleBlur = useCallback(() => {
     setIsTouched(false);
 
-    // Valida o campo
-    const validation = validateField(fieldName, inputValue);
-
     // Converte para número (ou 0 se vazio/inválido)
     let numValue = 0;
     if (inputValue !== '' && inputValue !== null && inputValue !== undefined) {
@@ -90,8 +82,14 @@ export function useValidatedInput(
     // SEMPRE SANITIZA antes de salvar (proteção contra valores absurdos)
     const sanitizedValue = sanitizeValue(fieldName, numValue);
 
-    // Detecta se houve sanitização (valor foi alterado)
-    const wasSanitized = numValue !== sanitizedValue && numValue !== 0;
+    // Atualiza o campo visualmente com valor sanitizado
+    setInputValue(sanitizedValue.toString());
+
+    // Valida o VALOR SANITIZADO (não o original)
+    const validation = validateField(fieldName, sanitizedValue);
+
+    // Detecta se houve sanitização (campo estava vazio OU valor foi alterado)
+    const wasSanitized = (inputValue === '' || inputValue === null || inputValue === undefined) || numValue !== sanitizedValue;
 
     if (wasSanitized) {
       // Busca os limites do campo para mensagem mais informativa
@@ -114,7 +112,7 @@ export function useValidatedInput(
     }
 
     if (!validation.valid) {
-      // Campo inválido/vazio: MOSTRA ERRO mas SALVA VALOR SANITIZADO
+      // Campo inválido mesmo após sanitização (não deveria acontecer normalmente)
       setHasError(true);
       setErrorMessage(validation.error || 'Valor inválido');
 
@@ -123,7 +121,7 @@ export function useValidatedInput(
       return;
     }
 
-    // Campo válido: limpa erro e salva valor sanitizado
+    // Campo válido após sanitização: limpa erro e salva valor
     setHasError(false);
     setErrorMessage('');
     onChange(sanitizedValue);
