@@ -255,7 +255,7 @@ export function ConfiguracoesCorte({ config, onChange, errorFields = [] }: Confi
       <CardContent className="space-y-2.5">
         <div className="space-y-1">
           <div className="flex items-center gap-1">
-            <Label htmlFor="profundidade">Profundidade</Label>
+            <Label htmlFor="profundidade">Profundidade - mm</Label>
             <InfoTooltip
               title={parametrosInfo.profundidade.title}
               content={parametrosInfo.profundidade.content}
@@ -311,7 +311,7 @@ export function ConfiguracoesCorte({ config, onChange, errorFields = [] }: Confi
           </div>
           <div className="space-y-1">
             <div className="flex items-center gap-1">
-              <Label htmlFor="profundidadePorPassada">Prof./Passada</Label>
+              <Label htmlFor="profundidadePorPassada">Prof./Passada - mm</Label>
               <InfoTooltip
                 title={parametrosInfo.profundidadePorPassada.title}
                 content={parametrosInfo.profundidadePorPassada.content}
@@ -340,7 +340,7 @@ export function ConfiguracoesCorte({ config, onChange, errorFields = [] }: Confi
 
         <div className="space-y-1">
           <div className="flex items-center gap-1">
-            <Label htmlFor="espacamento">Espaçamento entre Peças</Label>
+            <Label htmlFor="espacamento">Espaçamento entre Peças - mm</Label>
             <InfoTooltip
               title={parametrosInfo.espacamento.title}
               content={parametrosInfo.espacamento.content}
@@ -422,7 +422,7 @@ export function ConfiguracoesCorte({ config, onChange, errorFields = [] }: Confi
           <div className="grid grid-cols-2 gap-2.5">
             <div className="space-y-1">
               <div className="flex items-center gap-1">
-                <Label htmlFor="feedrate">Vel. Avanço</Label>
+                <Label htmlFor="feedrate">Vel. Avanço - mm/min</Label>
                 <InfoTooltip
                   title={parametrosInfo.feedrate.title}
                   content={parametrosInfo.feedrate.content}
@@ -449,7 +449,7 @@ export function ConfiguracoesCorte({ config, onChange, errorFields = [] }: Confi
             </div>
             <div className="space-y-1">
               <div className="flex items-center gap-1">
-                <Label htmlFor="plungeRate">Vel. Mergulho</Label>
+                <Label htmlFor="plungeRate">Vel. Mergulho - mm/min</Label>
                 <InfoTooltip
                   title={parametrosInfo.plungeRate.title}
                   content={parametrosInfo.plungeRate.content}
@@ -478,7 +478,7 @@ export function ConfiguracoesCorte({ config, onChange, errorFields = [] }: Confi
 
           <div className="space-y-1 mt-2.5">
             <div className="flex items-center gap-1">
-              <Label htmlFor="rapidsSpeed">Vel. Rápida</Label>
+              <Label htmlFor="rapidsSpeed">Vel. Rápida - mm/min</Label>
               <InfoTooltip
                 title={parametrosInfo.rapidsSpeed.title}
                 content={parametrosInfo.rapidsSpeed.content}
@@ -506,7 +506,7 @@ export function ConfiguracoesCorte({ config, onChange, errorFields = [] }: Confi
 
           <div className="space-y-1 mt-2">
             <div className="flex items-center gap-1">
-              <Label htmlFor="spindleSpeed">Rotação</Label>
+              <Label htmlFor="spindleSpeed">Rotação - RPM</Label>
               <InfoTooltip
                 title={parametrosInfo.spindleSpeed.title}
                 content={parametrosInfo.spindleSpeed.content}

@@ -62,7 +62,7 @@ export function ConfiguracoesFerramenta({ config, onChange, errorFields = [] }: 
         <div className="grid grid-cols-2 gap-2.5">
           <div className="space-y-1">
             <div className="flex items-center gap-1">
-              <Label htmlFor="diametro">Diâmetro</Label>
+              <Label htmlFor="diametro">Diâmetro - mm</Label>
               <InfoTooltip
                 title={parametrosInfo.ferramentaDiametro.title}
                 content={parametrosInfo.ferramentaDiametro.content}

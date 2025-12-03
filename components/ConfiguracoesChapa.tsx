@@ -75,7 +75,7 @@ export function ConfiguracoesChapa({ config, onChange }: ConfiguracoesChapaProps
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1">
             <div className="flex items-center gap-1">
-              <Label htmlFor="chapaLargura">Largura (Eixo X)</Label>
+              <Label htmlFor="chapaLargura">Largura (Eixo X) - mm</Label>
               <InfoTooltip
                 title={parametrosInfo.chapaLargura.title}
                 content={parametrosInfo.chapaLargura.content}
@@ -100,7 +100,7 @@ export function ConfiguracoesChapa({ config, onChange }: ConfiguracoesChapaProps
           </div>
           <div className="space-y-1">
             <div className="flex items-center gap-1">
-              <Label htmlFor="chapaAltura">Altura (Eixo Y)</Label>
+              <Label htmlFor="chapaAltura">Altura (Eixo Y) - mm</Label>
               <InfoTooltip
                 title={parametrosInfo.chapaAltura.title}
                 content={parametrosInfo.chapaAltura.content}
@@ -126,7 +126,7 @@ export function ConfiguracoesChapa({ config, onChange }: ConfiguracoesChapaProps
         </div>
         <div className="space-y-1">
           <div className="flex items-center gap-1">
-            <Label htmlFor="chapaEspessura">Espessura</Label>
+            <Label htmlFor="chapaEspessura">Espessura - mm</Label>
             <InfoTooltip
               title={parametrosInfo.chapaEspessura.title}
               content={parametrosInfo.chapaEspessura.content}
