@@ -14,13 +14,13 @@
 
 ### Status Geral
 - **Total:** 35 melhorias
-- **Concluídas:** 1/35 (3%)
+- **Concluídas:** 2/35 (6%)
 - **Em progresso:** 0/35 (0%)
-- **Pendentes:** 34/35 (97%)
+- **Pendentes:** 33/35 (94%)
 
 ### Por Categoria
 - [x] **Migração Backend:** 1/2
-- [ ] **Performance:** 0/4
+- [x] **Performance:** 1/4
 - [ ] **UX/UI:** 0/6
 - [ ] **Segurança:** 0/4
 - [ ] **Código e Arquitetura:** 0/4
@@ -189,7 +189,7 @@ export const VALIDATION_RULES = { ... } // Manter
 # 2. Performance
 
 ## 2.1. Reduzir Debounce Agressivo
-- [ ] **Status:** Pendente
+- [x] **Status:** ✅ Concluído em 2025-12-03
 - **Prioridade:** 🔴 CRÍTICA
 - **Tempo:** 10 minutos
 - **Impacto:** Preview 40% mais responsivo

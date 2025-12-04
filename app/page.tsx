@@ -80,10 +80,10 @@ export default function Home() {
   const [erro, setErro] = useState<string | null>(null);
 
   // Debounce para valores que mudam frequentemente durante digitação
-  const debouncedLargura = useDebounce(configChapa.largura, 500);
-  const debouncedAltura = useDebounce(configChapa.altura, 500);
-  const debouncedEspacamento = useDebounce(configCorte.espacamento, 500);
-  const debouncedMargemBorda = useDebounce(configCorte.margemBorda, 500);
+  const debouncedLargura = useDebounce(configChapa.largura, 300);
+  const debouncedAltura = useDebounce(configChapa.altura, 300);
+  const debouncedEspacamento = useDebounce(configCorte.espacamento, 300);
+  const debouncedMargemBorda = useDebounce(configCorte.margemBorda, 300);
 
   // Busca preview completo (nesting + tempo + métricas) via API
   useEffect(() => {
