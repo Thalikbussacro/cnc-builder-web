@@ -14,9 +14,9 @@
 
 ### Status Geral
 - **Total:** 35 melhorias
-- **Concluídas:** 19/35 (54%)
+- **Concluídas:** 20/35 (57%)
 - **Em progresso:** 0/35 (0%)
-- **Pendentes:** 16/35 (46%)
+- **Pendentes:** 15/35 (43%)
 
 ### Por Categoria
 - [x] **Migração Backend:** 1/2
@@ -24,7 +24,7 @@
 - [x] **UX/UI:** 6/6
 - [x] **Segurança:** 4/4
 - [x] **Código e Arquitetura:** 3/4
-- [ ] **Testes:** 1/3
+- [ ] **Testes:** 2/3
 - [ ] **Acessibilidade:** 0/3
 - [ ] **SEO:** 0/2
 - [ ] **PWA:** 0/2
@@ -1515,7 +1515,7 @@ describe('useDebounce', () => {
 ---
 
 ## 6.2. Testes E2E (Playwright)
-- [x] **Status:** ⚠️ Infraestrutura completa, bloqueado por erro de SSR (ThemeProvider)
+- [x] **Status:** ✅ Concluído em 2025-12-04 (incluindo correção SSR ThemeProvider)
 - **Prioridade:** 🟡 MÉDIA
 - **Tempo:** 1.5 horas
 

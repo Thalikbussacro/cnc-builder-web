@@ -18,15 +18,14 @@ test.describe('G-code Generation Flow', () => {
     await page.fill('#pecaLargura', '100');
     await page.fill('#pecaAltura', '200');
 
-    // Clica no botão de adicionar
-    await page.click('button:has-text("Adicionar Peça")');
+    // Clica no botão de adicionar usando data-testid
+    await page.click('[data-testid="btn-adicionar-peca"]');
 
-    // Verifica se a peça aparece na lista
-    // A peça deve mostrar dimensões 100 x 200
-    await expect(page.locator('text=100 x 200')).toBeVisible({ timeout: 5000 });
+    // Verifica que a lista mostra 1 peça
+    await expect(page.locator('text=Lista de Peças (1)')).toBeVisible({ timeout: 5000 });
 
-    // Verifica que não há mensagens de erro
-    await expect(page.locator('.bg-destructive')).not.toBeVisible();
+    // Verifica se a peça aparece na lista (formato: 100×200mm com caractere ×)
+    await expect(page.locator('.font-mono').filter({ hasText: '100×200mm' })).toBeVisible();
   });
 
   test('deve adicionar múltiplas peças', async ({ page }) => {
@@ -42,18 +41,18 @@ test.describe('G-code Generation Flow', () => {
     // Adiciona primeira peça
     await page.fill('#pecaLargura', '100');
     await page.fill('#pecaAltura', '200');
-    await page.click('button:has-text("Adicionar Peça")');
-    await expect(page.locator('text=100 x 200')).toBeVisible();
+    await page.click('[data-testid="btn-adicionar-peca"]');
+    await expect(page.locator('text=Lista de Peças (1)')).toBeVisible();
 
     // Adiciona segunda peça
     await page.fill('#pecaLargura', '150');
     await page.fill('#pecaAltura', '250');
-    await page.click('button:has-text("Adicionar Peça")');
-    await expect(page.locator('text=150 x 250')).toBeVisible();
+    await page.click('[data-testid="btn-adicionar-peca"]');
+    await expect(page.locator('text=Lista de Peças (2)')).toBeVisible();
 
-    // Verifica que ambas peças estão visíveis
-    await expect(page.locator('text=100 x 200')).toBeVisible();
-    await expect(page.locator('text=150 x 250')).toBeVisible();
+    // Verifica que ambas peças estão visíveis na lista
+    await expect(page.locator('.font-mono').filter({ hasText: '100×200mm' })).toBeVisible();
+    await expect(page.locator('.font-mono').filter({ hasText: '150×250mm' })).toBeVisible();
   });
 
   test('deve validar campos obrigatórios', async ({ page }) => {
@@ -66,9 +65,10 @@ test.describe('G-code Generation Flow', () => {
     }
 
     // Tenta adicionar peça sem preencher campos
-    await page.click('button:has-text("Adicionar Peça")');
+    await page.click('[data-testid="btn-adicionar-peca"]');
 
-    // Deve mostrar mensagem de erro
-    await expect(page.locator('text=/Informe.*válid/i')).toBeVisible({ timeout: 3000 });
+    // Deve mostrar mensagem de erro usando data-testid
+    await expect(page.getByTestId('erro-cadastro')).toBeVisible({ timeout: 3000 });
+    await expect(page.getByTestId('erro-cadastro')).toContainText('Informe');
   });
 });

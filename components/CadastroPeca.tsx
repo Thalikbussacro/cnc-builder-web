@@ -250,13 +250,14 @@ export function CadastroPeca() {
         </div>
 
         {erro && (
-          <p className="text-xs sm:text-sm text-red-600 font-medium">{erro}</p>
+          <p className="text-xs sm:text-sm text-red-600 font-medium" data-testid="erro-cadastro">{erro}</p>
         )}
 
         <Button
           onClick={handleAdicionar}
           className="w-full h-10 sm:h-11 font-semibold border-2 border-primary/50 shadow-md hover:shadow-lg transition-all"
           size="lg"
+          data-testid="btn-adicionar-peca"
         >
           ✚ Adicionar Peça
         </Button>

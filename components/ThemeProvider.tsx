@@ -53,10 +53,6 @@ export function ThemeProvider({
     setThemeState((prev) => (prev === "light" ? "dark" : "light"));
   };
 
-  if (!mounted) {
-    return <>{children}</>;
-  }
-
   const value = {
     theme,
     setTheme,
