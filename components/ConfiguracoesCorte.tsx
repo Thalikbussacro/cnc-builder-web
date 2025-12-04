@@ -11,17 +11,13 @@ import { InfoTooltip } from "@/components/InfoTooltip";
 import { SanitizationAlert } from "@/components/SanitizationAlert";
 import { parametrosInfo } from "@/lib/parametros-info";
 import { VALIDATION_RULES } from "@/lib/validation-rules";
-import type { AplicarRampaEm, ValidationField } from "@/types";
+import type { AplicarRampaEm, ConfiguracoesCorte as ConfiguracoesCorteType } from "@/types";
 import { cn } from "@/lib/utils";
 import { useValidatedInput } from "@/hooks/useValidatedInput";
 import { useValidationContext } from "@/contexts/ValidationContext";
 import { useConfigStore } from "@/stores/useConfigStore";
 
-type ConfiguracoesCorteProps = {
-  errorFields?: ValidationField[];
-};
-
-export function ConfiguracoesCorte({ errorFields = [] }: ConfiguracoesCorteProps) {
+export function ConfiguracoesCorte() {
   const { registerError, clearError } = useValidationContext();
   const { configCorte, setConfigCorte } = useConfigStore();
   const config = configCorte;
@@ -240,11 +236,11 @@ export function ConfiguracoesCorte({ errorFields = [] }: ConfiguracoesCorteProps
     });
   };
 
-  const handleCheckboxChange = (campo: keyof ConfiguracoesCorte, valor: boolean) => {
+  const handleCheckboxChange = (campo: keyof ConfiguracoesCorteType, valor: boolean) => {
     onChange({ ...config, [campo]: valor });
   };
 
-  const handleSelectChange = (campo: keyof ConfiguracoesCorte, valor: string) => {
+  const handleSelectChange = (campo: keyof ConfiguracoesCorteType, valor: string) => {
     onChange({ ...config, [campo]: valor });
   };
 

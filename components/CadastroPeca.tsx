@@ -10,15 +10,13 @@ import { InfoTooltip } from "@/components/InfoTooltip";
 import { parametrosInfo } from "@/lib/parametros-info";
 import { sanitizeString } from "@/lib/sanitize";
 import { toast } from "sonner";
-import { Upload, FileDown } from "lucide-react";
+import { FileDown } from "lucide-react";
 import { useConfigStore } from "@/stores/useConfigStore";
 import type { Peca, TipoCorte } from "@/types";
 
 export function CadastroPeca() {
-  const { addPeca, configChapa, configCorte, pecas, metodoNesting } = useConfigStore();
-  const espacamento = configCorte.espacamento;
+  const { addPeca, configChapa, pecas } = useConfigStore();
   const pecasExistentes = pecas;
-  const margemBorda = configCorte.margemBorda;
   const onAdicionar = addPeca;
   const [largura, setLargura] = useState<string>("");
   const [altura, setAltura] = useState<string>("");

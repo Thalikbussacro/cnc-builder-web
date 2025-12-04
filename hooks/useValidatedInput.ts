@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { validateField, sanitizeValue, type FieldValidationResult, VALIDATION_RULES } from '@/lib/validation-rules';
+import { validateField, sanitizeValue, VALIDATION_RULES } from '@/lib/validation-rules';
 
 /**
  * Hook para inputs validados com comportamento CONSISTENTE

@@ -8,17 +8,12 @@ import { InfoTooltip } from "@/components/InfoTooltip";
 import { SanitizationAlert } from "@/components/SanitizationAlert";
 import { parametrosInfo } from "@/lib/parametros-info";
 import { VALIDATION_RULES } from "@/lib/validation-rules";
-import type { ValidationField } from "@/types";
 import { cn } from "@/lib/utils";
 import { useValidatedInput } from "@/hooks/useValidatedInput";
 import { useValidationContext } from "@/contexts/ValidationContext";
 import { useConfigStore } from "@/stores/useConfigStore";
 
-type ConfiguracoesFerramentaProps = {
-  errorFields?: ValidationField[];
-};
-
-export function ConfiguracoesFerramenta({ errorFields = [] }: ConfiguracoesFerramentaProps) {
+export function ConfiguracoesFerramenta() {
   const { registerError, clearError } = useValidationContext();
   const { configFerramenta, setConfigFerramenta } = useConfigStore();
 

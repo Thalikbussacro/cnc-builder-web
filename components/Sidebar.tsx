@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { Settings, Scissors, Wrench, Package, PlusCircle, Menu, X, ChevronLeft, ChevronRight, AlertCircle } from "lucide-react";
+import { Settings, Scissors, Wrench, Package, PlusCircle, X, ChevronLeft, ChevronRight, AlertCircle } from "lucide-react";
 import { Button } from "./ui/button";
 import { useState } from "react";
 import dynamic from "next/dynamic";

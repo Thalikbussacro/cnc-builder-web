@@ -150,7 +150,7 @@ export class ApiClient {
     }
 
     // Retorna com tipo seguro
-    return response as GerarGCodeResponse;
+    return response as unknown as GerarGCodeResponse;
   }
 
   /**

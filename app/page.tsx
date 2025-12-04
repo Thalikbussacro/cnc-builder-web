@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useMemo } from "react";
 import dynamic from "next/dynamic";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { MainLayout } from "@/components/MainLayout";
@@ -15,7 +15,7 @@ import { SeletorNesting } from "@/components/SeletorNesting";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Button } from "@/components/ui/button";
 import { Menu, Loader2 } from "lucide-react";
-import type { Peca, PecaPosicionada, ConfiguracoesChapa as TConfigChapa, ConfiguracoesCorte as TConfigCorte, ConfiguracoesFerramenta as TConfigFerramenta, FormatoArquivo, VersaoGerador, TempoEstimado, MetodoNesting, ValidationResult, ValidationField } from "@/types";
+import type { FormatoArquivo, VersaoGerador, ValidationResult } from "@/types";
 import { downloadGCode } from "@/lib/utils";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { useDebounce } from "@/hooks/useDebounce";
@@ -51,11 +51,6 @@ export default function Home() {
     configFerramenta,
     metodoNesting,
     pecas,
-    setConfigChapa,
-    setConfigCorte,
-    setConfigFerramenta,
-    setMetodoNesting,
-    addPeca,
     removePeca,
     updatePeca,
     setPecas,
@@ -72,7 +67,6 @@ export default function Home() {
   // Estados de validação
   const [validationDialogOpen, setValidationDialogOpen] = useState(false);
   const [validationResult, setValidationResult] = useState<ValidationResult>({ valid: true, errors: [], warnings: [] });
-  const [errorFields, setErrorFields] = useState<ValidationField[]>([]);
   const [erro, setErro] = useState<string | null>(null);
 
   // Debounce para valores que mudam frequentemente durante digitação
@@ -164,21 +158,7 @@ export default function Home() {
     },
   });
 
-  // Atalhos de teclado
-  useKeyboardShortcuts({
-    onGenerate: handleVisualizarGCode,
-    onClear: handleLimpar,
-    onClose: () => {
-      setVisualizadorAberto(false);
-      setValidationDialogOpen(false);
-    },
-  });
-
-  // Handlers para peças (usam ações do store)
-  const handleAdicionarPeca = (peca: Peca | Peca[]) => {
-    addPeca(peca);
-  };
-
+  // Handlers (declarados antes de serem usados pelos hooks)
   const handleRemoverPeca = (id: string) => {
     removePeca(id);
   };
@@ -217,13 +197,6 @@ export default function Home() {
         configFerramenta: sanitizedConfigs.configFerramenta,
         metodoNesting,
       });
-
-      // Extrai campos com erro para destacar na UI
-      const fieldsWithErrors: ValidationField[] = [
-        ...result.errors.map(e => e.field),
-        ...result.warnings.map(w => w.field)
-      ];
-      setErrorFields(fieldsWithErrors);
 
       // Se houver erros ou avisos, mostra dialog
       if (!result.valid || result.warnings.length > 0) {
@@ -277,6 +250,16 @@ export default function Home() {
       });
     }
   };
+
+  // Atalhos de teclado (declarados depois dos handlers)
+  useKeyboardShortcuts({
+    onGenerate: handleVisualizarGCode,
+    onClear: handleLimpar,
+    onClose: () => {
+      setVisualizadorAberto(false);
+      setValidationDialogOpen(false);
+    },
+  });
 
   return (
     <MainLayout>
@@ -366,14 +349,10 @@ export default function Home() {
                     <ConfiguracoesChapa />
                   )}
                   {secaoAtiva === 'corte' && (
-                    <ConfiguracoesCorte
-                      errorFields={errorFields}
-                    />
+                    <ConfiguracoesCorte />
                   )}
                   {secaoAtiva === 'ferramenta' && (
-                    <ConfiguracoesFerramenta
-                      errorFields={errorFields}
-                    />
+                    <ConfiguracoesFerramenta />
                   )}
                   {secaoAtiva === 'nesting' && (
                     <SeletorNesting
