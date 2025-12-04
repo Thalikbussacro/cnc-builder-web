@@ -7,37 +7,33 @@ import { Label } from "@/components/ui/label";
 import { InfoTooltip } from "@/components/InfoTooltip";
 import { SanitizationAlert } from "@/components/SanitizationAlert";
 import { parametrosInfo } from "@/lib/parametros-info";
-import type { ConfiguracoesChapa } from "@/types";
 import { useValidatedInput } from "@/hooks/useValidatedInput";
 import { useValidationContext } from "@/contexts/ValidationContext";
+import { useConfigStore } from "@/stores/useConfigStore";
 import { cn } from "@/lib/utils";
 
-type ConfiguracoesChapaProps = {
-  config: ConfiguracoesChapa;
-  onChange: (config: ConfiguracoesChapa) => void;
-};
-
-export function ConfiguracoesChapa({ config, onChange }: ConfiguracoesChapaProps) {
+export function ConfiguracoesChapa() {
   const { registerError, clearError } = useValidationContext();
+  const { configChapa, setConfigChapa } = useConfigStore();
 
   // Validação de largura
   const largura = useValidatedInput(
-    config.largura,
-    (value) => onChange({ ...config, largura: value }),
+    configChapa.largura,
+    (value) => setConfigChapa({ largura: value }),
     'chapaLargura'
   );
 
   // Validação de altura
   const altura = useValidatedInput(
-    config.altura,
-    (value) => onChange({ ...config, altura: value }),
+    configChapa.altura,
+    (value) => setConfigChapa({ altura: value }),
     'chapaAltura'
   );
 
   // Validação de espessura
   const espessura = useValidatedInput(
-    config.espessura,
-    (value) => onChange({ ...config, espessura: value }),
+    configChapa.espessura,
+    (value) => setConfigChapa({ espessura: value }),
     'espessuraChapa'
   );
 

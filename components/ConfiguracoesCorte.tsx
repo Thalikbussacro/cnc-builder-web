@@ -11,19 +11,21 @@ import { InfoTooltip } from "@/components/InfoTooltip";
 import { SanitizationAlert } from "@/components/SanitizationAlert";
 import { parametrosInfo } from "@/lib/parametros-info";
 import { VALIDATION_RULES } from "@/lib/validation-rules";
-import type { ConfiguracoesCorte, AplicarRampaEm, ValidationField } from "@/types";
+import type { AplicarRampaEm, ValidationField } from "@/types";
 import { cn } from "@/lib/utils";
 import { useValidatedInput } from "@/hooks/useValidatedInput";
 import { useValidationContext } from "@/contexts/ValidationContext";
+import { useConfigStore } from "@/stores/useConfigStore";
 
 type ConfiguracoesCorteProps = {
-  config: ConfiguracoesCorte;
-  onChange: (config: ConfiguracoesCorte) => void;
   errorFields?: ValidationField[];
 };
 
-export function ConfiguracoesCorte({ config, onChange, errorFields = [] }: ConfiguracoesCorteProps) {
+export function ConfiguracoesCorte({ errorFields = [] }: ConfiguracoesCorteProps) {
   const { registerError, clearError } = useValidationContext();
+  const { configCorte, setConfigCorte } = useConfigStore();
+  const config = configCorte;
+  const onChange = setConfigCorte;
 
   // Constante para tolerância de ponto flutuante
   const FLOATING_POINT_TOLERANCE = 0.01;

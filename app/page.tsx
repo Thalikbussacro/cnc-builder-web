@@ -23,6 +23,7 @@ import { ApiClient } from "@/lib/api-client";
 import { sanitizeValue } from "@/lib/validation-rules";
 import { useValidationContext } from "@/contexts/ValidationContext";
 import { toast } from "sonner";
+import { useConfigStore } from "@/stores/useConfigStore";
 
 // Componentes grandes carregados sob demanda (code splitting)
 const VisualizadorGCode = dynamic(() => import("@/components/VisualizadorGCode").then(mod => ({ default: mod.VisualizadorGCode })), {
@@ -42,41 +43,26 @@ const ValidationDialog = dynamic(() => import("@/components/ValidationDialog").t
 export default function Home() {
   const { hasErrors } = useValidationContext();
 
-  // Estados com localStorage
-  const [configChapa, setConfigChapa] = useLocalStorage<TConfigChapa>('cnc-config-chapa', {
-    largura: 2850,
-    altura: 1500,
-    espessura: 15,
-  });
+  // Estado global com Zustand (persiste automaticamente via middleware)
+  const {
+    configChapa,
+    configCorte,
+    configFerramenta,
+    metodoNesting,
+    pecas,
+    setConfigChapa,
+    setConfigCorte,
+    setConfigFerramenta,
+    setMetodoNesting,
+    addPeca,
+    removePeca,
+    updatePeca,
+    setPecas,
+  } = useConfigStore();
 
-  const [configCorte, setConfigCorte] = useLocalStorage<TConfigCorte>('cnc-config-corte', {
-    profundidade: 15,
-    espacamento: 50,
-    profundidadePorPassada: 4,
-    feedrate: 1500,
-    plungeRate: 500,
-    rapidsSpeed: 4000,
-    spindleSpeed: 18000,
-    usarRampa: false,
-    anguloRampa: 3,
-    aplicarRampaEm: 'primeira-passada',
-    usarMesmoEspacamentoBorda: true,
-    margemBorda: 50,
-  });
-
-  const [configFerramenta, setConfigFerramenta] = useLocalStorage<TConfigFerramenta>('cnc-config-ferramenta', {
-    diametro: 6,
-    numeroFerramenta: 1,
-  });
-
-  const [metodoNesting, setMetodoNesting] = useLocalStorage<MetodoNesting>('cnc-metodo-nesting', 'shelf');
-
+  // Estados específicos da UI (não fazem parte do estado global)
   const [versaoGerador, setVersaoGerador] = useLocalStorage<VersaoGerador>('cnc-versao-gerador', 'v2');
-
   const [incluirComentarios, setIncluirComentarios] = useLocalStorage<boolean>('cnc-incluir-comentarios', true);
-
-  // Estados sem localStorage (temporários)
-  const [pecas, setPecas] = useState<Peca[]>([]);
   const [pecasPosicionadas, setPecasPosicionadas] = useState<PecaPosicionada[]>([]);
   const [visualizadorAberto, setVisualizadorAberto] = useState(false);
   const [gcodeGerado, setGcodeGerado] = useState("");
@@ -197,28 +183,22 @@ export default function Home() {
     },
   });
 
-  // Handler para adicionar peça (aceita uma ou múltiplas)
+  // Handlers para peças (usam ações do store)
   const handleAdicionarPeca = (peca: Peca | Peca[]) => {
-    if (Array.isArray(peca)) {
-      setPecas([...pecas, ...peca]);
-    } else {
-      setPecas([...pecas, peca]);
+    addPeca(peca);
+  };
+
+  const handleRemoverPeca = (id: string) => {
+    removePeca(id);
+  };
+
+  const handleToggleIgnorar = (id: string) => {
+    const peca = pecas.find(p => p.id === id);
+    if (peca) {
+      updatePeca(id, { ignorada: !peca.ignorada });
     }
   };
 
-  // Handler para remover peça individual
-  const handleRemoverPeca = (id: string) => {
-    setPecas(pecas.filter(p => p.id !== id));
-  };
-
-  // Handler para alternar estado de ignorar peça
-  const handleToggleIgnorar = (id: string) => {
-    setPecas(pecas.map(p =>
-      p.id === id ? { ...p, ignorada: !p.ignorada } : p
-    ));
-  };
-
-  // Handler para limpar tudo
   const handleLimpar = () => {
     if (pecas.length > 0 && !confirm("Deseja limpar todas as peças?")) {
       return;
@@ -496,39 +476,26 @@ export default function Home() {
               <div className="overflow-auto h-full">
                 <div className="max-w-3xl">
                   {secaoAtiva === 'chapa' && (
-                    <ConfiguracoesChapa config={configChapa} onChange={setConfigChapa} />
+                    <ConfiguracoesChapa />
                   )}
                   {secaoAtiva === 'corte' && (
                     <ConfiguracoesCorte
-                      config={configCorte}
-                      onChange={setConfigCorte}
                       errorFields={errorFields}
                     />
                   )}
                   {secaoAtiva === 'ferramenta' && (
                     <ConfiguracoesFerramenta
-                      config={configFerramenta}
-                      onChange={setConfigFerramenta}
                       errorFields={errorFields}
                     />
                   )}
                   {secaoAtiva === 'nesting' && (
                     <SeletorNesting
-                      metodo={metodoNesting}
-                      onChange={setMetodoNesting}
                       metricas={metricas}
                       tempoEstimado={tempoEstimado}
                     />
                   )}
                   {secaoAtiva === 'adicionar-peca' && (
-                    <CadastroPeca
-                      onAdicionar={handleAdicionarPeca}
-                      configChapa={configChapa}
-                      espacamento={configCorte.espacamento}
-                      pecasExistentes={pecas}
-                      metodoNesting={metodoNesting}
-                      margemBorda={configCorte.usarMesmoEspacamentoBorda ? undefined : configCorte.margemBorda}
-                    />
+                    <CadastroPeca />
                   )}
                 </div>
               </div>

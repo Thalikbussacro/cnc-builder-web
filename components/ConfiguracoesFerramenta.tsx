@@ -8,30 +8,30 @@ import { InfoTooltip } from "@/components/InfoTooltip";
 import { SanitizationAlert } from "@/components/SanitizationAlert";
 import { parametrosInfo } from "@/lib/parametros-info";
 import { VALIDATION_RULES } from "@/lib/validation-rules";
-import type { ConfiguracoesFerramenta, ValidationField } from "@/types";
+import type { ValidationField } from "@/types";
 import { cn } from "@/lib/utils";
 import { useValidatedInput } from "@/hooks/useValidatedInput";
 import { useValidationContext } from "@/contexts/ValidationContext";
+import { useConfigStore } from "@/stores/useConfigStore";
 
 type ConfiguracoesFerramentaProps = {
-  config: ConfiguracoesFerramenta;
-  onChange: (config: ConfiguracoesFerramenta) => void;
   errorFields?: ValidationField[];
 };
 
-export function ConfiguracoesFerramenta({ config, onChange, errorFields = [] }: ConfiguracoesFerramentaProps) {
+export function ConfiguracoesFerramenta({ errorFields = [] }: ConfiguracoesFerramentaProps) {
   const { registerError, clearError } = useValidationContext();
+  const { configFerramenta, setConfigFerramenta } = useConfigStore();
 
   // Validação de campos
   const diametroInput = useValidatedInput(
-    config.diametro,
-    (value) => onChange({ ...config, diametro: value }),
+    configFerramenta.diametro,
+    (value) => setConfigFerramenta({ diametro: value }),
     'diametroFresa'
   );
 
   const numeroFerramentaInput = useValidatedInput(
-    config.numeroFerramenta,
-    (value) => onChange({ ...config, numeroFerramenta: value }),
+    configFerramenta.numeroFerramenta,
+    (value) => setConfigFerramenta({ numeroFerramenta: value }),
     'numeroFerramenta'
   );
 

@@ -11,25 +11,15 @@ import { parametrosInfo } from "@/lib/parametros-info";
 import { sanitizeString } from "@/lib/sanitize";
 import { toast } from "sonner";
 import { Upload, FileDown } from "lucide-react";
-import type { Peca, ConfiguracoesChapa, TipoCorte, MetodoNesting } from "@/types";
+import { useConfigStore } from "@/stores/useConfigStore";
+import type { Peca, TipoCorte } from "@/types";
 
-type CadastroPecaProps = {
-  onAdicionar: (peca: Peca | Peca[]) => void;
-  configChapa: ConfiguracoesChapa;
-  espacamento: number;
-  pecasExistentes: Peca[];
-  metodoNesting?: MetodoNesting;
-  margemBorda?: number;
-};
-
-export function CadastroPeca({
-  onAdicionar,
-  configChapa,
-  espacamento,
-  pecasExistentes,
-  metodoNesting = 'greedy',
-  margemBorda,
-}: CadastroPecaProps) {
+export function CadastroPeca() {
+  const { addPeca, configChapa, configCorte, pecas, metodoNesting } = useConfigStore();
+  const espacamento = configCorte.espacamento;
+  const pecasExistentes = pecas;
+  const margemBorda = configCorte.margemBorda;
+  const onAdicionar = addPeca;
   const [largura, setLargura] = useState<string>("");
   const [altura, setAltura] = useState<string>("");
   const [tipoCorte, setTipoCorte] = useState<TipoCorte>("externo");

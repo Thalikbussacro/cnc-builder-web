@@ -9,12 +9,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import type { MetodoNesting, TempoEstimado } from "@/types";
+import { useConfigStore } from "@/stores/useConfigStore";
+import type { TempoEstimado } from "@/types";
 import { formatarTempo } from "@/lib/utils";
 
 type SeletorNestingProps = {
-  metodo: MetodoNesting;
-  onChange: (metodo: MetodoNesting) => void;
   metricas?: {
     areaUtilizada: number;
     eficiencia: number;
@@ -23,7 +22,8 @@ type SeletorNestingProps = {
   tempoEstimado?: TempoEstimado;
 };
 
-export function SeletorNesting({ metodo, onChange, metricas, tempoEstimado }: SeletorNestingProps) {
+export function SeletorNesting({ metricas, tempoEstimado }: SeletorNestingProps) {
+  const { metodoNesting, setMetodoNesting } = useConfigStore();
   return (
     <Card>
       <div className="p-3.5 space-y-2.5">
@@ -32,7 +32,7 @@ export function SeletorNesting({ metodo, onChange, metricas, tempoEstimado }: Se
 
           <div className="space-y-1">
             <Label htmlFor="metodo-nesting">Método de Posicionamento</Label>
-            <Select value={metodo} onValueChange={(value) => onChange(value as MetodoNesting)}>
+            <Select value={metodoNesting} onValueChange={setMetodoNesting}>
               <SelectTrigger id="metodo-nesting" className="w-full">
                 <SelectValue placeholder="Selecione o método" />
               </SelectTrigger>
