@@ -14,14 +14,14 @@
 
 ### Status Geral
 - **Total:** 35 melhorias
-- **Concluídas:** 10/35 (29%)
+- **Concluídas:** 11/35 (31%)
 - **Em progresso:** 0/35 (0%)
-- **Pendentes:** 25/35 (71%)
+- **Pendentes:** 24/35 (69%)
 
 ### Por Categoria
 - [x] **Migração Backend:** 1/2
 - [x] **Performance:** 4/4
-- [x] **UX/UI:** 5/6
+- [x] **UX/UI:** 6/6
 - [ ] **Segurança:** 0/4
 - [ ] **Código e Arquitetura:** 0/4
 - [ ] **Testes:** 0/3
@@ -763,7 +763,7 @@ import { Header } from '@/components/Header';
 ---
 
 ## 3.6. Upload CSV para Peças
-- [ ] **Status:** Pendente
+- [x] **Status:** ✅ Concluído em 2025-12-04
 - **Prioridade:** 🟢 BAIXA
 - **Tempo:** 45 minutos
 

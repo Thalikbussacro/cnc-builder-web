@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { InfoTooltip } from "@/components/InfoTooltip";
 import { parametrosInfo } from "@/lib/parametros-info";
+import { toast } from "sonner";
+import { Upload, FileDown } from "lucide-react";
 import type { Peca, ConfiguracoesChapa, TipoCorte, MetodoNesting } from "@/types";
 
 type CadastroPecaProps = {
@@ -89,6 +91,78 @@ export function CadastroPeca({
     if (e.key === "Enter") {
       handleAdicionar();
     }
+  };
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const csv = event.target?.result as string;
+        const lines = csv.split('\n');
+
+        // Pula header (primeira linha)
+        const pecasNovas: Peca[] = lines.slice(1)
+          .filter(line => line.trim())
+          .map((line, i) => {
+            const [largura, altura, tipoCorte, nome] = line.split(',');
+            return {
+              id: crypto.randomUUID(),
+              largura: parseFloat(largura),
+              altura: parseFloat(altura),
+              tipoCorte: tipoCorte?.trim() as TipoCorte || "externo",
+              nome: nome?.trim() || `Peça ${pecasExistentes.length + i + 1}`,
+            };
+          });
+
+        // Validar peças
+        const validas = pecasNovas.filter(p =>
+          !isNaN(p.largura) &&
+          !isNaN(p.altura) &&
+          p.largura > 0 &&
+          p.altura > 0 &&
+          ['externo', 'interno', 'na-linha'].includes(p.tipoCorte)
+        );
+
+        if (validas.length > 0) {
+          onAdicionar(validas);
+          toast.success(`${validas.length} peça(s) importada(s) do CSV`);
+
+          // Limpa o input file para permitir upload do mesmo arquivo novamente
+          e.target.value = '';
+        } else {
+          toast.error('Nenhuma peça válida encontrada no CSV');
+        }
+      } catch (error) {
+        toast.error('Erro ao ler arquivo CSV');
+        console.error('Erro CSV:', error);
+      }
+    };
+
+    reader.readAsText(file);
+  };
+
+  const downloadTemplate = () => {
+    const csv = `largura,altura,tipoCorte,nome
+100,200,externo,Peça A
+150,150,interno,Peça B
+200,100,externo,Peça C
+300,250,na-linha,Peça D`;
+
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'template-pecas.csv';
+    a.style.display = 'none';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    toast.success('Template CSV baixado com sucesso');
   };
 
   return (
@@ -195,6 +269,50 @@ export function CadastroPeca({
         >
           ✚ Adicionar Peça
         </Button>
+
+        {/* Separador */}
+        <div className="relative my-4">
+          <div className="absolute inset-0 flex items-center">
+            <span className="w-full border-t" />
+          </div>
+          <div className="relative flex justify-center text-xs uppercase">
+            <span className="bg-background px-2 text-muted-foreground">
+              ou importar múltiplas
+            </span>
+          </div>
+        </div>
+
+        {/* Upload CSV */}
+        <div className="space-y-2">
+          <Label htmlFor="csvUpload" className="text-xs sm:text-sm">
+            Importar Peças via CSV
+          </Label>
+          <div className="flex gap-2">
+            <div className="relative flex-1">
+              <Input
+                id="csvUpload"
+                type="file"
+                accept=".csv"
+                onChange={handleFileUpload}
+                className="h-9 sm:h-10 cursor-pointer file:mr-2 file:px-3 file:py-1.5 file:rounded file:border-0 file:text-xs file:font-medium file:bg-primary file:text-primary-foreground hover:file:bg-primary/90"
+              />
+            </div>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={downloadTemplate}
+              className="h-9 sm:h-10 whitespace-nowrap"
+              title="Baixar template CSV com formato correto"
+            >
+              <FileDown className="h-4 w-4 mr-1.5" />
+              Template
+            </Button>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Formato: largura, altura, tipoCorte, nome
+          </p>
+        </div>
       </CardContent>
     </Card>
   );
