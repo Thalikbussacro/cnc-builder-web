@@ -14,13 +14,13 @@
 
 ### Status Geral
 - **Total:** 35 melhorias
-- **Concluídas:** 5/35 (14%)
+- **Concluídas:** 6/35 (17%)
 - **Em progresso:** 0/35 (0%)
-- **Pendentes:** 30/35 (86%)
+- **Pendentes:** 29/35 (83%)
 
 ### Por Categoria
 - [x] **Migração Backend:** 1/2
-- [x] **Performance:** 1/4
+- [x] **Performance:** 2/4
 - [x] **UX/UI:** 3/6
 - [ ] **Segurança:** 0/4
 - [ ] **Código e Arquitetura:** 0/4
@@ -238,9 +238,9 @@ while 500ms feels laggy."
 ---
 
 ## 2.2. Memoização de Canvas
-- [ ] **Status:** Pendente
+- [x] **Status:** ✅ Concluído em 2025-12-04
 - **Prioridade:** 🟡 MÉDIA
-**Tempo:** 30 minutos
+- **Tempo:** 30 minutos
 - **Impacto:** Renderização 3-5x mais rápida
 
 ### Descrição

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, memo, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Maximize2, Loader2 } from "lucide-react";
@@ -54,7 +54,7 @@ const CORES = [
   { hex: "#6B4423", nome: "Castanho" },        // Castanho profundo
 ];
 
-export function PreviewCanvas({
+export const PreviewCanvas = memo(function PreviewCanvas({
   chapaLargura,
   chapaAltura,
   pecasPosicionadas,
@@ -73,6 +73,12 @@ export function PreviewCanvas({
     .filter(peca => !peca.ignorada)
     .reduce((total, peca) => total + peca.largura * peca.altura, 0);
   const taxaAproveitamento = areaTotalChapa > 0 ? (areaPecas / areaTotalChapa) * 100 : 0;
+
+  // Memoiza key do canvas baseado nas peças para otimizar re-renders
+  const canvasKey = useMemo(
+    () => pecasPosicionadas.map(p => `${p.x}-${p.y}-${p.largura}-${p.altura}-${p.ignorada}`).join('|'),
+    [pecasPosicionadas]
+  );
 
   // Ajusta tamanho do canvas baseado no container (reduzido pela metade)
   useEffect(() => {
@@ -334,4 +340,4 @@ export function PreviewCanvas({
       />
     </>
   );
-}
+});
