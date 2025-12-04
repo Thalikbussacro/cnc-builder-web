@@ -29,6 +29,7 @@
     "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
+    "@next/bundle-analyzer": "^16.0.7",
     "@types/node": "^22",
     "@types/react": "^19",
     "@types/react-dom": "^19",

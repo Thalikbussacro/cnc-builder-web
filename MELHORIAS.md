@@ -14,13 +14,13 @@
 
 ### Status Geral
 - **Total:** 35 melhorias
-- **Concluídas:** 6/35 (17%)
+- **Concluídas:** 7/35 (20%)
 - **Em progresso:** 0/35 (0%)
-- **Pendentes:** 29/35 (83%)
+- **Pendentes:** 28/35 (80%)
 
 ### Por Categoria
 - [x] **Migração Backend:** 1/2
-- [x] **Performance:** 2/4
+- [x] **Performance:** 3/4
 - [x] **UX/UI:** 3/6
 - [ ] **Segurança:** 0/4
 - [ ] **Código e Arquitetura:** 0/4
@@ -294,7 +294,7 @@ export const PreviewCanvas = memo(function PreviewCanvas({
 ---
 
 ## 2.3. Bundle Splitting
-- [ ] **Status:** Pendente
+- [x] **Status:** ✅ Concluído em 2025-12-04
 - **Prioridade:** 🟡 MÉDIA
 - **Tempo:** 45 minutos
 - **Impacto:** Bundle -30-40% (~200KB)

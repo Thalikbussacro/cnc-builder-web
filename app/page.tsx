@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import dynamic from "next/dynamic";
 import { MainLayout } from "@/components/MainLayout";
 import { Sidebar, type SecaoSidebar } from "@/components/Sidebar";
 import { ConfiguracoesChapa } from "@/components/ConfiguracoesChapa";
@@ -9,10 +10,7 @@ import { ConfiguracoesFerramenta } from "@/components/ConfiguracoesFerramenta";
 import { CadastroPeca } from "@/components/CadastroPeca";
 import { ListaPecas } from "@/components/ListaPecas";
 import { PreviewCanvas } from "@/components/PreviewCanvas";
-import { VisualizadorGCode } from "@/components/VisualizadorGCode";
 import { SeletorNesting } from "@/components/SeletorNesting";
-import { DicionarioGCode } from "@/components/DicionarioGCode";
-import { ValidationDialog } from "@/components/ValidationDialog";
 import { Button } from "@/components/ui/button";
 import { Menu, Loader2 } from "lucide-react";
 import type { Peca, PecaPosicionada, ConfiguracoesChapa as TConfigChapa, ConfiguracoesCorte as TConfigCorte, ConfiguracoesFerramenta as TConfigFerramenta, FormatoArquivo, VersaoGerador, TempoEstimado, MetodoNesting, ValidationResult, ValidationField } from "@/types";
@@ -23,6 +21,21 @@ import { ApiClient } from "@/lib/api-client";
 import { sanitizeValue } from "@/lib/validation-rules";
 import { useValidationContext } from "@/contexts/ValidationContext";
 import { toast } from "sonner";
+
+// Componentes grandes carregados sob demanda (code splitting)
+const VisualizadorGCode = dynamic(() => import("@/components/VisualizadorGCode").then(mod => ({ default: mod.VisualizadorGCode })), {
+  loading: () => <div className="flex items-center justify-center p-8"><Loader2 className="h-6 w-6 animate-spin" /></div>,
+  ssr: false,
+});
+
+const DicionarioGCode = dynamic(() => import("@/components/DicionarioGCode").then(mod => ({ default: mod.DicionarioGCode })), {
+  loading: () => <Button disabled><Loader2 className="h-4 w-4 animate-spin mr-2" />Carregando...</Button>,
+  ssr: false,
+});
+
+const ValidationDialog = dynamic(() => import("@/components/ValidationDialog").then(mod => ({ default: mod.ValidationDialog })), {
+  ssr: false,
+});
 
 export default function Home() {
   const { hasErrors } = useValidationContext();
