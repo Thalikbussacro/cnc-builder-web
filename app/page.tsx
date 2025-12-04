@@ -22,6 +22,7 @@ import { useDebounce } from "@/hooks/useDebounce";
 import { ApiClient } from "@/lib/api-client";
 import { sanitizeValue } from "@/lib/validation-rules";
 import { useValidationContext } from "@/contexts/ValidationContext";
+import { toast } from "sonner";
 
 export default function Home() {
   const { hasErrors } = useValidationContext();
@@ -260,6 +261,17 @@ export default function Home() {
         setValidationResult(result);
         setValidationDialogOpen(true);
         setCarregando(false);
+
+        // Toast de warning
+        if (result.warnings.length > 0 && !result.errors.length) {
+          toast.warning('Configurações com avisos', {
+            description: 'Revise os avisos antes de continuar',
+            action: {
+              label: 'Revisar',
+              onClick: () => setValidationDialogOpen(true),
+            },
+          });
+        }
         return;
       }
 
@@ -275,10 +287,20 @@ export default function Home() {
 
       setGcodeGerado(response.gcode);
       setVisualizadorAberto(true);
+
+      // Toast de sucesso
+      toast.success('G-code gerado com sucesso!', {
+        description: `${pecas.filter(p => !p.ignorada).length} peças processadas`,
+      });
     } catch (error) {
       const mensagemErro = error instanceof Error ? error.message : 'Erro ao gerar G-code';
       setErro(mensagemErro);
       console.error('Erro:', error);
+
+      // Toast de erro
+      toast.error('Erro ao gerar G-code', {
+        description: mensagemErro,
+      });
     } finally {
       setCarregando(false);
     }
@@ -328,10 +350,20 @@ export default function Home() {
 
       setGcodeGerado(response.gcode);
       setVisualizadorAberto(true);
+
+      // Toast de sucesso (com avisos)
+      toast.success('G-code gerado com avisos', {
+        description: `${pecas.filter(p => !p.ignorada).length} peças processadas`,
+      });
     } catch (error) {
       const mensagemErro = error instanceof Error ? error.message : 'Erro ao gerar G-code';
       setErro(mensagemErro);
       console.error('Erro ao gerar G-code:', error);
+
+      // Toast de erro
+      toast.error('Erro ao gerar G-code', {
+        description: mensagemErro,
+      });
     } finally {
       setCarregando(false);
     }
@@ -348,6 +380,9 @@ export default function Home() {
   const handleBaixarGCode = (formato: FormatoArquivo) => {
     if (gcodeGerado) {
       downloadGCode(gcodeGerado, formato);
+      toast.success('G-code baixado!', {
+        description: `Arquivo .${formato} salvo`,
+      });
     }
   };
 

@@ -3,6 +3,7 @@ import { Plus_Jakarta_Sans, JetBrains_Mono } from "next/font/google";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { Providers } from "@/components/Providers";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
 const plusJakartaSans = Plus_Jakarta_Sans({
@@ -37,6 +38,7 @@ export default function RootLayout({
             </Providers>
           </ThemeProvider>
         </ErrorBoundary>
+        <Toaster />
       </body>
     </html>
   );

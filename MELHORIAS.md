@@ -14,14 +14,14 @@
 
 ### Status Geral
 - **Total:** 35 melhorias
-- **Concluídas:** 4/35 (11%)
+- **Concluídas:** 5/35 (14%)
 - **Em progresso:** 0/35 (0%)
-- **Pendentes:** 31/35 (89%)
+- **Pendentes:** 30/35 (86%)
 
 ### Por Categoria
 - [x] **Migração Backend:** 1/2
 - [x] **Performance:** 1/4
-- [x] **UX/UI:** 2/6
+- [x] **UX/UI:** 3/6
 - [ ] **Segurança:** 0/4
 - [ ] **Código e Arquitetura:** 0/4
 - [ ] **Testes:** 0/3
@@ -573,7 +573,7 @@ const handleVisualizarGCode = async () => {
 ---
 
 ## 3.3. Toast Notifications
-- [ ] **Status:** Pendente
+- [x] **Status:** ✅ Concluído em 2025-12-03
 - **Prioridade:** 🟡 MÉDIA
 - **Tempo:** 25 minutos
 
