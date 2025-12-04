@@ -13,7 +13,24 @@ export interface ValidationResponse extends ValidationResult {
   };
 }
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+// Validação da API URL com fallback seguro
+const API_BASE_URL = (() => {
+  const url = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+
+  try {
+    new URL(url);
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+      throw new Error('URL deve começar com http:// ou https://');
+    }
+    console.log('✅ API URL configurada:', url);
+    return url;
+  } catch (error) {
+    console.error('❌ NEXT_PUBLIC_API_URL inválida:', error);
+    console.warn('⚠️ Usando fallback: http://localhost:3001');
+    return 'http://localhost:3001';
+  }
+})();
+
 const DEFAULT_TIMEOUT = 30000; // 30 segundos
 
 export interface GerarGCodeRequest {

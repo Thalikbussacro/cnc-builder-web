@@ -14,15 +14,15 @@
 
 ### Status Geral
 - **Total:** 35 melhorias
-- **Concluídas:** 12/35 (34%)
+- **Concluídas:** 13/35 (37%)
 - **Em progresso:** 0/35 (0%)
-- **Pendentes:** 23/35 (66%)
+- **Pendentes:** 22/35 (63%)
 
 ### Por Categoria
 - [x] **Migração Backend:** 1/2
 - [x] **Performance:** 4/4
 - [x] **UX/UI:** 6/6
-- [ ] **Segurança:** 1/4
+- [ ] **Segurança:** 2/4
 - [ ] **Código e Arquitetura:** 0/4
 - [ ] **Testes:** 0/3
 - [ ] **Acessibilidade:** 0/3
@@ -921,7 +921,7 @@ const novaPeca: Peca = {
 ---
 
 ## 4.2. Validação de API_URL
-- [ ] **Status:** Pendente
+- [x] **Status:** ✅ Concluído em 2025-12-04
 - **Prioridade:** 🟡 MÉDIA
 - **Tempo:** 15 minutos
 
