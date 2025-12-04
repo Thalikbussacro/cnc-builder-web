@@ -14,9 +14,9 @@
 
 ### Status Geral
 - **Total:** 35 melhorias
-- **Concluídas:** 21/35 (60%)
+- **Concluídas:** 22/35 (63%)
 - **Em progresso:** 0/35 (0%)
-- **Pendentes:** 14/35 (40%)
+- **Pendentes:** 13/35 (37%)
 
 ### Por Categoria
 - [x] **Migração Backend:** 1/2
@@ -25,7 +25,7 @@
 - [x] **Segurança:** 4/4
 - [x] **Código e Arquitetura:** 3/4
 - [ ] **Testes:** 2/3
-- [ ] **Acessibilidade:** 1/3
+- [ ] **Acessibilidade:** 2/3
 - [ ] **SEO:** 0/2
 - [ ] **PWA:** 0/2
 
@@ -1673,7 +1673,7 @@ npx playwright test --update-snapshots
 ---
 
 ## 7.2. Keyboard Navigation
-- [ ] **Status:** Pendente
+- [x] **Status:** ✅ Concluído em 2025-12-04
 - **Prioridade:** 🟡 MÉDIA
 - **Tempo:** 30 minutos
 
