@@ -14,17 +14,17 @@
 
 ### Status Geral
 - **Total:** 35 melhorias
-- **Concluídas:** 17/35 (49%)
+- **Concluídas:** 19/35 (54%)
 - **Em progresso:** 0/35 (0%)
-- **Pendentes:** 18/35 (51%)
+- **Pendentes:** 16/35 (46%)
 
 ### Por Categoria
 - [x] **Migração Backend:** 1/2
 - [x] **Performance:** 4/4
 - [x] **UX/UI:** 6/6
 - [x] **Segurança:** 4/4
-- [ ] **Código e Arquitetura:** 2/4
-- [ ] **Testes:** 0/3
+- [x] **Código e Arquitetura:** 3/4
+- [ ] **Testes:** 1/3
 - [ ] **Acessibilidade:** 0/3
 - [ ] **SEO:** 0/2
 - [ ] **PWA:** 0/2
@@ -1431,7 +1431,7 @@ npm run storybook
 # 6. Testes
 
 ## 6.1. Testes Unitários (Vitest)
-- [ ] **Status:** Pendente
+- [x] **Status:** ✅ Concluído em 2025-12-04
 - **Prioridade:** 🔴 CRÍTICA
 - **Tempo:** 2 horas
 
