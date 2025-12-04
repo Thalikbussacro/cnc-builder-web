@@ -1,6 +1,4 @@
-import type { Peca, PecaPosicionada, ConfiguracoesChapa, ConfiguracoesCorte, ConfiguracoesFerramenta, TempoEstimado } from '@/types';
-import type { MetodoNesting } from '@/lib/nesting-algorithm';
-import type { ValidationResult } from '@/lib/validator';
+import type { Peca, PecaPosicionada, ConfiguracoesChapa, ConfiguracoesCorte, ConfiguracoesFerramenta, TempoEstimado, MetodoNesting, ValidationResult } from '@/types';
 
 export interface ValidationResponse extends ValidationResult {
   preview?: {

@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Maximize2, Loader2 } from "lucide-react";
 import { PreviewFullscreen } from "@/components/PreviewFullscreen";
 import type { PecaPosicionada, TempoEstimado } from "@/types";
-import { formatarTempo } from "@/lib/gcode-generator";
+import { formatarTempo } from "@/lib/utils";
 
 // Hook para detectar tema dark
 function useIsDark() {

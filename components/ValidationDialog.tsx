@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { AlertCircle, AlertTriangle } from "lucide-react";
-import type { ValidationResult } from "@/lib/validator";
+import type { ValidationResult } from "@/types";
 
 type ValidationDialogProps = {
   open: boolean;

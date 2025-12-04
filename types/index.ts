@@ -123,3 +123,51 @@ export type TempoEstimado = {
   distanciaPosicionamento?: number; // mm - distância total de posicionamento
   distanciaTotal?: number;        // mm - distância total percorrida
 };
+
+/**
+ * Método de algoritmo de nesting
+ */
+export type MetodoNesting = 'greedy' | 'shelf' | 'guillotine';
+
+/**
+ * Severidade do problema de validação
+ */
+export type ValidationSeverity = 'error' | 'warning';
+
+/**
+ * Campo que tem problema de validação
+ */
+export type ValidationField =
+  | 'profundidade'
+  | 'profundidadePorPassada'
+  | 'espacamento'
+  | 'feedrate'
+  | 'plungeRate'
+  | 'rapidsSpeed'
+  | 'spindleSpeed'
+  | 'anguloRampa'
+  | 'diametroFresa'
+  | 'espessuraChapa'
+  | 'pecas'
+  | 'rampa';
+
+/**
+ * Problema de validação encontrado
+ */
+export type ValidationIssue = {
+  severity: ValidationSeverity;
+  field: ValidationField;
+  message: string;
+  suggestion: string;
+  currentValue?: number | string;
+  recommendedValue?: string;
+};
+
+/**
+ * Resultado da validação
+ */
+export type ValidationResult = {
+  valid: boolean;
+  errors: ValidationIssue[];
+  warnings: ValidationIssue[];
+};

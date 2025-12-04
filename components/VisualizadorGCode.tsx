@@ -14,7 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import type { FormatoArquivo, VersaoGerador } from "@/types";
-import { VERSOES_GERADOR } from "@/lib/gcode-generator";
+import { VERSOES_GERADOR } from "@/lib/utils";
 
 type VisualizadorGCodeProps = {
   isOpen: boolean;

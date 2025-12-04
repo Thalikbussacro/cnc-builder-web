@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { InfoTooltip } from "@/components/InfoTooltip";
-import { VERSOES_GERADOR } from "@/lib/gcode-generator";
+import { VERSOES_GERADOR } from "@/lib/utils";
 import type { VersaoGerador } from "@/types";
 import { Badge } from "@/components/ui/badge";
 

@@ -9,9 +9,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import type { MetodoNesting } from "@/lib/nesting-algorithm";
-import type { TempoEstimado } from "@/types";
-import { formatarTempo } from "@/lib/gcode-generator";
+import type { MetodoNesting, TempoEstimado } from "@/types";
+import { formatarTempo } from "@/lib/utils";
 
 type SeletorNestingProps = {
   metodo: MetodoNesting;

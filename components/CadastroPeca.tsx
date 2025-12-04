@@ -8,8 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { InfoTooltip } from "@/components/InfoTooltip";
 import { parametrosInfo } from "@/lib/parametros-info";
-import type { Peca, ConfiguracoesChapa, TipoCorte } from "@/types";
-import { posicionarPecas, type MetodoNesting } from "@/lib/nesting-algorithm";
+import type { Peca, ConfiguracoesChapa, TipoCorte, MetodoNesting } from "@/types";
 
 type CadastroPecaProps = {
   onAdicionar: (peca: Peca | Peca[]) => void;
@@ -77,42 +76,8 @@ export function CadastroPeca({
       });
     }
 
-    // Simula nesting com todas as peças (existentes + novas) para validar
-    const pecasTemp = [...pecasExistentes, ...novasPecas];
-    const resultado = posicionarPecas(
-      pecasTemp,
-      configChapa.largura,
-      configChapa.altura,
-      espacamento,
-      metodoNesting,
-      margemBorda
-    );
-
-    // VALIDAÇÃO CRÍTICA: Verifica se TODAS as peças existentes continuam posicionadas
-    const existentesIds = new Set(pecasExistentes.map(p => p.id));
-    const existentesPosicionadas = resultado.posicionadas.filter(p => existentesIds.has(p.id)).length;
-
-    if (existentesPosicionadas < pecasExistentes.length) {
-      const perdidas = pecasExistentes.length - existentesPosicionadas;
-      setErro(`Não há espaço suficiente. Adicionar estas peças removeria ${perdidas} peça(s) existente(s).`);
-      return;
-    }
-
-    // Verifica quantas das novas peças couberam
-    const novasIds = new Set(novasPecas.map(p => p.id));
-    const couberamCount = resultado.posicionadas.filter(p => novasIds.has(p.id)).length;
-
-    if (couberamCount === 0) {
-      setErro("Não há espaço na chapa para nenhuma destas peças.");
-      return;
-    }
-
-    if (couberamCount < quantidadeNum) {
-      setErro(`Apenas ${couberamCount} de ${quantidadeNum} peças cabem na chapa.`);
-      return;
-    }
-
     // Adiciona todas as peças de uma vez
+    // Nota: Validação de espaço é feita pela API no preview
     onAdicionar(quantidadeNum === 1 ? novasPecas[0] : novasPecas);
 
     // Reseta nome e quantidade após adicionar
