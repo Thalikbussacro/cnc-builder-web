@@ -14,15 +14,15 @@
 
 ### Status Geral
 - **Total:** 35 melhorias
-- **Concluídas:** 13/35 (37%)
+- **Concluídas:** 14/35 (40%)
 - **Em progresso:** 0/35 (0%)
-- **Pendentes:** 22/35 (63%)
+- **Pendentes:** 21/35 (60%)
 
 ### Por Categoria
 - [x] **Migração Backend:** 1/2
 - [x] **Performance:** 4/4
 - [x] **UX/UI:** 6/6
-- [ ] **Segurança:** 2/4
+- [ ] **Segurança:** 3/4
 - [ ] **Código e Arquitetura:** 0/4
 - [ ] **Testes:** 0/3
 - [ ] **Acessibilidade:** 0/3
@@ -956,7 +956,7 @@ console.log('API URL configurada:', API_BASE_URL);
 ---
 
 ## 4.3. Content Security Policy
-- [ ] **Status:** Pendente
+- [x] **Status:** ✅ Concluído em 2025-12-04
 - **Prioridade:** 🟢 BAIXA
 - **Tempo:** 20 minutos
 
