@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import dynamic from "next/dynamic";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { MainLayout } from "@/components/MainLayout";
 import { Sidebar, type SecaoSidebar } from "@/components/Sidebar";
 import { ConfiguracoesChapa } from "@/components/ConfiguracoesChapa";
@@ -63,11 +64,8 @@ export default function Home() {
   // Estados específicos da UI (não fazem parte do estado global)
   const [versaoGerador, setVersaoGerador] = useLocalStorage<VersaoGerador>('cnc-versao-gerador', 'v2');
   const [incluirComentarios, setIncluirComentarios] = useLocalStorage<boolean>('cnc-incluir-comentarios', true);
-  const [pecasPosicionadas, setPecasPosicionadas] = useState<PecaPosicionada[]>([]);
   const [visualizadorAberto, setVisualizadorAberto] = useState(false);
   const [gcodeGerado, setGcodeGerado] = useState("");
-  const [metricas, setMetricas] = useState<{ areaUtilizada: number; eficiencia: number; tempo: number } | undefined>();
-  const [tempoEstimado, setTempoEstimado] = useState<TempoEstimado | undefined>();
   const [secaoAtiva, setSecaoAtiva] = useLocalStorage<SecaoSidebar>('cnc-secao-ativa', 'chapa');
   const [sidebarMobileOpen, setSidebarMobileOpen] = useState(false);
 
@@ -75,10 +73,6 @@ export default function Home() {
   const [validationDialogOpen, setValidationDialogOpen] = useState(false);
   const [validationResult, setValidationResult] = useState<ValidationResult>({ valid: true, errors: [], warnings: [] });
   const [errorFields, setErrorFields] = useState<ValidationField[]>([]);
-
-  // Estados de API
-  const [carregando, setCarregando] = useState(false);
-  const [carregandoPreview, setCarregandoPreview] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
 
   // Debounce para valores que mudam frequentemente durante digitação
@@ -87,91 +81,88 @@ export default function Home() {
   const debouncedEspacamento = useDebounce(configCorte.espacamento, 300);
   const debouncedMargemBorda = useDebounce(configCorte.margemBorda, 300);
 
-  // Busca preview completo (nesting + tempo + métricas) via API
-  useEffect(() => {
-    // Limpa preview se não houver peças
-    if (pecas.length === 0) {
-      setPecasPosicionadas([]);
-      setMetricas(undefined);
-      setTempoEstimado(undefined);
-      setCarregandoPreview(false);
-      return;
-    }
-
-    // Marca como carregando
-    setCarregandoPreview(true);
-
-    // Chama API de validação para obter preview completo
-    const fetchPreview = async () => {
-      try {
-        // SANITIZA valores antes de enviar para API (evita travamentos com valores absurdos)
-        const configChapaSanitizada = {
-          largura: sanitizeValue('chapaLargura', configChapa.largura),
-          altura: sanitizeValue('chapaAltura', configChapa.altura),
-          espessura: sanitizeValue('espessuraChapa', configChapa.espessura),
-        };
-
-        const configCorteSanitizada = {
-          ...configCorte,
-          profundidade: sanitizeValue('profundidade', configCorte.profundidade),
-          profundidadePorPassada: sanitizeValue('profundidadePorPassada', configCorte.profundidadePorPassada),
-          espacamento: sanitizeValue('espacamento', configCorte.espacamento),
-          margemBorda: sanitizeValue('margemBorda', configCorte.margemBorda),
-          feedrate: sanitizeValue('feedrate', configCorte.feedrate),
-          plungeRate: sanitizeValue('plungeRate', configCorte.plungeRate),
-          rapidsSpeed: sanitizeValue('rapidsSpeed', configCorte.rapidsSpeed),
-          spindleSpeed: sanitizeValue('spindleSpeed', configCorte.spindleSpeed),
-          anguloRampa: sanitizeValue('anguloRampa', configCorte.anguloRampa),
-        };
-
-        const configFerramentaSanitizada = {
-          diametro: sanitizeValue('diametroFresa', configFerramenta.diametro),
-          numeroFerramenta: configFerramenta.numeroFerramenta,
-        };
-
-        const result = await ApiClient.validate({
-          pecas: pecas.filter(p => !p.ignorada),
-          configChapa: configChapaSanitizada,
-          configCorte: configCorteSanitizada,
-          configFerramenta: configFerramentaSanitizada,
-          metodoNesting,
-        });
-
-        // Atualiza preview com dados da API (fonte única da verdade)
-        if (result.preview) {
-          setPecasPosicionadas(result.preview.pecasPosicionadas);
-          setMetricas(result.preview.metricas);
-          setTempoEstimado(result.preview.tempoEstimado);
-        }
-      } catch (error) {
-        // Silenciosamente ignora erros de preview (não é crítico)
-        console.warn('Erro ao buscar preview:', error);
-        // Limpa preview em caso de erro
-        setPecasPosicionadas([]);
-        setMetricas(undefined);
-        setTempoEstimado(undefined);
-      } finally {
-        setCarregandoPreview(false);
-      }
-    };
-
-    fetchPreview();
-  }, [
+  // Memoiza configurações sanitizadas para evitar recalcular a cada render
+  const sanitizedConfigs = useMemo(() => ({
+    configChapa: {
+      largura: sanitizeValue('chapaLargura', debouncedLargura),
+      altura: sanitizeValue('chapaAltura', debouncedAltura),
+      espessura: sanitizeValue('espessuraChapa', configChapa.espessura),
+    },
+    configCorte: {
+      ...configCorte,
+      profundidade: sanitizeValue('profundidade', configCorte.profundidade),
+      profundidadePorPassada: sanitizeValue('profundidadePorPassada', configCorte.profundidadePorPassada),
+      espacamento: sanitizeValue('espacamento', debouncedEspacamento),
+      margemBorda: sanitizeValue('margemBorda', debouncedMargemBorda),
+      feedrate: sanitizeValue('feedrate', configCorte.feedrate),
+      plungeRate: sanitizeValue('plungeRate', configCorte.plungeRate),
+      rapidsSpeed: sanitizeValue('rapidsSpeed', configCorte.rapidsSpeed),
+      spindleSpeed: sanitizeValue('spindleSpeed', configCorte.spindleSpeed),
+      anguloRampa: sanitizeValue('anguloRampa', configCorte.anguloRampa),
+    },
+    configFerramenta: {
+      diametro: sanitizeValue('diametroFresa', configFerramenta.diametro),
+      numeroFerramenta: configFerramenta.numeroFerramenta,
+    },
+  }), [
     debouncedLargura,
     debouncedAltura,
     debouncedEspacamento,
     debouncedMargemBorda,
     configChapa.espessura,
-    configCorte.profundidade,
-    configCorte.profundidadePorPassada,
-    configCorte.feedrate,
-    configCorte.plungeRate,
-    configCorte.rapidsSpeed,
-    configCorte.usarMesmoEspacamentoBorda,
-    configFerramenta.diametro,
-    metodoNesting,
-    pecas,
+    configCorte,
+    configFerramenta,
   ]);
+
+  // Preview automático via React Query
+  const { data: previewData, isLoading: carregandoPreview } = useQuery({
+    queryKey: ['preview', pecas, sanitizedConfigs, metodoNesting],
+    queryFn: async () => {
+      return await ApiClient.validate({
+        pecas: pecas.filter(p => !p.ignorada),
+        configChapa: sanitizedConfigs.configChapa,
+        configCorte: sanitizedConfigs.configCorte,
+        configFerramenta: sanitizedConfigs.configFerramenta,
+        metodoNesting,
+      });
+    },
+    enabled: pecas.length > 0, // Só busca se houver peças
+    staleTime: 5000, // Cache de 5 segundos
+    retry: false, // Não retenta em caso de erro (preview não é crítico)
+  });
+
+  // Extrai dados do preview (ou usa valores vazios)
+  const pecasPosicionadas = previewData?.preview?.pecasPosicionadas ?? [];
+  const metricas = previewData?.preview?.metricas;
+  const tempoEstimado = previewData?.preview?.tempoEstimado;
+
+  // Mutation para gerar G-code
+  const generateGCodeMutation = useMutation({
+    mutationFn: async () => {
+      return await ApiClient.gerarGCode({
+        pecas: pecas.filter(p => !p.ignorada),
+        configChapa: sanitizedConfigs.configChapa,
+        configCorte: sanitizedConfigs.configCorte,
+        configFerramenta: sanitizedConfigs.configFerramenta,
+        metodoNesting,
+        incluirComentarios,
+      });
+    },
+    onSuccess: (response) => {
+      setGcodeGerado(response.gcode);
+      setVisualizadorAberto(true);
+      toast.success('G-code gerado com sucesso!', {
+        description: `${pecas.filter(p => !p.ignorada).length} peças processadas`,
+      });
+    },
+    onError: (error: unknown) => {
+      const mensagemErro = error instanceof Error ? error.message : 'Erro ao gerar G-code';
+      setErro(mensagemErro);
+      toast.error('Erro ao gerar G-code', {
+        description: mensagemErro,
+      });
+    },
+  });
 
   // Atalhos de teclado
   useKeyboardShortcuts({
@@ -218,39 +209,12 @@ export default function Home() {
     setErro(null);
 
     try {
-      setCarregando(true);
-
-      // SANITIZA valores antes de enviar para API (evita travamentos com valores absurdos)
-      const configChapaSanitizada = {
-        largura: sanitizeValue('chapaLargura', configChapa.largura),
-        altura: sanitizeValue('chapaAltura', configChapa.altura),
-        espessura: sanitizeValue('espessuraChapa', configChapa.espessura),
-      };
-
-      const configCorteSanitizada = {
-        ...configCorte,
-        profundidade: sanitizeValue('profundidade', configCorte.profundidade),
-        profundidadePorPassada: sanitizeValue('profundidadePorPassada', configCorte.profundidadePorPassada),
-        espacamento: sanitizeValue('espacamento', configCorte.espacamento),
-        margemBorda: sanitizeValue('margemBorda', configCorte.margemBorda),
-        feedrate: sanitizeValue('feedrate', configCorte.feedrate),
-        plungeRate: sanitizeValue('plungeRate', configCorte.plungeRate),
-        rapidsSpeed: sanitizeValue('rapidsSpeed', configCorte.rapidsSpeed),
-        spindleSpeed: sanitizeValue('spindleSpeed', configCorte.spindleSpeed),
-        anguloRampa: sanitizeValue('anguloRampa', configCorte.anguloRampa),
-      };
-
-      const configFerramentaSanitizada = {
-        diametro: sanitizeValue('diametroFresa', configFerramenta.diametro),
-        numeroFerramenta: configFerramenta.numeroFerramenta,
-      };
-
       // VALIDAÇÃO VIA API (fonte única da verdade)
       const result = await ApiClient.validate({
         pecas: pecas.filter(p => !p.ignorada),
-        configChapa: configChapaSanitizada,
-        configCorte: configCorteSanitizada,
-        configFerramenta: configFerramentaSanitizada,
+        configChapa: sanitizedConfigs.configChapa,
+        configCorte: sanitizedConfigs.configCorte,
+        configFerramenta: sanitizedConfigs.configFerramenta,
         metodoNesting,
       });
 
@@ -265,7 +229,6 @@ export default function Home() {
       if (!result.valid || result.warnings.length > 0) {
         setValidationResult(result);
         setValidationDialogOpen(true);
-        setCarregando(false);
 
         // Toast de warning
         if (result.warnings.length > 0 && !result.errors.length) {
@@ -280,98 +243,22 @@ export default function Home() {
         return;
       }
 
-      // Gera G-code via API (validação já foi feita)
-      const response = await ApiClient.gerarGCode({
-        pecas: pecas.filter(p => !p.ignorada),
-        configChapa: configChapaSanitizada,
-        configCorte: configCorteSanitizada,
-        configFerramenta: configFerramentaSanitizada,
-        metodoNesting,
-        incluirComentarios,
-      });
-
-      setGcodeGerado(response.gcode);
-      setVisualizadorAberto(true);
-
-      // Toast de sucesso
-      toast.success('G-code gerado com sucesso!', {
-        description: `${pecas.filter(p => !p.ignorada).length} peças processadas`,
-      });
+      // Gera G-code via mutation (validação já foi feita)
+      generateGCodeMutation.mutate();
     } catch (error) {
-      const mensagemErro = error instanceof Error ? error.message : 'Erro ao gerar G-code';
+      const mensagemErro = error instanceof Error ? error.message : 'Erro ao validar configurações';
       setErro(mensagemErro);
-      console.error('Erro:', error);
-
-      // Toast de erro
-      toast.error('Erro ao gerar G-code', {
+      toast.error('Erro ao validar configurações', {
         description: mensagemErro,
       });
-    } finally {
-      setCarregando(false);
     }
   };
 
   // Handler para continuar mesmo com avisos
-  const handleContinueWithWarnings = async () => {
+  const handleContinueWithWarnings = () => {
     setValidationDialogOpen(false);
-
-    // Gera G-code via API (mesmo com avisos)
-    try {
-      setCarregando(true);
-
-      // SANITIZA valores antes de enviar para API (evita travamentos com valores absurdos)
-      const configChapaSanitizada = {
-        largura: sanitizeValue('chapaLargura', configChapa.largura),
-        altura: sanitizeValue('chapaAltura', configChapa.altura),
-        espessura: sanitizeValue('espessuraChapa', configChapa.espessura),
-      };
-
-      const configCorteSanitizada = {
-        ...configCorte,
-        profundidade: sanitizeValue('profundidade', configCorte.profundidade),
-        profundidadePorPassada: sanitizeValue('profundidadePorPassada', configCorte.profundidadePorPassada),
-        espacamento: sanitizeValue('espacamento', configCorte.espacamento),
-        margemBorda: sanitizeValue('margemBorda', configCorte.margemBorda),
-        feedrate: sanitizeValue('feedrate', configCorte.feedrate),
-        plungeRate: sanitizeValue('plungeRate', configCorte.plungeRate),
-        rapidsSpeed: sanitizeValue('rapidsSpeed', configCorte.rapidsSpeed),
-        spindleSpeed: sanitizeValue('spindleSpeed', configCorte.spindleSpeed),
-        anguloRampa: sanitizeValue('anguloRampa', configCorte.anguloRampa),
-      };
-
-      const configFerramentaSanitizada = {
-        diametro: sanitizeValue('diametroFresa', configFerramenta.diametro),
-        numeroFerramenta: configFerramenta.numeroFerramenta,
-      };
-
-      const response = await ApiClient.gerarGCode({
-        pecas: pecas.filter(p => !p.ignorada),
-        configChapa: configChapaSanitizada,
-        configCorte: configCorteSanitizada,
-        configFerramenta: configFerramentaSanitizada,
-        metodoNesting,
-        incluirComentarios,
-      });
-
-      setGcodeGerado(response.gcode);
-      setVisualizadorAberto(true);
-
-      // Toast de sucesso (com avisos)
-      toast.success('G-code gerado com avisos', {
-        description: `${pecas.filter(p => !p.ignorada).length} peças processadas`,
-      });
-    } catch (error) {
-      const mensagemErro = error instanceof Error ? error.message : 'Erro ao gerar G-code';
-      setErro(mensagemErro);
-      console.error('Erro ao gerar G-code:', error);
-
-      // Toast de erro
-      toast.error('Erro ao gerar G-code', {
-        description: mensagemErro,
-      });
-    } finally {
-      setCarregando(false);
-    }
+    // Gera G-code via mutation (mesmo com avisos)
+    generateGCodeMutation.mutate();
   };
 
   // Handler para mudança de versão do gerador
@@ -431,10 +318,10 @@ export default function Home() {
                 onClick={handleVisualizarGCode}
                 variant="default"
                 size="sm"
-                disabled={pecas.length === 0 || carregando || hasErrors()}
+                disabled={pecas.length === 0 || generateGCodeMutation.isPending || hasErrors()}
                 title={hasErrors() ? "Corrija os erros nos campos antes de gerar o G-code" : undefined}
               >
-                {carregando && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                {generateGCodeMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
                 <span className="hidden md:inline">Baixar/Copiar </span>G-code
                 <kbd className="hidden xl:inline ml-2 px-1.5 py-0.5 text-[10px] font-mono bg-background/20 rounded border border-background/30 opacity-60">
                   Ctrl+Enter
