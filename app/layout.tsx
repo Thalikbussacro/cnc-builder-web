@@ -31,6 +31,9 @@ export default function RootLayout({
   return (
     <html lang="pt-BR" className={`${plusJakartaSans.variable} ${jetbrainsMono.variable}`} suppressHydrationWarning>
       <body className="font-sans antialiased">
+        <a href="#main-content" className="skip-to-content">
+          Pular para o conteúdo principal
+        </a>
         <ErrorBoundary>
           <ThemeProvider defaultTheme="light" storageKey="gcg-theme">
             <Providers>

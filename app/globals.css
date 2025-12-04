@@ -58,4 +58,51 @@
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
+
+  /* Melhorias para navegação por teclado */
+  *:focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  /* Remove outline padrão em elementos que já têm estilo focus-visible do Tailwind */
+  .focus-visible\:ring-2:focus-visible,
+  .focus-visible\:ring-offset-2:focus-visible {
+    outline: none;
+  }
+
+  /* Garante que botões e links sejam claramente visíveis ao receber foco */
+  button:focus-visible,
+  a:focus-visible,
+  [role="button"]:focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+  }
+
+  /* Inputs já têm estilo focus do Tailwind, mas garantimos visibilidade */
+  input:focus-visible,
+  textarea:focus-visible,
+  select:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px hsl(var(--ring));
+  }
+
+  /* Skip to main content link (acessibilidade) */
+  .skip-to-content {
+    position: absolute;
+    top: -40px;
+    left: 0;
+    background: hsl(var(--primary));
+    color: hsl(var(--primary-foreground));
+    padding: 8px 16px;
+    text-decoration: none;
+    z-index: 100;
+    border-radius: 0 0 4px 0;
+    font-weight: 600;
+  }
+
+  .skip-to-content:focus {
+    top: 0;
+  }
 }
