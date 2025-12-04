@@ -1515,7 +1515,7 @@ describe('useDebounce', () => {
 ---
 
 ## 6.2. Testes E2E (Playwright)
-- [ ] **Status:** Pendente
+- [x] **Status:** ⚠️ Infraestrutura completa, bloqueado por erro de SSR (ThemeProvider)
 - **Prioridade:** 🟡 MÉDIA
 - **Tempo:** 1.5 horas
 
