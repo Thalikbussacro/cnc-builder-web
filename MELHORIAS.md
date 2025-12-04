@@ -14,14 +14,14 @@
 
 ### Status Geral
 - **Total:** 35 melhorias
-- **Concluídas:** 8/35 (23%)
+- **Concluídas:** 9/35 (26%)
 - **Em progresso:** 0/35 (0%)
-- **Pendentes:** 27/35 (77%)
+- **Pendentes:** 26/35 (74%)
 
 ### Por Categoria
 - [x] **Migração Backend:** 1/2
 - [x] **Performance:** 4/4
-- [x] **UX/UI:** 3/6
+- [x] **UX/UI:** 4/6
 - [ ] **Segurança:** 0/4
 - [ ] **Código e Arquitetura:** 0/4
 - [ ] **Testes:** 0/3
@@ -634,7 +634,7 @@ toast.warning('Configurações com avisos', {
 ---
 
 ## 3.4. Keyboard Shortcuts
-- [ ] **Status:** Pendente
+- [x] **Status:** ✅ Concluído em 2025-12-04
 - **Prioridade:** 🟡 MÉDIA
 - **Tempo:** 35 minutos
 

@@ -17,6 +17,7 @@ import type { Peca, PecaPosicionada, ConfiguracoesChapa as TConfigChapa, Configu
 import { downloadGCode } from "@/lib/utils";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { useDebounce } from "@/hooks/useDebounce";
+import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { ApiClient } from "@/lib/api-client";
 import { sanitizeValue } from "@/lib/validation-rules";
 import { useValidationContext } from "@/contexts/ValidationContext";
@@ -184,6 +185,16 @@ export default function Home() {
     metodoNesting,
     pecas,
   ]);
+
+  // Atalhos de teclado
+  useKeyboardShortcuts({
+    onGenerate: handleVisualizarGCode,
+    onClear: handleLimpar,
+    onClose: () => {
+      setVisualizadorAberto(false);
+      setValidationDialogOpen(false);
+    },
+  });
 
   // Handler para adicionar peça (aceita uma ou múltiplas)
   const handleAdicionarPeca = (peca: Peca | Peca[]) => {
@@ -443,6 +454,9 @@ export default function Home() {
               >
                 {carregando && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
                 <span className="hidden md:inline">Baixar/Copiar </span>G-code
+                <kbd className="hidden xl:inline ml-2 px-1.5 py-0.5 text-[10px] font-mono bg-background/20 rounded border border-background/30 opacity-60">
+                  Ctrl+Enter
+                </kbd>
               </Button>
               <Button
                 onClick={handleLimpar}
@@ -453,6 +467,9 @@ export default function Home() {
               >
                 <span className="hidden sm:inline">Limpar</span>
                 <span className="sm:hidden">✕</span>
+                <kbd className="hidden xl:inline ml-2 px-1.5 py-0.5 text-[10px] font-mono bg-background/20 rounded border border-background/30 opacity-60">
+                  Ctrl+K
+                </kbd>
               </Button>
             </div>
           </div>
