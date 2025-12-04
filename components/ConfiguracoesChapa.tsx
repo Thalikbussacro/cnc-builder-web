@@ -85,9 +85,12 @@ export function ConfiguracoesChapa() {
               onBlur={largura.handleBlur}
               step="10"
               className={cn(largura.hasError && "border-destructive focus-visible:ring-destructive")}
+              aria-label="Largura da chapa em milímetros (Eixo X)"
+              aria-invalid={largura.hasError}
+              aria-describedby={largura.hasError ? "chapaLargura-error" : undefined}
             />
             {largura.hasError && largura.errorMessage && (
-              <p className="text-xs text-destructive mt-1">{largura.errorMessage}</p>
+              <p id="chapaLargura-error" role="alert" className="text-xs text-destructive mt-1">{largura.errorMessage}</p>
             )}
             <SanitizationAlert
               alert={largura.sanitizationAlert}
@@ -110,9 +113,12 @@ export function ConfiguracoesChapa() {
               onBlur={altura.handleBlur}
               step="10"
               className={cn(altura.hasError && "border-destructive focus-visible:ring-destructive")}
+              aria-label="Altura da chapa em milímetros (Eixo Y)"
+              aria-invalid={altura.hasError}
+              aria-describedby={altura.hasError ? "chapaAltura-error" : undefined}
             />
             {altura.hasError && altura.errorMessage && (
-              <p className="text-xs text-destructive mt-1">{altura.errorMessage}</p>
+              <p id="chapaAltura-error" role="alert" className="text-xs text-destructive mt-1">{altura.errorMessage}</p>
             )}
             <SanitizationAlert
               alert={altura.sanitizationAlert}
@@ -137,9 +143,12 @@ export function ConfiguracoesChapa() {
             min="1"
             step="1"
             className={cn(espessura.hasError && "border-destructive focus-visible:ring-destructive")}
+            aria-label="Espessura da chapa em milímetros"
+            aria-invalid={espessura.hasError}
+            aria-describedby={espessura.hasError ? "chapaEspessura-error" : undefined}
           />
           {espessura.hasError && espessura.errorMessage && (
-            <p className="text-xs text-destructive mt-1">{espessura.errorMessage}</p>
+            <p id="chapaEspessura-error" role="alert" className="text-xs text-destructive mt-1">{espessura.errorMessage}</p>
           )}
           <SanitizationAlert
             alert={espessura.sanitizationAlert}

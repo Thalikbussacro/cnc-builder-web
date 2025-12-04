@@ -174,6 +174,7 @@ export function CadastroPeca() {
             onKeyPress={handleKeyPress}
             placeholder="Ex: Tampa lateral, Base, etc."
             className="h-9 sm:h-10"
+            aria-label="Nome da peça (opcional)"
           />
         </div>
 
@@ -192,6 +193,8 @@ export function CadastroPeca() {
               step="10"
               className="h-9 sm:h-10"
               placeholder="mm"
+              aria-label="Comprimento da peça em milímetros (Eixo X)"
+              aria-required="true"
             />
           </div>
           <div className="space-y-1.5">
@@ -208,6 +211,8 @@ export function CadastroPeca() {
               step="10"
               className="h-9 sm:h-10"
               placeholder="mm"
+              aria-label="Largura da peça em milímetros (Eixo Y)"
+              aria-required="true"
             />
           </div>
           <div className="space-y-1.5">
@@ -223,6 +228,8 @@ export function CadastroPeca() {
               min="1"
               step="1"
               className="h-9 sm:h-10"
+              aria-label="Quantidade de peças a adicionar"
+              aria-required="true"
             />
           </div>
         </div>
@@ -238,7 +245,7 @@ export function CadastroPeca() {
             />
           </div>
           <Select value={tipoCorte} onValueChange={(value: TipoCorte) => setTipoCorte(value)}>
-            <SelectTrigger id="tipoCorte" className="h-9 sm:h-10">
+            <SelectTrigger id="tipoCorte" className="h-9 sm:h-10" aria-label="Tipo de corte da peça">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>

@@ -310,6 +310,8 @@ export const PreviewCanvas = memo(function PreviewCanvas({
               height={canvasSize.height}
               className="border border-border shadow-sm"
               style={{ backgroundColor: isDark ? "#1a1a1a" : "#f5f5f5" }}
+              role="img"
+              aria-label={`Visualização do posicionamento de ${pecasPosicionadas.filter(p => !p.ignorada).length} peças na chapa de ${chapaLargura.toFixed(0)}×${chapaAltura.toFixed(0)}mm com ${taxaAproveitamento.toFixed(1)}% de aproveitamento`}
             />
           </div>
 

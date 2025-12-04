@@ -61,7 +61,11 @@ export function ListaPecas({ pecas, onRemover, onToggleIgnorar }: ListaPecasProp
             Nenhuma peça cadastrada
           </p>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 max-h-48 sm:max-h-64 overflow-y-auto pr-1">
+          <div
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 max-h-48 sm:max-h-64 overflow-y-auto pr-1"
+            role="list"
+            aria-label="Lista de peças cadastradas"
+          >
             {pecas.map((peca, index) => {
               const cor = CORES[index % CORES.length];
               const tipoInfo = TIPO_CORTE_INFO[peca.tipoCorte];
@@ -73,6 +77,8 @@ export function ListaPecas({ pecas, onRemover, onToggleIgnorar }: ListaPecasProp
                   className={`flex flex-col gap-1.5 p-2 bg-secondary/30 rounded-lg border border-border hover:shadow-md transition-all ${
                     ignorada ? 'opacity-50 bg-muted/20' : ''
                   }`}
+                  role="listitem"
+                  aria-label={`${peca.nome || `Peça ${index + 1}`}, dimensões ${peca.largura}×${peca.altura}mm, tipo ${tipoInfo.label}${ignorada ? ', ignorada' : ''}`}
                 >
                   {/* Linha 1: Indicador + Nome + Remover */}
                   <div className="flex items-center gap-2">
@@ -96,6 +102,7 @@ export function ListaPecas({ pecas, onRemover, onToggleIgnorar }: ListaPecasProp
                         size="sm"
                         className="h-5 w-5 p-0 hover:bg-destructive/20 hover:text-destructive flex-shrink-0"
                         onClick={() => onRemover(peca.id)}
+                        aria-label={`Remover ${peca.nome || `peça ${index + 1}`}`}
                       >
                         <X className="h-3 w-3" />
                       </Button>
