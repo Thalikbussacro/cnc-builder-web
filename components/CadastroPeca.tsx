@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { InfoTooltip } from "@/components/InfoTooltip";
 import { parametrosInfo } from "@/lib/parametros-info";
+import { sanitizeString } from "@/lib/sanitize";
 import { toast } from "sonner";
 import { Upload, FileDown } from "lucide-react";
 import type { Peca, ConfiguracoesChapa, TipoCorte, MetodoNesting } from "@/types";
@@ -67,13 +68,14 @@ export function CadastroPeca({
 
     // Cria N peças idênticas
     const novasPecas: Peca[] = [];
+    const nomeSanitizado = nome.trim() ? sanitizeString(nome.trim()) : undefined;
     for (let i = 0; i < quantidadeNum; i++) {
       novasPecas.push({
         largura: larguraNum,
         altura: alturaNum,
         tipoCorte: tipoCorte,
         id: crypto.randomUUID(),
-        nome: nome.trim() || undefined,
+        nome: nomeSanitizado,
         numeroOriginal: pecasExistentes.length + i + 1,
       });
     }
@@ -108,12 +110,13 @@ export function CadastroPeca({
           .filter(line => line.trim())
           .map((line, i) => {
             const [largura, altura, tipoCorte, nome] = line.split(',');
+            const nomeRaw = nome?.trim() || `Peça ${pecasExistentes.length + i + 1}`;
             return {
               id: crypto.randomUUID(),
               largura: parseFloat(largura),
               altura: parseFloat(altura),
               tipoCorte: tipoCorte?.trim() as TipoCorte || "externo",
-              nome: nome?.trim() || `Peça ${pecasExistentes.length + i + 1}`,
+              nome: sanitizeString(nomeRaw),
             };
           });
 
