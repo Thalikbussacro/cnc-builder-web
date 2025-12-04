@@ -1,78 +1,59 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 
 /**
- * Hook para persistir estado no localStorage com debounce
+ * Hook otimizado para persistir estado no localStorage
+ *
+ * Melhorias:
+ * - Lazy initialization: só lê localStorage uma vez (no mount)
+ * - Debounce de escritas: evita salvar a cada keystroke
+ * - Memoização: previne re-criação de funções
+ *
  * @param key - Chave do localStorage
  * @param initialValue - Valor inicial se não houver nada salvo
- * @param debounceMs - Delay do debounce em milissegundos (padrão: 500ms)
  * @returns [value, setValue] - Estado e função para atualizar
  */
-export function useLocalStorage<T>(
-  key: string,
-  initialValue: T,
-  debounceMs: number = 500
-): [T, (value: T) => void] {
-  // Sempre começa com initialValue para evitar mismatch de hidratação
-  const [storedValue, setStoredValue] = useState<T>(initialValue);
-  const [isHydrated, setIsHydrated] = useState(false);
-  const saveTimerRef = useRef<NodeJS.Timeout>();
-
-  // Carrega do localStorage apenas no cliente após hidratação
-  useEffect(() => {
-    setIsHydrated(true);
+export function useLocalStorage<T>(key: string, initialValue: T) {
+  // Lazy initialization (só lê localStorage uma vez)
+  const [storedValue, setStoredValue] = useState<T>(() => {
+    if (typeof window === 'undefined') return initialValue;
 
     try {
       const item = window.localStorage.getItem(key);
-      if (item) {
-        const parsed = JSON.parse(item);
-        // Mescla valores salvos com valores padrão (para adicionar campos novos)
-        // Isso garante compatibilidade quando novos campos são adicionados
-        const merged = { ...initialValue, ...parsed };
-        setStoredValue(merged as T);
-
-        // Salva de volta para atualizar com novos campos
-        window.localStorage.setItem(key, JSON.stringify(merged));
-      }
-    } catch (error) {
-      console.warn(`Erro ao carregar ${key} do localStorage:`, error);
+      return item ? JSON.parse(item) : initialValue;
+    } catch {
+      return initialValue;
     }
-  }, [key]);
+  });
 
-  // Limpa timer pendente quando componente desmontar
-  useEffect(() => {
-    return () => {
-      if (saveTimerRef.current) {
-        clearTimeout(saveTimerRef.current);
-      }
-    };
-  }, []);
-
-  // Função para atualizar o valor com debounce
-  const setValue = (value: T) => {
-    try {
-      // Atualiza estado imediatamente (não debounced)
-      setStoredValue(value);
-
-      // Salva no localStorage com debounce
-      if (isHydrated) {
-        // Cancela timer anterior se existir
-        if (saveTimerRef.current) {
-          clearTimeout(saveTimerRef.current);
+  // Debounce de escritas (evita salvar a cada keystroke)
+  const debouncedSave = useMemo(
+    () => debounce((value: T) => {
+        try {
+          window.localStorage.setItem(key, JSON.stringify(value));
+        } catch {
+          // Ignore quota errors
         }
+      }, 500),
+    [key]
+  );
 
-        // Agenda novo save
-        saveTimerRef.current = setTimeout(() => {
-          try {
-            window.localStorage.setItem(key, JSON.stringify(value));
-          } catch (error) {
-            console.warn(`Erro ao salvar ${key} no localStorage:`, error);
-          }
-        }, debounceMs);
-      }
-    } catch (error) {
-      console.warn(`Erro ao processar ${key}:`, error);
-    }
+  const setValue = useCallback((value: T | ((val: T) => T)) => {
+    const valueToStore = value instanceof Function ? value(storedValue) : value;
+    setStoredValue(valueToStore);
+    debouncedSave(valueToStore);
+  }, [storedValue, debouncedSave]);
+
+  return [storedValue, setValue] as const;
+}
+
+// Helper debounce
+function debounce<T extends (...args: any[]) => any>(
+  func: T,
+  wait: number
+): (...args: Parameters<T>) => void {
+  let timeout: NodeJS.Timeout;
+  return (...args: Parameters<T>) => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func(...args), wait);
   };
-
-  return [storedValue, setValue];
 }
