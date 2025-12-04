@@ -79,10 +79,33 @@ export interface GerarGCodeResponse {
 }
 
 export class ApiClient {
+  // Rate limiting client-side (previne sobrecarga do backend)
+  private static lastRequestTime = 0;
+  private static readonly MIN_REQUEST_INTERVAL = 100; // ms entre requests
+
   /**
-   * Cria um fetch com timeout
+   * Throttle interno para prevenir sobrecarga do backend
+   * Garante intervalo mínimo entre requests
    */
-  private static fetchWithTimeout(url: string, options: RequestInit, timeout: number): Promise<Response> {
+  private static async throttle(): Promise<void> {
+    const now = Date.now();
+    const timeSinceLastRequest = now - this.lastRequestTime;
+
+    if (timeSinceLastRequest < this.MIN_REQUEST_INTERVAL) {
+      const waitTime = this.MIN_REQUEST_INTERVAL - timeSinceLastRequest;
+      await new Promise(resolve => setTimeout(resolve, waitTime));
+    }
+
+    this.lastRequestTime = Date.now();
+  }
+
+  /**
+   * Cria um fetch com timeout e throttling
+   */
+  private static async fetchWithTimeout(url: string, options: RequestInit, timeout: number): Promise<Response> {
+    // Aplica throttling antes de fazer o request
+    await this.throttle();
+
     return new Promise((resolve, reject) => {
       const timer = setTimeout(() => {
         reject(new Error('Timeout: A requisição demorou muito para responder'));
