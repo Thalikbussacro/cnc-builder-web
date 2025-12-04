@@ -11,6 +11,7 @@ import { CadastroPeca } from "@/components/CadastroPeca";
 import { ListaPecas } from "@/components/ListaPecas";
 import { PreviewCanvas } from "@/components/PreviewCanvas";
 import { SeletorNesting } from "@/components/SeletorNesting";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { Button } from "@/components/ui/button";
 import { Menu, Loader2 } from "lucide-react";
 import type { Peca, PecaPosicionada, ConfiguracoesChapa as TConfigChapa, ConfiguracoesCorte as TConfigCorte, ConfiguracoesFerramenta as TConfigFerramenta, FormatoArquivo, VersaoGerador, TempoEstimado, MetodoNesting, ValidationResult, ValidationField } from "@/types";
@@ -444,6 +445,7 @@ export default function Home() {
             </div>
 
             <div className="flex items-center gap-2">
+              <ThemeToggle />
               <DicionarioGCode />
               <Button
                 onClick={handleVisualizarGCode}
