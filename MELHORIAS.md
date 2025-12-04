@@ -14,9 +14,9 @@
 
 ### Status Geral
 - **Total:** 35 melhorias
-- **Concluídas:** 20/35 (57%)
+- **Concluídas:** 21/35 (60%)
 - **Em progresso:** 0/35 (0%)
-- **Pendentes:** 15/35 (43%)
+- **Pendentes:** 14/35 (40%)
 
 ### Por Categoria
 - [x] **Migração Backend:** 1/2
@@ -25,7 +25,7 @@
 - [x] **Segurança:** 4/4
 - [x] **Código e Arquitetura:** 3/4
 - [ ] **Testes:** 2/3
-- [ ] **Acessibilidade:** 0/3
+- [ ] **Acessibilidade:** 1/3
 - [ ] **SEO:** 0/2
 - [ ] **PWA:** 0/2
 
@@ -1630,7 +1630,7 @@ npx playwright test --update-snapshots
 # 7. Acessibilidade
 
 ## 7.1. ARIA Labels
-- [ ] **Status:** Pendente
+- [x] **Status:** ✅ Concluído em 2025-12-04
 - **Prioridade:** 🟡 MÉDIA
 - **Tempo:** 45 minutos
 
