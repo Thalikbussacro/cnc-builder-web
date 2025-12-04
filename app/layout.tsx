@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Plus_Jakarta_Sans, JetBrains_Mono } from "next/font/google";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { Providers } from "@/components/Providers";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 import "./globals.css";
 
 const plusJakartaSans = Plus_Jakarta_Sans({
@@ -29,11 +30,13 @@ export default function RootLayout({
   return (
     <html lang="pt-BR" className={`${plusJakartaSans.variable} ${jetbrainsMono.variable}`} suppressHydrationWarning>
       <body className="font-sans antialiased">
-        <ThemeProvider defaultTheme="light" storageKey="gcg-theme">
-          <Providers>
-            {children}
-          </Providers>
-        </ThemeProvider>
+        <ErrorBoundary>
+          <ThemeProvider defaultTheme="light" storageKey="gcg-theme">
+            <Providers>
+              {children}
+            </Providers>
+          </ThemeProvider>
+        </ErrorBoundary>
       </body>
     </html>
   );
