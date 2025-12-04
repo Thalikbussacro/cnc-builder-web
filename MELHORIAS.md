@@ -14,14 +14,14 @@
 
 ### Status Geral
 - **Total:** 35 melhorias
-- **Concluídas:** 3/35 (9%)
+- **Concluídas:** 4/35 (11%)
 - **Em progresso:** 0/35 (0%)
-- **Pendentes:** 32/35 (91%)
+- **Pendentes:** 31/35 (89%)
 
 ### Por Categoria
 - [x] **Migração Backend:** 1/2
 - [x] **Performance:** 1/4
-- [x] **UX/UI:** 1/6
+- [x] **UX/UI:** 2/6
 - [ ] **Segurança:** 0/4
 - [ ] **Código e Arquitetura:** 0/4
 - [ ] **Testes:** 0/3
@@ -522,7 +522,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 ---
 
 ## 3.2. Loading States
-- [ ] **Status:** Pendente
+- [x] **Status:** ✅ Já implementado (verificado em 2025-12-03)
 - **Prioridade:** 🟡 MÉDIA
 - **Tempo:** 30 minutos
 
