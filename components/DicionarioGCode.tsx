@@ -343,6 +343,12 @@ export function DicionarioGCode() {
       <div
         className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] transition-opacity"
         onClick={() => setAberto(false)}
+        role="button"
+        tabIndex={-1}
+        onKeyDown={(e) => {
+          if (e.key === 'Escape') setAberto(false);
+        }}
+        aria-label="Fechar dicionário G-code"
       />
 
       {/* Painel Lateral Deslizante */}

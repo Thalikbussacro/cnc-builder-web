@@ -78,6 +78,12 @@ export function VisualizadorGCode({
       <div
         className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] transition-opacity"
         onClick={onClose}
+        role="button"
+        tabIndex={-1}
+        onKeyDown={(e) => {
+          if (e.key === 'Escape') onClose();
+        }}
+        aria-label="Fechar visualizador de G-code"
       />
 
       {/* Painel Lateral Deslizante */}

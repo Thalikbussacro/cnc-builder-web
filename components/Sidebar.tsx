@@ -187,6 +187,12 @@ export function Sidebar({ secaoAtiva, onSecaoChange, mobileOpen, onMobileOpenCha
           <div
             className="lg:hidden fixed inset-0 bg-background/80 backdrop-blur-sm z-40"
             onClick={() => onMobileOpenChange(false)}
+            role="button"
+            tabIndex={-1}
+            onKeyDown={(e) => {
+              if (e.key === 'Escape') onMobileOpenChange(false);
+            }}
+            aria-label="Fechar menu lateral"
           />
           {/* Drawer */}
           <aside className="lg:hidden fixed left-0 top-0 bottom-0 w-80 bg-card border-r z-50 shadow-lg animate-in slide-in-from-left duration-300">
