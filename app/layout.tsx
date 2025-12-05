@@ -3,6 +3,7 @@ import { Plus_Jakarta_Sans, JetBrains_Mono } from "next/font/google";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { Providers } from "@/components/Providers";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { OfflineIndicator } from "@/components/OfflineIndicator";
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
@@ -63,6 +64,7 @@ export const metadata: Metadata = {
       "max-snippet": -1,
     },
   },
+  manifest: "/manifest.json",
 };
 
 export const viewport = {
@@ -90,6 +92,7 @@ export default function RootLayout({
           </ThemeProvider>
         </ErrorBoundary>
         <Toaster />
+        <OfflineIndicator />
       </body>
     </html>
   );

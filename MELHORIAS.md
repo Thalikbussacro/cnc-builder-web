@@ -14,9 +14,9 @@
 
 ### Status Geral
 - **Total:** 35 melhorias
-- **Concluídas:** 25/35 (71%)
+- **Concluídas:** 27/35 (77%)
 - **Em progresso:** 0/35 (0%)
-- **Pendentes:** 10/35 (29%)
+- **Pendentes:** 8/35 (23%)
 
 ### Por Categoria
 - [x] **Migração Backend:** 1/2
@@ -27,7 +27,7 @@
 - [ ] **Testes:** 2/3
 - [x] **Acessibilidade:** 3/3
 - [x] **SEO:** 2/2
-- [ ] **PWA:** 0/2
+- [x] **PWA:** 2/2
 
 ---
 
@@ -1836,7 +1836,7 @@ export default function robots(): MetadataRoute.Robots {
 # 9. PWA
 
 ## 9.1. PWA Support
-- [ ] **Status:** Pendente
+- [x] **Status:** ✅ Concluído em 2025-12-04
 - **Prioridade:** 🟡 MÉDIA
 - **Tempo:** 35 minutos
 
@@ -1899,7 +1899,7 @@ module.exports = withPWA({
 ---
 
 ## 9.2. Offline Mode
-- [ ] **Status:** Pendente
+- [x] **Status:** ✅ Concluído em 2025-12-04
 - **Prioridade:** 🟢 BAIXA
 - **Tempo:** 25 minutos
 

@@ -1,0 +1,5 @@
+# PWA - Arquivos gerados automaticamente pelo next-pwa
+sw.js
+sw.js.map
+workbox-*.js
+workbox-*.js.map

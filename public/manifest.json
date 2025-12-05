@@ -1,0 +1,41 @@
+{
+  "name": "G-Code Generator (GCG)",
+  "short_name": "GCG",
+  "description": "Gerador profissional de G-code com nesting automático para fresadoras CNC",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#F5B642",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icon-192.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["productivity", "utilities"],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Nova Peça",
+      "short_name": "Nova",
+      "description": "Adicionar uma nova peça",
+      "url": "/?action=new-piece",
+      "icons": [
+        {
+          "src": "/icon-192.svg",
+          "sizes": "192x192",
+          "type": "image/svg+xml"
+        }
+      ]
+    }
+  ]
+}
