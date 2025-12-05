@@ -13,9 +13,9 @@ Este documento descreve o processo padronizado para reescrever mensagens de comm
 
 **Estrutura:**
 ```
-tipo: descrição curta e direta
+tipo: descricao curta sem acentos e em minusculas
 
-Corpo opcional com detalhes técnicos objetivos.
+Corpo opcional com detalhes técnicos objetivos (pode ter acentos).
 ```
 
 **Tipos convencionais:**
@@ -56,7 +56,8 @@ Corpo opcional com detalhes técnicos objetivos.
 **Cabeçalho:**
 - Máximo ~50 caracteres
 - Imperativo: "adicionar" não "adicionado"
-- Minúsculas após o tipo
+- **Apenas minúsculas** (incluindo após o tipo)
+- **Sem acentos** - usar "adicao" ao invés de "adição"
 - Sem ponto final
 
 **Corpo:**
@@ -83,9 +84,9 @@ Criar arquivo `commit-rewrite-map.py`:
 """Mapeamento de mensagens de commit reescritas"""
 
 COMMIT_MESSAGES = {
-    'hash_do_commit': '''tipo: descrição curta
+    'hash_do_commit': '''tipo: descricao curta sem acentos e minusculas
 
-Corpo opcional com detalhes.''',
+Corpo opcional com detalhes (pode ter acentos).''',
 
     # Adicionar todos os commits aqui
 }
@@ -231,7 +232,7 @@ feat: add keyboard shortcuts for better UX (#3.4)
 
 ### Depois (Mensagem Reescrita):
 ```
-feat: adicionar atalhos de teclado para melhor UX
+feat: adicionar atalhos de teclado para melhor ux
 
 Cria hook useKeyboardShortcuts para atalhos globais. Adiciona Ctrl+Enter
 para gerar G-code, Ctrl+K para limpar todas as peças, Escape para fechar
@@ -250,7 +251,8 @@ Antes de executar a reescrita, verificar cada mensagem:
 - [ ] Português claro e profissional
 - [ ] Tipo conventional commit correto
 - [ ] Cabeçalho conciso (≤50 chars)
-- [ ] Corpo objetivo e relevante
+- [ ] **Cabeçalho sem acentos e apenas minúsculas**
+- [ ] Corpo objetivo e relevante (pode ter acentos)
 - [ ] Tom natural e técnico
 
 ## Notas Importantes
