@@ -19,8 +19,56 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "G-Code Generator (GCG)",
+  title: {
+    default: "G-Code Generator (GCG)",
+    template: "%s | G-Code Generator",
+  },
   description: "Aplicação web profissional para gerar código G-Code otimizado para fresadoras CNC com algoritmo de nesting automático e validações de segurança",
+  keywords: [
+    "CNC",
+    "G-code",
+    "nesting",
+    "fresadora",
+    "CAM",
+    "gerador g-code",
+    "otimização",
+    "corte CNC",
+    "manufatura",
+    "automação industrial"
+  ],
+  authors: [{ name: "CNC Builder Team" }],
+  creator: "CNC Builder",
+  publisher: "CNC Builder",
+  applicationName: "G-Code Generator",
+  openGraph: {
+    title: "G-Code Generator (GCG)",
+    description: "Gerador profissional de G-code com nesting automático para fresadoras CNC",
+    type: "website",
+    locale: "pt_BR",
+    siteName: "G-Code Generator",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "G-Code Generator (GCG)",
+    description: "Gerador profissional de G-code com nesting automático",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+};
+
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
 };
 
 export default function RootLayout({
