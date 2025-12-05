@@ -27,7 +27,7 @@ const COMANDOS_G: ComandoGCode[] = [
     nome: "Movimento Linear com Corte",
     descricao: "Move a ferramenta em linha reta COM velocidade controlada (feedrate). É o comando principal de corte.",
     exemplo: "G1 X50 Y30 F1500",
-    usoReal: "TODO corte em linha reta. Exemplo: cortar lado de um retângulo de X0 Y0 até X100 Y0 com velocidade de 1500mm/min."
+    usoReal: "Para cortar em linha reta. Exemplo: cortar lado de um retângulo de X0 Y0 até X100 Y0 com velocidade de 1500mm/min."
   },
   {
     codigo: "G2",

@@ -65,8 +65,8 @@ export function VisualizadorGCode({
       await navigator.clipboard.writeText(gcode);
       setCopiado(true);
       setTimeout(() => setCopiado(false), 2000);
-    } catch (err) {
-      console.error("Erro ao copiar:", err);
+    } catch {
+      // Ignora erros de clipboard
     }
   };
 

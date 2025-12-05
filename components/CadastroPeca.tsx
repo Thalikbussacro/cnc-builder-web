@@ -126,9 +126,8 @@ export function CadastroPeca() {
         } else {
           toast.error('Nenhuma peça válida encontrada no CSV');
         }
-      } catch (error) {
+      } catch {
         toast.error('Erro ao ler arquivo CSV');
-        console.error('Erro CSV:', error);
       }
     };
 

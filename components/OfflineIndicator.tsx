@@ -9,10 +9,7 @@ export function OfflineIndicator() {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    // Mark component as mounted (client-side only)
     setMounted(true);
-
-    // Initial state
     setIsOnline(navigator.onLine);
 
     const handleOnline = () => setIsOnline(true);
@@ -27,7 +24,6 @@ export function OfflineIndicator() {
     };
   }, []);
 
-  // Don't render anything until mounted (prevents hydration mismatch)
   if (!mounted || isOnline) return null;
 
   return (

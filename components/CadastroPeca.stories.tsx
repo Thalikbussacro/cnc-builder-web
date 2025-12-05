@@ -17,7 +17,6 @@ type Story = StoryObj<typeof CadastroPeca>;
 export const Default: Story = {
   args: {
     onAdicionar: (peca: Peca) => {
-      console.log('Peça adicionada:', peca);
       alert(`Peça adicionada: ${peca.largura}×${peca.altura}mm`);
     },
   },
@@ -25,8 +24,6 @@ export const Default: Story = {
 
 export const WithCallback: Story = {
   args: {
-    onAdicionar: (peca: Peca) => {
-      console.log('Nova peça:', peca);
-    },
+    onAdicionar: () => {},
   },
 };
