@@ -14,9 +14,9 @@
 
 ### Status Geral
 - **Total:** 35 melhorias
-- **Concluídas:** 28/35 (80%)
+- **Concluídas:** 29/35 (83%)
 - **Em progresso:** 0/35 (0%)
-- **Pendentes:** 7/35 (20%)
+- **Pendentes:** 6/35 (17%)
 
 ### Por Categoria
 - [x] **Migração Backend:** 2/2
@@ -24,7 +24,7 @@
 - [x] **UX/UI:** 6/6
 - [x] **Segurança:** 4/4
 - [x] **Código e Arquitetura:** 3/4
-- [ ] **Testes:** 2/3
+- [x] **Testes:** 3/3
 - [x] **Acessibilidade:** 3/3
 - [x] **SEO:** 2/2
 - [x] **PWA:** 2/2
@@ -1596,7 +1596,7 @@ npx playwright test --ui
 ---
 
 ## 6.3. Visual Regression
-- [ ] **Status:** Pendente
+- [x] **Status:** ✅ Concluído em 2025-12-04
 - **Prioridade:** 🟢 BAIXA
 - **Tempo:** 30 minutos
 
