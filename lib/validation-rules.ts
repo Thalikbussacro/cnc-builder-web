@@ -1,6 +1,16 @@
 /**
- * Regras de validação para parâmetros de corte CNC
+ * VALIDAÇÃO FRONTEND - Apenas UX
  *
+ * ⚠️ IMPORTANTE: Este arquivo é APENAS para validação UX (imediata).
+ * A fonte única da verdade é o BACKEND (/api/gcode/validate).
+ *
+ * Uso permitido:
+ * - validateField(): validação enquanto usuário digita
+ * - sanitizeValue(): limita valores absurdos antes de enviar para API
+ *
+ * ❌ NUNCA adicionar lógica de negócio aqui - sempre no backend!
+ *
+ * Regras de validação para parâmetros de corte CNC
  * IMPORTANTE: Estes valores podem ser ajustados conforme necessário.
  * Cada regra define limites mínimos, máximos e valores recomendados.
  */
@@ -149,32 +159,6 @@ export const VALIDATION_RULES = {
     min: 1,             // Mínimo: 1 passada
     max: 100,           // Máximo razoável: 100 passadas
   },
-} as const;
-
-/**
- * Mensagens de erro/aviso padronizadas
- */
-export const VALIDATION_MESSAGES = {
-  // Erros críticos
-  profundidadeZero: 'Profundidade não pode ser zero ou negativa',
-  profundidadePassadaZero: 'Profundidade por passada não pode ser zero ou negativa',
-  profundidadePassadaMaiorQueTotal: 'Profundidade por passada não pode ser maior que profundidade total',
-  feedrateZero: 'Velocidade de avanço não pode ser zero',
-  plungeRateZero: 'Velocidade de mergulho não pode ser zero',
-  spindleSpeedZero: 'Rotação do spindle não pode ser zero',
-  diametroFresaZero: 'Diâmetro da fresa não pode ser zero',
-  nenhumaPecaAdicionada: 'Nenhuma peça foi adicionada',
-  nenhumaPecaPosicionada: 'Nenhuma peça coube na chapa',
-  todasPecasPequenasParaRampa: 'Todas as peças são pequenas demais para rampa',
-
-  // Avisos
-  plungeRateMaiorQueFeedrate: 'Velocidade de mergulho está maior que velocidade de avanço',
-  profundidadeMaiorQueEspessura: 'Profundidade de corte é maior que espessura da chapa',
-  feedrateMuitoAlto: 'Velocidade de avanço muito alta para materiais duros',
-  spindleSpeedMuitoBaixo: 'Rotação do spindle está muito baixa',
-  anguloRampaConservador: 'Ângulo da rampa muito baixo (rampa será muito longa)',
-  anguloRampaAgressivo: 'Ângulo da rampa agressivo (pode estressar a ferramenta)',
-  algumasPecasPequenasParaRampa: 'Algumas peças usarão mergulho vertical (tamanho insuficiente para rampa)',
 } as const;
 
 /**

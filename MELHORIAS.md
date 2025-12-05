@@ -14,12 +14,12 @@
 
 ### Status Geral
 - **Total:** 35 melhorias
-- **Concluídas:** 27/35 (77%)
+- **Concluídas:** 28/35 (80%)
 - **Em progresso:** 0/35 (0%)
-- **Pendentes:** 8/35 (23%)
+- **Pendentes:** 7/35 (20%)
 
 ### Por Categoria
-- [x] **Migração Backend:** 1/2
+- [x] **Migração Backend:** 2/2
 - [x] **Performance:** 4/4
 - [x] **UX/UI:** 6/6
 - [x] **Segurança:** 4/4
@@ -146,7 +146,7 @@ BREAKING: App now requires API running at localhost:3001"
 ---
 
 ## 1.2. Simplificar validation-rules.ts
-- [ ] **Status:** Pendente
+- [x] **Status:** ✅ Concluído em 2025-12-04
 - **Prioridade:** 🟡 MÉDIA
 - **Tempo:** 20 minutos
 - **Dependências:** Requer #1.1 completo
