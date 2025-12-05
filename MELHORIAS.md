@@ -14,16 +14,16 @@
 
 ### Status Geral
 - **Total:** 35 melhorias
-- **Concluídas:** 29/35 (83%)
+- **Concluídas:** 30/35 (86%)
 - **Em progresso:** 0/35 (0%)
-- **Pendentes:** 6/35 (17%)
+- **Pendentes:** 5/35 (14%)
 
 ### Por Categoria
 - [x] **Migração Backend:** 2/2
 - [x] **Performance:** 4/4
 - [x] **UX/UI:** 6/6
 - [x] **Segurança:** 4/4
-- [x] **Código e Arquitetura:** 3/4
+- [x] **Código e Arquitetura:** 4/4
 - [x] **Testes:** 3/3
 - [x] **Acessibilidade:** 3/3
 - [x] **SEO:** 2/2
@@ -1372,7 +1372,7 @@ npm run build 2>&1 | grep "error TS"
 ---
 
 ## 5.4. Storybook
-- [ ] **Status:** Pendente
+- [x] **Status:** ✅ Concluído em 2025-12-04
 - **Prioridade:** 🟢 BAIXA
 - **Tempo:** 1 hora
 
