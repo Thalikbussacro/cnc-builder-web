@@ -88,11 +88,11 @@ export default function RootLayout({
           <ThemeProvider defaultTheme="light" storageKey="gcg-theme">
             <Providers>
               {children}
+              <Toaster />
+              <OfflineIndicator />
             </Providers>
           </ThemeProvider>
         </ErrorBoundary>
-        <Toaster />
-        <OfflineIndicator />
       </body>
     </html>
   );

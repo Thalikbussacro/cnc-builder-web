@@ -14,6 +14,16 @@ import { PreviewCanvas } from "@/components/PreviewCanvas";
 import { SeletorNesting } from "@/components/SeletorNesting";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Menu, Loader2 } from "lucide-react";
 import type { FormatoArquivo, VersaoGerador, ValidationResult } from "@/types";
 import { downloadGCode } from "@/lib/utils";
@@ -68,6 +78,9 @@ export default function Home() {
   const [validationDialogOpen, setValidationDialogOpen] = useState(false);
   const [validationResult, setValidationResult] = useState<ValidationResult>({ valid: true, errors: [], warnings: [] });
   const [erro, setErro] = useState<string | null>(null);
+
+  // Estado para modal de confirmação de limpar
+  const [clearConfirmDialogOpen, setClearConfirmDialogOpen] = useState(false);
 
   // Debounce para valores que mudam frequentemente durante digitação
   const debouncedLargura = useDebounce(configChapa.largura, 300);
@@ -171,10 +184,17 @@ export default function Home() {
   };
 
   const handleLimpar = () => {
-    if (pecas.length > 0 && !confirm("Deseja limpar todas as peças?")) {
-      return;
+    if (pecas.length > 0) {
+      setClearConfirmDialogOpen(true);
     }
+  };
+
+  const handleConfirmLimpar = () => {
     setPecas([]);
+    setClearConfirmDialogOpen(false);
+    toast.success('Peças limpas', {
+      description: 'Todas as peças foram removidas',
+    });
   };
 
   // Handler para visualizar G-code
@@ -389,6 +409,24 @@ export default function Home() {
         validation={validationResult}
         onContinue={validationResult.errors.length === 0 ? handleContinueWithWarnings : undefined}
       />
+
+      {/* Clear Confirmation Dialog */}
+      <AlertDialog open={clearConfirmDialogOpen} onOpenChange={setClearConfirmDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Limpar todas as peças?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta ação não pode ser desfeita. Todas as {pecas.length} peças cadastradas serão removidas.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmLimpar} className="bg-destructive hover:bg-destructive/90">
+              Limpar tudo
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* G-Code Viewer */}
       <VisualizadorGCode

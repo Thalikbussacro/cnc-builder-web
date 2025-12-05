@@ -31,7 +31,7 @@ export const VALIDATION_RULES = {
   // ========================================================================
   profundidadePorPassada: {
     min: 1,             // mm - Mínimo: 1mm
-    max: 10,            // mm - Máximo razoável
+    max: 100,           // mm - Máximo razoável
     recomendadoMin: 1,  // mm - Mínimo recomendado
     recomendadoMax: 5,  // mm - Máximo recomendado (depende do material)
     // Relação com diâmetro da fresa (profundidade < X% do diâmetro)

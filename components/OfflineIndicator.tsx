@@ -6,8 +6,12 @@ import { WifiOff } from "lucide-react";
 
 export function OfflineIndicator() {
   const [isOnline, setIsOnline] = useState(true);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    // Mark component as mounted (client-side only)
+    setMounted(true);
+
     // Initial state
     setIsOnline(navigator.onLine);
 
@@ -23,7 +27,8 @@ export function OfflineIndicator() {
     };
   }, []);
 
-  if (isOnline) return null;
+  // Don't render anything until mounted (prevents hydration mismatch)
+  if (!mounted || isOnline) return null;
 
   return (
     <Alert
