@@ -265,7 +265,7 @@ export function CadastroPeca() {
           size="lg"
           data-testid="btn-adicionar-peca"
         >
-          ✚ Adicionar Peça
+          Adicionar Peça
         </Button>
 
         {/* Separador */}

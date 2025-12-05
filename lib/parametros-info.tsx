@@ -25,7 +25,7 @@ export const parametrosInfo = {
           <strong className="text-amber-700 dark:text-amber-400">Dica prática:</strong> Sempre adicione 0.5mm a mais que a espessura real da madeira para garantir que o corte seja completo e não deixe fibras conectadas.
         </div>
         <div className="text-amber-600 dark:text-amber-500">
-          <strong>⚠️ Atenção:</strong> Se cortar muito fundo (mais de 2mm além da espessura), pode danificar a mesa de sacrifício da CNC.
+          <strong>Atenção:</strong> Se cortar muito fundo (mais de 2mm além da espessura), pode danificar a mesa de sacrifício da CNC.
         </div>
       </>
     ),
@@ -53,7 +53,7 @@ export const parametrosInfo = {
           <strong>Quando diminuir:</strong> Aproveitar melhor o material (menor desperdício), peças grandes e estáveis.
         </div>
         <div className="text-amber-600 dark:text-amber-500">
-          <strong>⚠️ Atenção:</strong> Espaçamento insuficiente pode causar deslocamento de peças durante o corte.
+          <strong>Atenção:</strong> Espaçamento insuficiente pode causar deslocamento de peças durante o corte.
         </div>
       </>
     ),
@@ -79,7 +79,7 @@ export const parametrosInfo = {
           <strong className="text-amber-700 dark:text-amber-400">Exemplo prático:</strong> Para cortar MDF 15mm com fresa 6mm usando 4mm por passada, a máquina fará 4 passadas (4mm + 4mm + 4mm + 3mm = 15mm total).
         </div>
         <div className="text-amber-600 dark:text-amber-500">
-          <strong>⚠️ Atenção:</strong> Passadas muito profundas (mais que o diâmetro da fresa) causam vibração excessiva e podem quebrar a fresa.
+          <strong>Atenção:</strong> Passadas muito profundas (mais que o diâmetro da fresa) causam vibração excessiva e podem quebrar a fresa.
         </div>
       </>
     ),
@@ -109,7 +109,7 @@ export const parametrosInfo = {
           </ul>
         </div>
         <div className="text-amber-600 dark:text-amber-500">
-          <strong>⚠️ Atenção:</strong> Feedrate muito alto quebra a fresa. Muito baixo queima a madeira e desgasta a fresa.
+          <strong>Atenção:</strong> Feedrate muito alto quebra a fresa. Muito baixo queima a madeira e desgasta a fresa.
         </div>
       </>
     ),
@@ -135,7 +135,7 @@ export const parametrosInfo = {
           <strong className="text-amber-700 dark:text-amber-400">Regra simples:</strong> Use cerca de 30% do feedrate. Exemplo: se feedrate é 1500mm/min, plunge rate deve ser ~500mm/min.
         </div>
         <div className="text-amber-600 dark:text-amber-500">
-          <strong>⚠️ Atenção:</strong> Descer rápido demais na madeira pode quebrar a ponta da fresa ou causar lascas na entrada do corte.
+          <strong>Atenção:</strong> Descer rápido demais na madeira pode quebrar a ponta da fresa ou causar lascas na entrada do corte.
         </div>
       </>
     ),
@@ -191,7 +191,7 @@ export const parametrosInfo = {
           </ul>
         </div>
         <div className="text-amber-600 dark:text-amber-500">
-          <strong>⚠️ Atenção:</strong> RPM muito baixo deixa acabamento áspero na madeira. RPM muito alto queima a madeira e desgasta a fresa rapidamente.
+          <strong>Atenção:</strong> RPM muito baixo deixa acabamento áspero na madeira. RPM muito alto queima a madeira e desgasta a fresa rapidamente.
         </div>
       </>
     ),
@@ -206,7 +206,7 @@ export const parametrosInfo = {
         </div>
         <div className="space-y-2 mt-3">
           <div className="p-3 bg-red-50 dark:bg-red-950/30 rounded border border-red-200 dark:border-red-800">
-            <strong className="text-red-700 dark:text-red-400">❌ Mergulho Vertical (sem rampa):</strong>
+            <strong className="text-red-700 dark:text-red-400">Mergulho Vertical (sem rampa):</strong>
             <ul className="list-disc ml-5 mt-2 space-y-1 text-sm">
               <li>Fresa mergulha direto verticalmente no material</li>
               <li>Todo impacto de uma vez na ponta da ferramenta</li>
@@ -217,7 +217,7 @@ export const parametrosInfo = {
           </div>
 
           <div className="p-3 bg-green-50 dark:bg-green-950/30 rounded border border-green-200 dark:border-green-800">
-            <strong className="text-green-700 dark:text-green-400">✅ Rampa de Entrada (recomendado):</strong>
+            <strong className="text-green-700 dark:text-green-400">Rampa de Entrada (recomendado):</strong>
             <ul className="list-disc ml-5 mt-2 space-y-1 text-sm">
               <li>Fresa desce gradualmente enquanto avança</li>
               <li>Força de corte distribuída ao longo do movimento</li>
@@ -231,14 +231,14 @@ export const parametrosInfo = {
         <div className="bg-amber-50 dark:bg-amber-950/30 p-2 rounded border border-amber-200 dark:border-amber-800 mt-3">
           <strong className="text-amber-700 dark:text-amber-400">Quando usar rampa:</strong>
           <ul className="list-disc ml-5 mt-1 space-y-1 text-sm">
-            <li>✅ Sempre em materiais duros (MDF, compensado, acrílico)</li>
-            <li>✅ Com fresas pequenas (até 8mm)</li>
-            <li>✅ Em cortes profundos (acima de 5mm)</li>
-            <li>⚠️ Menos crítico apenas em materiais muito macios (espuma, isopor)</li>
+            <li>Sempre em materiais duros (MDF, compensado, acrílico)</li>
+            <li>Com fresas pequenas (até 8mm)</li>
+            <li>Em cortes profundos (acima de 5mm)</li>
+            <li>Menos crítico apenas em materiais muito macios (espuma, isopor)</li>
           </ul>
         </div>
         <div className="text-green-600 dark:text-green-400 mt-2">
-          <strong>💡 Recomendação:</strong> SEMPRE use rampa de entrada para preservar suas ferramentas e obter melhor qualidade de corte!
+          <strong>Recomendação:</strong> SEMPRE use rampa de entrada para preservar suas ferramentas e obter melhor qualidade de corte!
         </div>
       </>
     ),
@@ -269,10 +269,10 @@ export const parametrosInfo = {
           </ul>
         </div>
         <div className="text-amber-600 dark:text-amber-500 mt-2">
-          <strong>⚠️ Atenção:</strong> O sistema verifica automaticamente se há espaço suficiente na chapa para a rampa. Se não houver, faz mergulho vertical e emite aviso.
+          <strong>Atenção:</strong> O sistema verifica automaticamente se há espaço suficiente na chapa para a rampa. Se não houver, faz mergulho vertical e emite aviso.
         </div>
         <div className="bg-green-50 dark:bg-green-950/30 p-2 rounded border border-green-200 dark:border-green-800 mt-2">
-          <strong className="text-green-700 dark:text-green-400">💡 Dica:</strong> Com peças de 500×500mm você tem espaço de sobra. Use 3° para máxima proteção da ferramenta!
+          <strong className="text-green-700 dark:text-green-400">Dica:</strong> Com peças de 500×500mm você tem espaço de sobra. Use 3° para máxima proteção da ferramenta!
         </div>
       </>
     ),
@@ -369,7 +369,7 @@ export const parametrosInfo = {
           <strong>Quando usar maior:</strong> Cortes retos longos, desbaste rápido, maior estabilidade.
         </div>
         <div className="text-amber-600 dark:text-amber-500">
-          <strong>⚠️ Atenção:</strong> O valor informado aqui afeta a compensação de ferramenta (G41/G42). Use o diâmetro real da fresa.
+          <strong>Atenção:</strong> O valor informado aqui afeta a compensação de ferramenta (G41/G42). Use o diâmetro real da fresa.
         </div>
       </>
     ),
@@ -435,7 +435,7 @@ export const parametrosInfo = {
           </div>
         </div>
         <div className="text-amber-600 dark:text-amber-500 mt-3">
-          <strong>⚠️ Atenção:</strong> Escolher tipo errado faz a peça de madeira sair com tamanho incorreto (diferença = diâmetro da fresa)!
+          <strong>Atenção:</strong> Escolher tipo errado faz a peça de madeira sair com tamanho incorreto (diferença = diâmetro da fresa)!
         </div>
       </>
     ),

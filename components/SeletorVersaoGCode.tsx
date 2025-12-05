@@ -76,7 +76,7 @@ export function SeletorVersaoGCode({ versaoSelecionada, onChange }: SeletorVersa
 
         <div className="mt-4 p-3 bg-amber-50 dark:bg-amber-950/30 rounded-lg border border-amber-200 dark:border-amber-800">
           <p className="text-xs text-amber-800 dark:text-amber-200">
-            <strong>💡 Dica:</strong> A versão V2 gera código mais eficiente eliminando comandos redundantes,
+            <strong>Dica:</strong> A versão V2 gera código mais eficiente eliminando comandos redundantes,
             mantendo total compatibilidade com controladores DDCS e similares.
           </p>
         </div>

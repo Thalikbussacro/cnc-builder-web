@@ -108,8 +108,9 @@ export function VisualizadorGCode({
               size="icon"
               onClick={onClose}
               className="h-8 w-8 sm:h-10 sm:w-10 hover:bg-red-600/20 hover:text-red-500"
+              aria-label="Fechar"
             >
-              ✕
+              X
             </Button>
           </div>
 
@@ -217,7 +218,7 @@ export function VisualizadorGCode({
                 </div>
               </RadioGroup>
               <p className="text-xs text-muted-foreground">
-                ℹ️ Todos os formatos são idênticos (apenas extensão diferente)
+                Nota: Todos os formatos são idênticos (apenas extensão diferente)
               </p>
             </div>
 
@@ -229,7 +230,7 @@ export function VisualizadorGCode({
                 className="flex-1 h-11 font-semibold border-2 shadow-md hover:shadow-lg transition-all"
                 disabled={copiado}
               >
-                {copiado ? "✓ Copiado!" : "📋 Copiar"}
+                {copiado ? "Copiado!" : "Copiar"}
               </Button>
               <Button
                 onClick={() => {
@@ -239,7 +240,7 @@ export function VisualizadorGCode({
                 variant="default"
                 className="flex-1 h-11 font-semibold !border-2 !border-primary/50 shadow-md hover:shadow-lg transition-all"
               >
-                💾 Baixar .{formato}
+                Baixar .{formato}
               </Button>
               <Button
                 onClick={onClose}

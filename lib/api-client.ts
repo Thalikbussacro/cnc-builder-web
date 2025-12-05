@@ -22,11 +22,9 @@ const API_BASE_URL = (() => {
     if (!url.startsWith('http://') && !url.startsWith('https://')) {
       throw new Error('URL deve começar com http:// ou https://');
     }
-    console.log('✅ API URL configurada:', url);
     return url;
   } catch (error) {
-    console.error('❌ NEXT_PUBLIC_API_URL inválida:', error);
-    console.warn('⚠️ Usando fallback: http://localhost:3001');
+    console.error('NEXT_PUBLIC_API_URL inválida, usando fallback:', error);
     return 'http://localhost:3001';
   }
 })();

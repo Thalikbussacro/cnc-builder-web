@@ -1,57 +1,132 @@
-# Gerador de G-code CNC
+# CNC Builder Web
 
-Aplicação web para gerar código G-code para fresadoras CNC com algoritmo de nesting automático.
+Aplicação web para geração de código G-code para fresadoras CNC com algoritmo de nesting automático.
 
-## 🚀 Funcionalidades
+## Descrição
 
-- ✅ Configuração de dimensões da chapa (largura, altura, espessura)
-- ✅ Configuração de parâmetros de corte (profundidade, espaçamento)
-- ✅ Cadastro de múltiplas peças retangulares
-- ✅ Algoritmo de nesting automático (bin packing 2D)
-- ✅ Preview visual 2D mostrando posicionamento das peças na chapa
-- ✅ Validação em tempo real se a peça cabe na chapa
-- ✅ Geração de arquivo G-code (.nc) com todas as peças posicionadas
-- ✅ Download do arquivo gerado
+Este sistema permite a configuração de chapas, cadastro de peças retangulares e geração automática de código G-code otimizado para máquinas CNC. Inclui preview visual 2D, validação em tempo real e suporte a múltiplos formatos de arquivo (.tap, .nc, .gcode, .cnc).
 
-## 🛠️ Tecnologias
+## Requisitos
 
-- **Next.js 15** - Framework React com App Router
-- **TypeScript** - Tipagem estática
-- **Tailwind CSS** - Estilização
-- **shadcn/ui** - Componentes de UI
-- **Canvas API** - Preview visual 2D
+- Node.js 18.x ou superior
+- npm 9.x ou superior
 
-## 📦 Instalação
+## Instalação
 
 ```bash
-# Instalar dependências
 npm install
-
-# Executar servidor de desenvolvimento
-npm run dev
-
-# Abrir navegador em http://localhost:3000
 ```
 
-## 🎯 Como Usar
+## Executar
 
-1. **Configure a Chapa**: Defina largura, altura e espessura da chapa de metal
-2. **Configure o Corte**: Defina profundidade do corte e espaçamento entre peças
-3. **Adicione Peças**: Cadastre as dimensões das peças retangulares que deseja cortar
-   - A aplicação valida automaticamente se a peça cabe na chapa
-   - O preview é atualizado em tempo real
-4. **Visualize o Preview**: Veja como as peças foram posicionadas na chapa
-5. **Gere o G-code**: Clique em "Gerar G-code" para baixar o arquivo .nc
+### Desenvolvimento
 
-## 📝 Formato do G-code
+```bash
+npm run dev
+```
+
+Acesse `http://localhost:3000`
+
+### Produção
+
+```bash
+npm run build
+npm run start
+```
+
+## Funcionalidades
+
+- Configuração de dimensões da chapa (largura, altura, espessura)
+- Configuração de parâmetros de corte (profundidade, espaçamento, velocidades)
+- Cadastro manual ou importação via CSV de peças retangulares
+- Algoritmo de nesting automático (bin packing 2D)
+- Preview visual 2D com Canvas API
+- Validação em tempo real de dimensões
+- Suporte a múltiplos tipos de corte (G41/G42/G40)
+- Rampa de entrada configurável
+- Geração de G-code com duas versões (clássica e otimizada)
+- Exportação em múltiplos formatos (.tap, .nc, .gcode, .cnc)
+- Estimativa de tempo de corte
+- Persistência local de configurações
+
+## Estrutura do Projeto
+
+```
+.
+├── app/
+│   ├── page.tsx              # Página principal
+│   ├── layout.tsx            # Layout raiz
+│   └── globals.css           # Estilos globais
+├── components/
+│   ├── ConfiguracoesChapa.tsx
+│   ├── ConfiguracoesCorte.tsx
+│   ├── ConfiguracoesFerramenta.tsx
+│   ├── CadastroPeca.tsx
+│   ├── ListaPecas.tsx
+│   ├── PreviewCanvas.tsx
+│   ├── VisualizadorGCode.tsx
+│   ├── DicionarioGCode.tsx
+│   ├── InfoTooltip.tsx
+│   └── ui/                   # Componentes shadcn/ui
+├── lib/
+│   ├── api-client.ts         # Cliente HTTP para API
+│   ├── parametros-info.tsx   # Documentação técnica
+│   ├── sanitize.ts           # Sanitização de entrada
+│   ├── validation-rules.ts   # Regras de validação
+│   └── utils.ts              # Utilitários gerais
+├── stores/
+│   └── useConfigStore.ts     # Estado global (Zustand)
+├── hooks/
+│   └── useLocalStorage.ts    # Persistência local
+└── types/
+    └── index.ts              # Definições TypeScript
+```
+
+## Stack Tecnológica
+
+- **Frontend**: Next.js 15 (App Router), React 19, TypeScript 5
+- **Estilização**: Tailwind CSS 3, shadcn/ui
+- **Estado**: Zustand 5
+- **Validação**: Zod
+- **Canvas**: API nativa do navegador
+- **Build**: Turbopack
+
+## Scripts Disponíveis
+
+- `npm run dev` - Servidor de desenvolvimento
+- `npm run build` - Build de produção
+- `npm run start` - Servidor de produção
+- `npm run lint` - Linter (ESLint)
+
+## Algoritmo de Nesting
+
+O sistema utiliza uma estratégia greedy de bin packing 2D:
+
+1. Ordenação de peças por área (decrescente)
+2. Manutenção de lista de pontos candidatos
+3. Posicionamento iterativo com validação de colisões
+4. Geração de novos candidatos após cada posicionamento
+
+## Integração com API
+
+A aplicação se comunica com uma API externa para geração de G-code. Configure a URL da API através da variável de ambiente:
+
+```bash
+NEXT_PUBLIC_API_URL=http://localhost:3001
+```
+
+## Formato do G-code Gerado
 
 O arquivo gerado contém:
-- Legenda explicativa dos comandos G-code
-- Configuração inicial (unidades, coordenadas, spindle)
-- Comandos de corte para cada peça com múltiplas passadas
-- Comandos de finalização
 
-### Exemplo de saída:
+- Cabeçalho com configurações (G21, G90, M3)
+- Comandos de corte para cada peça
+- Suporte a múltiplas passadas
+- Compensação de ferramenta (G41/G42/G40)
+- Rampa de entrada opcional
+- Comandos de finalização (M5, M30)
+
+### Exemplo de Saída
 
 ```gcode
 (--- LEGENDA DOS COMANDOS G-CODE ---)
@@ -71,7 +146,7 @@ G1 Z-5.00 F300 ; Desce a fresa até -5.00mm
 G1 X500.00 Y0.00 F2000 ; Corta lado inferior
 G1 X500.00 Y500.00 ; Corta lado direito
 G1 X0.00 Y500.00 ; Corta lado superior
-G1 X0.00 Y0.00 ; Corta lado esquerdo (fecha o retângulo)
+G1 X0.00 Y0.00 ; Corta lado esquerdo
 G0 Z5 ; Levanta fresa após corte
 
 ...
@@ -82,67 +157,6 @@ G0 X0 Y0 ; Volta para o ponto inicial
 M30 ; Fim do programa
 ```
 
-## 🧮 Algoritmo de Nesting
+## Licença
 
-O algoritmo utiliza uma estratégia **greedy** (gulosa):
-
-1. Ordena peças por área (maiores primeiro)
-2. Mantém lista de pontos candidatos para posicionamento
-3. Para cada peça, tenta posicionar no primeiro candidato válido
-4. Valida se não há colisão com peças já posicionadas
-5. Gera novos candidatos (direita e abaixo da peça posicionada)
-
-**Nota**: Este algoritmo não garante solução ótima, mas é rápido e eficiente para a maioria dos casos.
-
-## 📁 Estrutura do Projeto
-
-```
-├── app/
-│   ├── page.tsx           # Página principal com estado e integração
-│   ├── layout.tsx         # Layout raiz
-│   └── globals.css        # Estilos globais
-├── components/
-│   ├── ConfiguracoesChapa.tsx    # Inputs da chapa
-│   ├── ConfiguracoesCorte.tsx    # Inputs de corte
-│   ├── CadastroPeca.tsx          # Formulário de cadastro
-│   ├── ListaPecas.tsx            # Lista de peças cadastradas
-│   ├── PreviewCanvas.tsx         # Canvas com preview visual
-│   └── ui/                       # Componentes shadcn/ui
-├── lib/
-│   ├── nesting-algorithm.ts      # Algoritmo de posicionamento
-│   ├── gcode-generator.ts        # Geração e download de G-code
-│   └── utils.ts                  # Utilitários
-└── types/
-    └── index.ts                  # Tipos TypeScript
-```
-
-## 🔧 Scripts Disponíveis
-
-- `npm run dev` - Inicia servidor de desenvolvimento
-- `npm run build` - Cria build de produção
-- `npm run start` - Inicia servidor de produção
-- `npm run lint` - Executa linter
-
-## 📚 Referências
-
-- Migrado da aplicação Delphi original ([uFrmCNC2.pas](CNC%20Builder%20Delphi/uFrmCNC2.pas))
-- Implementação completa documentada em [SETUP-GCODE.md](SETUP-GCODE.md)
-
-## 🚧 Melhorias Futuras
-
-- [ ] Rotação de peças para melhor aproveitamento
-- [ ] Diferentes estratégias de nesting (escolha pelo usuário)
-- [ ] Preview 3D com Three.js
-- [ ] Otimização de caminho da fresa
-- [ ] Suporte a formas não retangulares
-- [ ] Salvar/carregar projetos (localStorage)
-- [ ] Exportar/importar lista de peças (JSON)
-- [ ] PWA (Progressive Web App)
-
-## 📄 Licença
-
-Este projeto foi desenvolvido para uso interno.
-
----
-
-**Desenvolvido com Next.js 15 + TypeScript + Tailwind CSS**
+Uso interno.
