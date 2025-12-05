@@ -1,5 +1,6 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import { CadastroPeca } from './CadastroPeca';
+import type { Peca } from '@/types';
 
 const meta: Meta<typeof CadastroPeca> = {
   title: 'Components/CadastroPeca',
@@ -15,7 +16,7 @@ type Story = StoryObj<typeof CadastroPeca>;
 
 export const Default: Story = {
   args: {
-    onAdicionar: (peca) => {
+    onAdicionar: (peca: Peca) => {
       console.log('Peça adicionada:', peca);
       alert(`Peça adicionada: ${peca.largura}×${peca.altura}mm`);
     },
@@ -24,7 +25,7 @@ export const Default: Story = {
 
 export const WithCallback: Story = {
   args: {
-    onAdicionar: (peca) => {
+    onAdicionar: (peca: Peca) => {
       console.log('Nova peça:', peca);
     },
   },
