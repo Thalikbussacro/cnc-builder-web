@@ -82,7 +82,8 @@ export function ConfiguracoesCorte({ onValidate }: ConfiguracoesCorteProps = {})
       });
     }
 
-    onChange({
+    // Aplica mudança diretamente SEM validação (não afeta nesting)
+    setConfigCorte({
       ...config,
       numeroPassadas: value,
       profundidadePorPassada: novaProfundidadePorPassada
@@ -108,7 +109,8 @@ export function ConfiguracoesCorte({ onValidate }: ConfiguracoesCorteProps = {})
       });
     }
 
-    onChange({
+    // Aplica mudança diretamente SEM validação (não afeta nesting)
+    setConfigCorte({
       ...config,
       profundidadePorPassada: value,
       numeroPassadas: novoNumeroPassadas
