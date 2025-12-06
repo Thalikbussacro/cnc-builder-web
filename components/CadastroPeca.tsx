@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,11 +10,15 @@ import { InfoTooltip } from "@/components/InfoTooltip";
 import { parametrosInfo } from "@/lib/parametros-info";
 import { sanitizeString } from "@/lib/sanitize";
 import { toast } from "sonner";
-import { FileDown } from "lucide-react";
+import { FileDown, AlertTriangle } from "lucide-react";
 import { useConfigStore } from "@/stores/useConfigStore";
 import type { Peca, TipoCorte } from "@/types";
 
-export function CadastroPeca() {
+type CadastroPecaProps = {
+  pecasNaoCouberam?: Peca[];
+};
+
+export function CadastroPeca({ pecasNaoCouberam = [] }: CadastroPecaProps) {
   const { addPeca, configChapa, pecas } = useConfigStore();
   const pecasExistentes = pecas;
   const onAdicionar = addPeca;
@@ -24,6 +28,21 @@ export function CadastroPeca() {
   const [nome, setNome] = useState<string>("");
   const [quantidade, setQuantidade] = useState<string>("1");
   const [erro, setErro] = useState<string>("");
+
+  // Alerta quando há peças que não couberam
+  useEffect(() => {
+    if (pecasNaoCouberam.length > 0) {
+      const pecasStr = pecasNaoCouberam.length === 1
+        ? `Peça #${pecasNaoCouberam[0].numeroOriginal}`
+        : `${pecasNaoCouberam.length} peças`;
+
+      toast.warning('Chapa cheia!', {
+        description: `${pecasStr} não couberam. Remova peças ou aumente a chapa.`,
+        icon: <AlertTriangle className="h-4 w-4" />,
+        duration: 5000,
+      });
+    }
+  }, [pecasNaoCouberam.length]);
 
   const handleAdicionar = () => {
     setErro("");
@@ -155,10 +174,22 @@ export function CadastroPeca() {
     toast.success('Template CSV baixado com sucesso');
   };
 
+  const chapaCheia = pecasNaoCouberam.length > 0;
+
   return (
     <Card>
       <CardHeader className="pb-2">
-        <CardTitle className="text-base sm:text-lg">Cadastro de Peças</CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-base sm:text-lg">Cadastro de Peças</CardTitle>
+          {chapaCheia && (
+            <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-amber-100 dark:bg-amber-900/30 border border-amber-300 dark:border-amber-700">
+              <AlertTriangle className="h-3.5 w-3.5 text-amber-600 dark:text-amber-500" />
+              <span className="text-xs font-medium text-amber-700 dark:text-amber-400">
+                {pecasNaoCouberam.length} peça{pecasNaoCouberam.length > 1 ? 's' : ''} não coube{pecasNaoCouberam.length > 1 ? 'ram' : 'u'}
+              </span>
+            </div>
+          )}
+        </div>
       </CardHeader>
       <CardContent className="space-y-2 sm:space-y-3">
         <div className="space-y-1.5">
