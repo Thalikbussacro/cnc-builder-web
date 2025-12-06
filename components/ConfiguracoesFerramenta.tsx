@@ -12,21 +12,40 @@ import { cn } from "@/lib/utils";
 import { useValidatedInput } from "@/hooks/useValidatedInput";
 import { useValidationContext } from "@/contexts/ValidationContext";
 import { useConfigStore } from "@/stores/useConfigStore";
+import type { ConfiguracoesFerramenta as ConfiguracoesFerramentaType } from "@/types";
 
-export function ConfiguracoesFerramenta() {
+type ConfiguracoesFerramentaProps = {
+  onValidate?: (newConfig: Partial<ConfiguracoesFerramentaType>) => Promise<boolean>;
+};
+
+export function ConfiguracoesFerramenta({ onValidate }: ConfiguracoesFerramentaProps = {}) {
   const { registerError, clearError } = useValidationContext();
   const { configFerramenta, setConfigFerramenta } = useConfigStore();
+
+  // Handler que valida antes de aplicar mudança
+  const handleConfigChange = async (newConfig: Partial<ConfiguracoesFerramentaType>) => {
+    // Se há validação, executa antes
+    if (onValidate) {
+      const cabem = await onValidate(newConfig);
+      if (!cabem) {
+        // Não aplica a mudança, o modal vai aparecer
+        return;
+      }
+    }
+    // Aplica a mudança
+    setConfigFerramenta(newConfig);
+  };
 
   // Validação de campos
   const diametroInput = useValidatedInput(
     configFerramenta.diametro,
-    (value) => setConfigFerramenta({ diametro: value }),
+    (value) => handleConfigChange({ diametro: value }),
     'diametroFresa'
   );
 
   const numeroFerramentaInput = useValidatedInput(
     configFerramenta.numeroFerramenta,
-    (value) => setConfigFerramenta({ numeroFerramenta: value }),
+    (value) => handleConfigChange({ numeroFerramenta: value }),
     'numeroFerramenta'
   );
 

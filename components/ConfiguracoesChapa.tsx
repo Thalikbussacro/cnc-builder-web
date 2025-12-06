@@ -11,29 +11,48 @@ import { useValidatedInput } from "@/hooks/useValidatedInput";
 import { useValidationContext } from "@/contexts/ValidationContext";
 import { useConfigStore } from "@/stores/useConfigStore";
 import { cn } from "@/lib/utils";
+import type { ConfiguracoesChapa as ConfiguracoesChapaType } from "@/types";
 
-export function ConfiguracoesChapa() {
+type ConfiguracoesChapaProps = {
+  onValidate?: (newConfig: Partial<ConfiguracoesChapaType>) => Promise<boolean>;
+};
+
+export function ConfiguracoesChapa({ onValidate }: ConfiguracoesChapaProps = {}) {
   const { registerError, clearError } = useValidationContext();
   const { configChapa, setConfigChapa } = useConfigStore();
+
+  // Handler que valida antes de aplicar mudança
+  const handleConfigChange = async (newConfig: Partial<ConfiguracoesChapaType>) => {
+    // Se há validação, executa antes
+    if (onValidate) {
+      const cabem = await onValidate(newConfig);
+      if (!cabem) {
+        // Não aplica a mudança, o modal vai aparecer
+        return;
+      }
+    }
+    // Aplica a mudança
+    setConfigChapa(newConfig);
+  };
 
   // Validação de largura
   const largura = useValidatedInput(
     configChapa.largura,
-    (value) => setConfigChapa({ largura: value }),
+    (value) => handleConfigChange({ largura: value }),
     'chapaLargura'
   );
 
   // Validação de altura
   const altura = useValidatedInput(
     configChapa.altura,
-    (value) => setConfigChapa({ altura: value }),
+    (value) => handleConfigChange({ altura: value }),
     'chapaAltura'
   );
 
   // Validação de espessura
   const espessura = useValidatedInput(
     configChapa.espessura,
-    (value) => setConfigChapa({ espessura: value }),
+    (value) => handleConfigChange({ espessura: value }),
     'espessuraChapa'
   );
 

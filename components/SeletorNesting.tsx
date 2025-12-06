@@ -10,7 +10,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useConfigStore } from "@/stores/useConfigStore";
-import type { TempoEstimado } from "@/types";
+import type { TempoEstimado, MetodoNesting } from "@/types";
 import { formatarTempo } from "@/lib/utils";
 
 type SeletorNestingProps = {
@@ -20,10 +20,25 @@ type SeletorNestingProps = {
     tempo: number;
   };
   tempoEstimado?: TempoEstimado;
+  onValidate?: (newMetodo: MetodoNesting) => Promise<boolean>;
 };
 
-export function SeletorNesting({ metricas, tempoEstimado }: SeletorNestingProps) {
+export function SeletorNesting({ metricas, tempoEstimado, onValidate }: SeletorNestingProps) {
   const { metodoNesting, setMetodoNesting } = useConfigStore();
+
+  // Handler que valida antes de aplicar mudança
+  const handleMetodoChange = async (newMetodo: MetodoNesting) => {
+    // Se há validação, executa antes
+    if (onValidate) {
+      const cabem = await onValidate(newMetodo);
+      if (!cabem) {
+        // Não aplica a mudança, o modal vai aparecer
+        return;
+      }
+    }
+    // Aplica a mudança
+    setMetodoNesting(newMetodo);
+  };
   return (
     <Card>
       <div className="p-3.5 space-y-2.5">
@@ -32,7 +47,7 @@ export function SeletorNesting({ metricas, tempoEstimado }: SeletorNestingProps)
 
           <div className="space-y-1">
             <Label htmlFor="metodo-nesting">Método de Posicionamento</Label>
-            <Select value={metodoNesting} onValueChange={setMetodoNesting}>
+            <Select value={metodoNesting} onValueChange={handleMetodoChange}>
               <SelectTrigger id="metodo-nesting" className="w-full">
                 <SelectValue placeholder="Selecione o método" />
               </SelectTrigger>

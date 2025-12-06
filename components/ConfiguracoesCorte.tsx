@@ -17,11 +17,30 @@ import { useValidatedInput } from "@/hooks/useValidatedInput";
 import { useValidationContext } from "@/contexts/ValidationContext";
 import { useConfigStore } from "@/stores/useConfigStore";
 
-export function ConfiguracoesCorte() {
+type ConfiguracoesCorteProps = {
+  onValidate?: (newConfig: Partial<ConfiguracoesCorteType>) => Promise<boolean>;
+};
+
+export function ConfiguracoesCorte({ onValidate }: ConfiguracoesCorteProps = {}) {
   const { registerError, clearError } = useValidationContext();
   const { configCorte, setConfigCorte } = useConfigStore();
   const config = configCorte;
-  const onChange = setConfigCorte;
+
+  // Handler que valida antes de aplicar mudança
+  const handleConfigChange = React.useCallback(async (newConfig: Partial<ConfiguracoesCorteType>) => {
+    // Se há validação, executa antes
+    if (onValidate) {
+      const cabem = await onValidate(newConfig);
+      if (!cabem) {
+        // Não aplica a mudança, o modal vai aparecer
+        return;
+      }
+    }
+    // Aplica a mudança
+    setConfigCorte(newConfig);
+  }, [onValidate, setConfigCorte]);
+
+  const onChange = handleConfigChange;
 
   // Constante para tolerância de ponto flutuante
   const FLOATING_POINT_TOLERANCE = 0.01;
