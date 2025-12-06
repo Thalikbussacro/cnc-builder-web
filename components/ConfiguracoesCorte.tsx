@@ -42,131 +42,25 @@ export function ConfiguracoesCorte({ onValidate }: ConfiguracoesCorteProps = {})
 
   const onChange = handleConfigChange;
 
-  // Constante para tolerância de ponto flutuante
-  const FLOATING_POINT_TOLERANCE = 0.01;
-
-  // Calcula número de passadas baseado na profundidade total e profundidade por passada
-  // Usa Math.round com tolerância para evitar erros de arredondamento
-  // Ex: 16/5.33 = 3.0018... deve mostrar 3, não 4
-  const numeroPassadas = React.useMemo(() => {
-    // Se algum valor for inválido (0, negativo, NaN, Infinity), retorna 1
-    if (!config.profundidade || !config.profundidadePorPassada ||
-        config.profundidade <= 0 || config.profundidadePorPassada <= 0 ||
-        !isFinite(config.profundidade) || !isFinite(config.profundidadePorPassada)) {
-      return 1;
-    }
-    const resultado = Math.round(config.profundidade / config.profundidadePorPassada + FLOATING_POINT_TOLERANCE);
-    // Garante que seja no mínimo 1 e finito
-    return (resultado > 0 && isFinite(resultado)) ? resultado : 1;
-  }, [config.profundidade, config.profundidadePorPassada]);
-
-  // Estado local para permitir edição do campo de passadas
-  const [numeroPassadasTemp, setNumeroPassadasTemp] = React.useState<string>(numeroPassadas.toString());
-
-  // Estado para alerta de sanitização do campo de passadas
-  const [passadasSanitizationAlert, setPassadasSanitizationAlert] = React.useState<{
-    show: boolean;
-    message: string;
-  }>({
-    show: false,
-    message: '',
-  });
-
-  // Estado para alertas de ajuste automático
-  const [profundidadeAutoAdjustAlert, setProfundidadeAutoAdjustAlert] = React.useState<{
-    show: boolean;
-    message: string;
-  }>({
-    show: false,
-    message: '',
-  });
-
-  const [profundidadePorPassadaAutoAdjustAlert, setProfundidadePorPassadaAutoAdjustAlert] = React.useState<{
-    show: boolean;
-    message: string;
-  }>({
-    show: false,
-    message: '',
-  });
-
-  // Estado para rastrear qual campo foi editado por último
-  const [lastEditedField, setLastEditedField] = React.useState<'profundidade' | 'numeroPassadas' | 'profundidadePorPassada' | null>(null);
-
-  // Estado para erro de validação cruzada
-  const [crossValidationError, setCrossValidationError] = React.useState<string>('');
-
-  // Validação cruzada: profundidadePorPassada * numeroPassadas <= profundidade
-  React.useEffect(() => {
-    const totalDepth = config.profundidadePorPassada * parseInt(numeroPassadasTemp || '1');
-
-    if (totalDepth > config.profundidade && lastEditedField) {
-      const errorMsg = `Profundidade total das passadas (${totalDepth}mm) excede a profundidade do corte (${config.profundidade}mm). Diminua o valor deste campo.`;
-      setCrossValidationError(errorMsg);
-
-      // Registra erro no campo que foi editado por último
-      registerError('corte', `${lastEditedField}-cross`);
-    } else {
-      setCrossValidationError('');
-      // Limpa erros de validação cruzada
-      clearError('corte', 'profundidade-cross');
-      clearError('corte', 'numeroPassadas-cross');
-      clearError('corte', 'profundidadePorPassada-cross');
-    }
-  }, [config.profundidade, config.profundidadePorPassada, numeroPassadasTemp, lastEditedField, registerError, clearError]);
-
-  // Atualiza o valor temporário quando o cálculo mudar (usuário mudou prof. ou prof./passada)
-  React.useEffect(() => {
-    setNumeroPassadasTemp(numeroPassadas.toString());
-  }, [numeroPassadas]);
-
-  // Handler customizado para profundidade com ajuste automático
-  const handleProfundidadeChange = (value: number) => {
-    setLastEditedField('profundidade');
-
-    // Calcula novo número de passadas baseado na nova profundidade
-    const novoNumeroPassadas = Math.round(value / config.profundidadePorPassada + FLOATING_POINT_TOLERANCE);
-    const numeroPassadasFinal = Math.max(1, Math.min(100, novoNumeroPassadas));
-
-    // Se o número de passadas mudou, mostra alerta
-    if (numeroPassadasFinal !== parseInt(numeroPassadasTemp)) {
-      setProfundidadeAutoAdjustAlert({
-        show: true,
-        message: `Valor ajustado automaticamente para ${numeroPassadasFinal} (mínimo: 1)`,
-      });
-    }
-
-    onChange({ ...config, profundidade: value });
-  };
+  // Estado para erro de validação matemática
+  const [mathValidationError, setMathValidationError] = React.useState<string>('');
 
   // Validação de campos
   const profundidadeInput = useValidatedInput(
     config.profundidade,
-    handleProfundidadeChange,
+    (value) => onChange({ ...config, profundidade: value }),
     'profundidade'
   );
 
-  // Handler customizado para profundidade por passada com ajuste automático
-  const handleProfundidadePorPassadaChange = (value: number) => {
-    setLastEditedField('profundidadePorPassada');
-
-    // Calcula novo número de passadas baseado na nova profundidade por passada
-    const novoNumeroPassadas = Math.round(config.profundidade / value + FLOATING_POINT_TOLERANCE);
-    const numeroPassadasFinal = Math.max(1, Math.min(100, novoNumeroPassadas));
-
-    // Se o número de passadas mudou, mostra alerta
-    if (numeroPassadasFinal !== parseInt(numeroPassadasTemp)) {
-      setProfundidadePorPassadaAutoAdjustAlert({
-        show: true,
-        message: `Valor ajustado automaticamente para ${numeroPassadasFinal} (mínimo: 1)`,
-      });
-    }
-
-    onChange({ ...config, profundidadePorPassada: value });
-  };
+  const numeroPassadasInput = useValidatedInput(
+    config.numeroPassadas,
+    (value) => onChange({ ...config, numeroPassadas: value }),
+    'numeroPassadas'
+  );
 
   const profundidadePorPassadaInput = useValidatedInput(
     config.profundidadePorPassada,
-    handleProfundidadePorPassadaChange,
+    (value) => onChange({ ...config, profundidadePorPassada: value }),
     'profundidadePorPassada'
   );
 
@@ -212,6 +106,22 @@ export function ConfiguracoesCorte({ onValidate }: ConfiguracoesCorteProps = {})
     'anguloRampa'
   );
 
+  // Validação matemática: numeroPassadas × profundidadePorPassada deve = profundidade
+  useEffect(() => {
+    const total = config.numeroPassadas * config.profundidadePorPassada;
+    const diff = Math.abs(total - config.profundidade);
+
+    // Tolerância de 0.01mm para erros de arredondamento
+    if (diff > 0.01) {
+      const errorMsg = `Valores inconsistentes: ${config.numeroPassadas} passada${config.numeroPassadas > 1 ? 's' : ''} × ${config.profundidadePorPassada}mm = ${total.toFixed(2)}mm, mas profundidade é ${config.profundidade}mm`;
+      setMathValidationError(errorMsg);
+      registerError('corte', 'math-validation');
+    } else {
+      setMathValidationError('');
+      clearError('corte', 'math-validation');
+    }
+  }, [config.profundidade, config.numeroPassadas, config.profundidadePorPassada, registerError, clearError]);
+
   // Registra/limpa erros no contexto global
   useEffect(() => {
     if (profundidadeInput.hasError) {
@@ -220,6 +130,14 @@ export function ConfiguracoesCorte({ onValidate }: ConfiguracoesCorteProps = {})
       clearError('corte', 'profundidade');
     }
   }, [profundidadeInput.hasError, registerError, clearError]);
+
+  useEffect(() => {
+    if (numeroPassadasInput.hasError) {
+      registerError('corte', 'numeroPassadas');
+    } else {
+      clearError('corte', 'numeroPassadas');
+    }
+  }, [numeroPassadasInput.hasError, registerError, clearError]);
 
   useEffect(() => {
     if (profundidadePorPassadaInput.hasError) {
@@ -293,72 +211,6 @@ export function ConfiguracoesCorte({ onValidate }: ConfiguracoesCorteProps = {})
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleNumeroPassadasChange = (valor: string) => {
-    // Atualiza estado temporário (permite digitar livremente)
-    setNumeroPassadasTemp(valor);
-    setLastEditedField('numeroPassadas');
-  };
-
-  const handleNumeroPassadasBlur = () => {
-    // Converte para número (ou 0 se vazio/inválido)
-    let numValue = 0;
-    if (numeroPassadasTemp !== '' && numeroPassadasTemp !== null && numeroPassadasTemp !== undefined) {
-      const parsed = parseInt(numeroPassadasTemp);
-      numValue = !isNaN(parsed) ? parsed : 0;
-    }
-
-    // SEMPRE SANITIZA antes de salvar (mínimo 1, máximo 100)
-    const sanitizedValue = Math.max(1, Math.min(100, numValue));
-
-    // Detecta se houve sanitização (campo estava vazio OU valor foi alterado)
-    const wasSanitized = (numeroPassadasTemp === '' || numeroPassadasTemp === null || numeroPassadasTemp === undefined) || numValue !== sanitizedValue;
-
-    if (wasSanitized) {
-      // Mostra alerta de sanitização
-      setPassadasSanitizationAlert({
-        show: true,
-        message: `Valor ajustado automaticamente para ${sanitizedValue} (mínimo: 1)`,
-      });
-    }
-
-    // Atualiza o campo visualmente com valor sanitizado
-    setNumeroPassadasTemp(sanitizedValue.toString());
-
-    // Ao mudar número de passadas, recalcula profundidade por passada
-    const novaProfundidadePorPassada = Math.round((config.profundidade / sanitizedValue) * 100) / 100;
-
-    // Mostra alerta se a profundidade por passada mudou
-    if (novaProfundidadePorPassada !== config.profundidadePorPassada) {
-      setPassadasSanitizationAlert({
-        show: true,
-        message: `Profundidade por passada ajustada automaticamente para ${novaProfundidadePorPassada}mm`,
-      });
-    }
-
-    onChange({ ...config, profundidadePorPassada: novaProfundidadePorPassada });
-  };
-
-  const dismissPassadasSanitizationAlert = () => {
-    setPassadasSanitizationAlert({
-      show: false,
-      message: '',
-    });
-  };
-
-  const dismissProfundidadeAutoAdjustAlert = () => {
-    setProfundidadeAutoAdjustAlert({
-      show: false,
-      message: '',
-    });
-  };
-
-  const dismissProfundidadePorPassadaAutoAdjustAlert = () => {
-    setProfundidadePorPassadaAutoAdjustAlert({
-      show: false,
-      message: '',
-    });
-  };
-
   const handleCheckboxChange = (campo: keyof ConfiguracoesCorteType, valor: boolean) => {
     onChange({ ...config, [campo]: valor });
   };
@@ -389,14 +241,11 @@ export function ConfiguracoesCorte({ onValidate }: ConfiguracoesCorteProps = {})
             onBlur={profundidadeInput.handleBlur}
             min="1"
             max={VALIDATION_RULES.profundidade.max}
-            step="1"
-            className={cn((profundidadeInput.hasError || (crossValidationError && lastEditedField === 'profundidade')) && "border-destructive focus-visible:ring-destructive")}
+            step="0.01"
+            className={cn((profundidadeInput.hasError || mathValidationError) && "border-destructive focus-visible:ring-destructive")}
           />
           {profundidadeInput.hasError && profundidadeInput.errorMessage && (
             <p className="text-xs text-destructive mt-1">{profundidadeInput.errorMessage}</p>
-          )}
-          {crossValidationError && lastEditedField === 'profundidade' && (
-            <p className="text-xs text-destructive mt-1">{crossValidationError}</p>
           )}
           <SanitizationAlert
             alert={profundidadeInput.sanitizationAlert}
@@ -404,45 +253,42 @@ export function ConfiguracoesCorte({ onValidate }: ConfiguracoesCorteProps = {})
           />
         </div>
 
+        {/* Alerta de validação matemática - aparece sobre os 3 campos */}
+        {mathValidationError && (
+          <div className="bg-destructive/10 border border-destructive/30 rounded-md p-2.5">
+            <p className="text-xs text-destructive font-medium">{mathValidationError}</p>
+            <p className="text-xs text-muted-foreground mt-1">
+              Ajuste os valores para que a equação fique correta: Nº Passadas × Prof./Passada = Profundidade
+            </p>
+          </div>
+        )}
+
         <div className="grid grid-cols-2 gap-2.5">
           <div className="space-y-1">
             <div className="flex items-center gap-1">
               <Label htmlFor="numeroPassadas">Nº Passadas</Label>
               <InfoTooltip
                 title="Número de Passadas"
-                content="Quantidade de vezes que a fresa descerá até atingir a profundidade total. Alterar este valor recalcula automaticamente a profundidade por passada."
+                content="Quantidade de vezes que a fresa descerá até atingir a profundidade total."
               />
             </div>
             <Input
               id="numeroPassadas"
               type="number"
-              value={numeroPassadasTemp}
-              onChange={(e) => handleNumeroPassadasChange(e.target.value)}
-              onBlur={handleNumeroPassadasBlur}
+              value={numeroPassadasInput.inputValue}
+              onChange={numeroPassadasInput.handleChange}
+              onBlur={numeroPassadasInput.handleBlur}
               min="1"
+              max={VALIDATION_RULES.numeroPassadas.max}
               step="1"
-              className={cn(crossValidationError && lastEditedField === 'numeroPassadas' && "border-destructive focus-visible:ring-destructive")}
+              className={cn((numeroPassadasInput.hasError || mathValidationError) && "border-destructive focus-visible:ring-destructive")}
             />
-            {crossValidationError && lastEditedField === 'numeroPassadas' && (
-              <p className="text-xs text-destructive mt-1">{crossValidationError}</p>
+            {numeroPassadasInput.hasError && numeroPassadasInput.errorMessage && (
+              <p className="text-xs text-destructive mt-1">{numeroPassadasInput.errorMessage}</p>
             )}
             <SanitizationAlert
-              alert={{
-                show: passadasSanitizationAlert.show,
-                message: passadasSanitizationAlert.message,
-                originalValue: 0,
-                sanitizedValue: 0,
-              }}
-              onDismiss={dismissPassadasSanitizationAlert}
-            />
-            <SanitizationAlert
-              alert={{
-                show: profundidadeAutoAdjustAlert.show,
-                message: profundidadeAutoAdjustAlert.message,
-                originalValue: 0,
-                sanitizedValue: 0,
-              }}
-              onDismiss={dismissProfundidadeAutoAdjustAlert}
+              alert={numeroPassadasInput.sanitizationAlert}
+              onDismiss={numeroPassadasInput.dismissSanitizationAlert}
             />
           </div>
           <div className="space-y-1">
@@ -459,29 +305,17 @@ export function ConfiguracoesCorte({ onValidate }: ConfiguracoesCorteProps = {})
               value={profundidadePorPassadaInput.inputValue}
               onChange={profundidadePorPassadaInput.handleChange}
               onBlur={profundidadePorPassadaInput.handleBlur}
-              min="1"
+              min="0.01"
               max={VALIDATION_RULES.profundidadePorPassada.max}
-              step="1"
-              className={cn((profundidadePorPassadaInput.hasError || (crossValidationError && lastEditedField === 'profundidadePorPassada')) && "border-destructive focus-visible:ring-destructive")}
+              step="0.01"
+              className={cn((profundidadePorPassadaInput.hasError || mathValidationError) && "border-destructive focus-visible:ring-destructive")}
             />
             {profundidadePorPassadaInput.hasError && profundidadePorPassadaInput.errorMessage && (
               <p className="text-xs text-destructive mt-1">{profundidadePorPassadaInput.errorMessage}</p>
             )}
-            {crossValidationError && lastEditedField === 'profundidadePorPassada' && (
-              <p className="text-xs text-destructive mt-1">{crossValidationError}</p>
-            )}
             <SanitizationAlert
               alert={profundidadePorPassadaInput.sanitizationAlert}
               onDismiss={profundidadePorPassadaInput.dismissSanitizationAlert}
-            />
-            <SanitizationAlert
-              alert={{
-                show: profundidadePorPassadaAutoAdjustAlert.show,
-                message: profundidadePorPassadaAutoAdjustAlert.message,
-                originalValue: 0,
-                sanitizedValue: 0,
-              }}
-              onDismiss={dismissProfundidadePorPassadaAutoAdjustAlert}
             />
           </div>
         </div>

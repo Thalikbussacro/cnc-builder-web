@@ -31,7 +31,8 @@ const defaultChapa: ConfiguracoesChapa = {
 const defaultCorte: ConfiguracoesCorte = {
   profundidade: 15,
   espacamento: 50,
-  profundidadePorPassada: 4,
+  numeroPassadas: 4,
+  profundidadePorPassada: 3.75,
   feedrate: 1500,
   plungeRate: 500,
   rapidsSpeed: 4000,
