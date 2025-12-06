@@ -44,6 +44,8 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  // Silencia warning do Turbopack (Next.js 16+) com configuração webpack do next-pwa
+  turbopack: {},
   async headers() {
     return [
       {
