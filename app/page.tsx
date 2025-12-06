@@ -25,7 +25,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Menu, Loader2 } from "lucide-react";
-import type { FormatoArquivo, VersaoGerador, ValidationResult } from "@/types";
+import type { FormatoArquivo, VersaoGerador, ValidationResult, Peca } from "@/types";
 import { downloadGCode } from "@/lib/utils";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { useDebounce } from "@/hooks/useDebounce";
@@ -143,6 +143,36 @@ export default function Home() {
   const pecasNaoCouberam = previewData?.preview?.pecasNaoCouberam ?? [];
   const metricas = previewData?.preview?.metricas;
   const tempoEstimado = previewData?.preview?.tempoEstimado;
+
+  // Função para validar se novas peças cabem ANTES de adicionar
+  const validarPecasAntes = async (novasPecas: Peca[]): Promise<boolean> => {
+    try {
+      // Combina peças existentes (não ignoradas) com as novas peças
+      const pecasParaValidar = [...pecas.filter(p => !p.ignorada), ...novasPecas];
+
+      // Chama API de validação
+      const resultado = await ApiClient.validate({
+        pecas: pecasParaValidar,
+        configChapa: sanitizedConfigs.configChapa,
+        configCorte: sanitizedConfigs.configCorte,
+        configFerramenta: sanitizedConfigs.configFerramenta,
+        metodoNesting,
+      });
+
+      // Verifica se alguma das novas peças aparece em pecasNaoCouberam
+      const idsNovasPecas = new Set(novasPecas.map(p => p.id));
+      const algumaNaoCoube = resultado.preview?.pecasNaoCouberam?.some(
+        p => idsNovasPecas.has(p.id)
+      ) ?? false;
+
+      // Retorna true se todas as novas peças couberem
+      return !algumaNaoCoube;
+    } catch (error) {
+      console.error('Erro ao validar peças:', error);
+      // Em caso de erro na validação, permite adicionar (fail-safe)
+      return true;
+    }
+  };
 
   // Mutation para gerar G-code
   const generateGCodeMutation = useMutation({
@@ -382,7 +412,10 @@ export default function Home() {
                     />
                   )}
                   {secaoAtiva === 'adicionar-peca' && (
-                    <CadastroPeca pecasNaoCouberam={pecasNaoCouberam} />
+                    <CadastroPeca
+                      pecasNaoCouberam={pecasNaoCouberam}
+                      onValidarAntes={validarPecasAntes}
+                    />
                   )}
                 </div>
               </div>
