@@ -55,55 +55,6 @@ You are a senior software engineer collaborating with a colleague. Prioritize co
 **ALWAYS consult these files before any implementation:**
 
 - `CLAUDE.md` - Development guidance and project context
-- `SETUP.md` - Comprehensive development roadmap and stage-by-stage implementation plan
 
 **Mandatory Development Flow:**
-1. **Check Current Progress**: Review git history to see last completed sub-stage
-2. **Continue from Next Sub-stage**: Start with the next uncompleted checkpoint from SETUP.md
-3. **Implement**: Complete all tasks in the current sub-stage
-4. **Test Functionality**: Run tests and verify everything works before committing
-5. **Commit Changes**: Use the exact commit message provided in SETUP.md
-6. **Ask User**: "Sub-stage X.X completed and tested. Ready to continue to X.Y?"
-7. **Wait for Confirmation**: Get user approval before proceeding to next sub-stage
-
-## Project Context
-
-### Technology Stack
-- **Frontend**: Next.js 15 with App Router, TypeScript, Tailwind CSS, shadcn/ui components
-- **Backend**: Next.js API Routes, Prisma ORM, PostgreSQL (Neon)
-- **Security**: JWT authentication, multi-tier password system, session management
-- **Rich Text**: Quill.js for content editing
-- **Data**: TanStack Table, React Hook Form + Zod validation
-
-### Key Development Commands
-Since this is an early-stage project, standard Next.js commands apply:
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm run start` - Start production server
-- `npx prisma migrate dev` - Run database migrations
-- `npx prisma studio` - Open Prisma database GUI
-- `npx shadcn-ui@latest add [component]` - Add shadcn/ui components
-
-### Architecture Overview
-This is a client access management application for software support companies with:
-- **Multi-user authentication system** with session timeouts
-- **Client database management** with custom fields and password protection
-- **Rich text editing** with Quill.js for access point documentation
-- **Image management** with base64 storage for security
-- **Audit trail** with version tracking for all content changes
-- **Session cleanup** system for security compliance
-
-### Security Requirements
-- All passwords hashed with bcrypt
-- JWT-based authentication with middleware protection
-- Session timeouts with cross-tab synchronization
-- Content sanitization for XSS prevention
-- Base64 image storage in database (no file uploads)
-- Comprehensive session cleanup on logout/timeout
-
-## Context About Me
-- Mid-level software engineer with experience in various technology stacks
-- Prefer complete planning to minimize code reviews
-- Want to be consulted on implementation decisions
-- Comfortable with technical discussions and constructive feedback
-- Looking for genuine technical dialogue, not validation
+**Check Current Progress**: Review git history to see last completed sub-stage
