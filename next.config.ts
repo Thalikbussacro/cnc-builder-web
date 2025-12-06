@@ -23,6 +23,7 @@ const securityHeaders = [
       img-src 'self' data: blob:;
       connect-src 'self' ${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'} ${process.env.NODE_ENV === 'production' ? 'https://vercel.live' : ''};
       font-src 'self' data:;
+      frame-src ${process.env.NODE_ENV === 'production' ? 'https://vercel.live' : "'none'"};
     `.replace(/\s{2,}/g, ' ').trim()
   },
   {
