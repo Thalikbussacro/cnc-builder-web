@@ -11,12 +11,20 @@ export function useLocalStorage<T>(key: string, initialValue: T) {
     try {
       const item = window.localStorage.getItem(key);
       if (item) {
-        setStoredValue(JSON.parse(item));
+        const parsedValue = JSON.parse(item);
+        // Valida se o tipo corresponde ao initialValue
+        if (typeof parsedValue === typeof initialValue) {
+          setStoredValue(parsedValue);
+        } else {
+          // Tipo inválido - remove do localStorage e usa initialValue
+          window.localStorage.removeItem(key);
+        }
       }
     } catch {
-      // Ignora erros de parse
+      // Erro de parse - remove do localStorage
+      window.localStorage.removeItem(key);
     }
-  }, [key]);
+  }, [key, initialValue]);
 
   const debouncedSave = useMemo(
     () => debounce((value: T) => {
