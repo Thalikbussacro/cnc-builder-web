@@ -35,6 +35,8 @@ import { sanitizeValue } from "@/lib/validation-rules";
 import { useValidationContext } from "@/contexts/ValidationContext";
 import { toast } from "sonner";
 import { useConfigStore } from "@/stores/useConfigStore";
+import { useConfigValidation } from "@/hooks/useConfigValidation";
+import { ModalConfirmacaoRemocao } from "@/components/ModalConfirmacaoRemocao";
 
 // Componentes grandes carregados sob demanda (code splitting)
 const VisualizadorGCode = dynamic(() => import("@/components/VisualizadorGCode").then(mod => ({ default: mod.VisualizadorGCode })), {
@@ -64,7 +66,21 @@ export default function Home() {
     removePeca,
     updatePeca,
     setPecas,
+    setConfigChapa,
+    setConfigCorte,
+    setConfigFerramenta,
+    setMetodoNesting,
   } = useConfigStore();
+
+  // Hook de validação de configurações
+  const {
+    pendingChange,
+    validateChapaChange,
+    validateCorteChange,
+    validateFerramentaChange,
+    validateNestingChange,
+    cancelPendingChange,
+  } = useConfigValidation();
 
   // Estados específicos da UI (não fazem parte do estado global)
   const [versaoGerador, setVersaoGerador] = useLocalStorage<VersaoGerador>('cnc-versao-gerador', 'v2');
@@ -225,6 +241,67 @@ export default function Home() {
     setClearConfirmDialogOpen(false);
     toast.success('Peças limpas', {
       description: 'Todas as peças foram removidas',
+    });
+  };
+
+  // Handlers de confirmação de mudanças que causam remoção de peças
+  const handleConfirmarMudanca = () => {
+    if (!pendingChange) return;
+
+    // Remove as peças que não cabem
+    const idsParaRemover = new Set(pendingChange.pecasQueNaoCabem.map(p => p.id));
+    const pecasRestantes = pecas.filter(p => !idsParaRemover.has(p.id));
+    setPecas(pecasRestantes);
+
+    // Aplica a nova configuração
+    switch (pendingChange.type) {
+      case 'chapa':
+        setConfigChapa(pendingChange.newValue);
+        break;
+      case 'corte':
+        setConfigCorte(pendingChange.newValue);
+        break;
+      case 'ferramenta':
+        setConfigFerramenta(pendingChange.newValue);
+        break;
+      case 'nesting':
+        setMetodoNesting(pendingChange.newValue);
+        break;
+    }
+
+    // Limpa mudança pendente
+    cancelPendingChange();
+
+    // Mostra toast
+    toast.success('Configuração alterada', {
+      description: `${pendingChange.pecasQueNaoCabem.length} peça(s) removida(s)`,
+    });
+  };
+
+  const handleCancelarMudanca = () => {
+    if (!pendingChange) return;
+
+    // Reverte para o valor anterior
+    switch (pendingChange.type) {
+      case 'chapa':
+        setConfigChapa(pendingChange.previousValue);
+        break;
+      case 'corte':
+        setConfigCorte(pendingChange.previousValue);
+        break;
+      case 'ferramenta':
+        setConfigFerramenta(pendingChange.previousValue);
+        break;
+      case 'nesting':
+        setMetodoNesting(pendingChange.previousValue);
+        break;
+    }
+
+    // Limpa mudança pendente
+    cancelPendingChange();
+
+    toast.info('Alteração cancelada', {
+      description: 'Configuração mantida como estava',
     });
   };
 
@@ -397,18 +474,19 @@ export default function Home() {
               <div className="overflow-auto h-full">
                 <div className="max-w-3xl">
                   {secaoAtiva === 'chapa' && (
-                    <ConfiguracoesChapa />
+                    <ConfiguracoesChapa onValidate={validateChapaChange} />
                   )}
                   {secaoAtiva === 'corte' && (
-                    <ConfiguracoesCorte />
+                    <ConfiguracoesCorte onValidate={validateCorteChange} />
                   )}
                   {secaoAtiva === 'ferramenta' && (
-                    <ConfiguracoesFerramenta />
+                    <ConfiguracoesFerramenta onValidate={validateFerramentaChange} />
                   )}
                   {secaoAtiva === 'nesting' && (
                     <SeletorNesting
                       metricas={metricas}
                       tempoEstimado={tempoEstimado}
+                      onValidate={validateNestingChange}
                     />
                   )}
                   {secaoAtiva === 'adicionar-peca' && (
@@ -461,6 +539,14 @@ export default function Home() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Modal de confirmação de remoção de peças */}
+      <ModalConfirmacaoRemocao
+        open={pendingChange !== null}
+        pecasQueNaoCabem={pendingChange?.pecasQueNaoCabem || []}
+        onConfirm={handleConfirmarMudanca}
+        onCancel={handleCancelarMudanca}
+      />
 
       {/* G-Code Viewer */}
       <VisualizadorGCode
