@@ -18,10 +18,10 @@ const securityHeaders = [
     key: 'Content-Security-Policy',
     value: `
       default-src 'self';
-      script-src 'self' 'unsafe-eval' 'unsafe-inline';
+      script-src 'self' 'unsafe-eval' 'unsafe-inline' ${process.env.NODE_ENV === 'production' ? 'https://vercel.live' : ''};
       style-src 'self' 'unsafe-inline';
       img-src 'self' data: blob:;
-      connect-src 'self' ${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'};
+      connect-src 'self' ${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'} ${process.env.NODE_ENV === 'production' ? 'https://vercel.live' : ''};
       font-src 'self' data:;
     `.replace(/\s{2,}/g, ' ').trim()
   },
