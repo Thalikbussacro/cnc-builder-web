@@ -51,6 +51,7 @@ export type AplicarRampaEm = 'primeira-passada' | 'todas-passadas';
 export type ConfiguracoesCorte = {
   profundidade: number;
   espacamento: number;
+  numeroPassadas: number;           // Quantidade de vezes que a fresa descerá
   profundidadePorPassada: number;  // mm - Quanto desce em cada passada
   feedrate: number;                 // mm/min - Velocidade de avanço durante corte
   plungeRate: number;               // mm/min - Velocidade de descida (mergulho) no eixo Z
