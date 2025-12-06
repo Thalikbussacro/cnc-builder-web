@@ -1,5 +1,6 @@
 "use client";
 
+import { useRef } from "react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -27,10 +28,30 @@ export function ModalConfirmacaoRemocao({
   onCancel,
 }: ModalConfirmacaoRemocaoProps) {
   const quantidade = pecasQueNaoCabem.length;
+  const isConfirmingRef = useRef(false);
+
+  const handleConfirm = () => {
+    isConfirmingRef.current = true;
+    onConfirm();
+  };
+
+  const handleCancel = () => {
+    isConfirmingRef.current = false;
+    onCancel();
+  };
 
   return (
-    <AlertDialog open={open} onOpenChange={(isOpen) => !isOpen && onCancel()}>
-      <AlertDialogContent>
+    <AlertDialog open={open} onOpenChange={(isOpen) => {
+      // Só chama onCancel se não estiver confirmando
+      if (!isOpen && !isConfirmingRef.current) {
+        onCancel();
+      }
+      // Reseta flag
+      if (!isOpen) {
+        isConfirmingRef.current = false;
+      }
+    }}>
+      <AlertDialogContent onEscapeKeyDown={(e) => e.preventDefault()}>
         <AlertDialogHeader>
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900/30">
@@ -85,11 +106,11 @@ export function ModalConfirmacaoRemocao({
         </div>
 
         <AlertDialogFooter>
-          <AlertDialogCancel onClick={onCancel}>
+          <AlertDialogCancel onClick={handleCancel}>
             Cancelar alteração
           </AlertDialogCancel>
           <AlertDialogAction
-            onClick={onConfirm}
+            onClick={handleConfirm}
             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
           >
             Continuar e remover {quantidade === 1 ? "peça" : "peças"}
