@@ -98,6 +98,12 @@ export default function Home() {
   // Estado para modal de confirmação de limpar
   const [clearConfirmDialogOpen, setClearConfirmDialogOpen] = useState(false);
 
+  // Estado para adição de peças pendente (quando peças não cabem)
+  const [pendingPecasAdicionais, setPendingPecasAdicionais] = useState<{
+    novasPecas: Peca[];
+    pecasQueNaoCabem: Peca[];
+  } | null>(null);
+
   // Debounce para valores que mudam frequentemente durante digitação
   const debouncedLargura = useDebounce(configChapa.largura, 300);
   const debouncedAltura = useDebounce(configChapa.altura, 300);
@@ -175,14 +181,19 @@ export default function Home() {
         metodoNesting,
       });
 
-      // Verifica se alguma das novas peças aparece em pecasNaoCouberam
-      const idsNovasPecas = new Set(novasPecas.map(p => p.id));
-      const algumaNaoCoube = resultado.preview?.pecasNaoCouberam?.some(
-        p => idsNovasPecas.has(p.id)
-      ) ?? false;
+      const pecasNaoCouberam = resultado.preview?.pecasNaoCouberam ?? [];
 
-      // Retorna true se todas as novas peças couberem
-      return !algumaNaoCoube;
+      // Se QUALQUER peça (nova ou antiga) não couber, mostra modal de confirmação
+      if (pecasNaoCouberam.length > 0) {
+        setPendingPecasAdicionais({
+          novasPecas,
+          pecasQueNaoCabem: pecasNaoCouberam,
+        });
+        return false; // Não adiciona ainda, aguarda confirmação do usuário
+      }
+
+      // Todas as peças cabem, pode adicionar diretamente
+      return true;
     } catch (error) {
       console.error('Erro ao validar peças:', error);
       // Em caso de erro na validação, permite adicionar (fail-safe)
@@ -302,6 +313,40 @@ export default function Home() {
 
     toast.info('Alteração cancelada', {
       description: 'Configuração mantida como estava',
+    });
+  };
+
+  // Handlers para confirmação de adição de peças
+  const handleConfirmarAdicaoPecas = () => {
+    if (!pendingPecasAdicionais) return;
+
+    // Remove as peças que não cabem
+    const idsParaRemover = new Set(pendingPecasAdicionais.pecasQueNaoCabem.map(p => p.id));
+    const pecasRestantes = pecas.filter(p => !idsParaRemover.has(p.id));
+
+    // Adiciona as novas peças
+    const todasPecas = [...pecasRestantes, ...pendingPecasAdicionais.novasPecas];
+    setPecas(todasPecas);
+
+    // Limpa adição pendente
+    setPendingPecasAdicionais(null);
+
+    // Mostra toast
+    const qtdAdicionadas = pendingPecasAdicionais.novasPecas.length;
+    const qtdRemovidas = pendingPecasAdicionais.pecasQueNaoCabem.length;
+    toast.success('Peças adicionadas', {
+      description: `${qtdAdicionadas} peça(s) adicionada(s), ${qtdRemovidas} peça(s) removida(s)`,
+    });
+  };
+
+  const handleCancelarAdicaoPecas = () => {
+    if (!pendingPecasAdicionais) return;
+
+    // Limpa adição pendente
+    setPendingPecasAdicionais(null);
+
+    toast.info('Adição cancelada', {
+      description: 'Nenhuma peça foi adicionada',
     });
   };
 
@@ -540,12 +585,20 @@ export default function Home() {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Modal de confirmação de remoção de peças */}
+      {/* Modal de confirmação de remoção de peças (mudança de config) */}
       <ModalConfirmacaoRemocao
         open={pendingChange !== null}
         pecasQueNaoCabem={pendingChange?.pecasQueNaoCabem || []}
         onConfirm={handleConfirmarMudanca}
         onCancel={handleCancelarMudanca}
+      />
+
+      {/* Modal de confirmação de remoção de peças (adição de novas peças) */}
+      <ModalConfirmacaoRemocao
+        open={pendingPecasAdicionais !== null}
+        pecasQueNaoCabem={pendingPecasAdicionais?.pecasQueNaoCabem || []}
+        onConfirm={handleConfirmarAdicaoPecas}
+        onCancel={handleCancelarAdicaoPecas}
       />
 
       {/* G-Code Viewer */}
