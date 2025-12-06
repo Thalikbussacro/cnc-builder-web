@@ -45,24 +45,90 @@ export function ConfiguracoesCorte({ onValidate }: ConfiguracoesCorteProps = {})
   // Estado para erro de validação matemática
   const [mathValidationError, setMathValidationError] = React.useState<string>('');
 
-  // Validação de campos
+  // Estados para alertas de ajuste automático
+  const [numeroPassadasAutoAdjustAlert, setNumeroPassadasAutoAdjustAlert] = React.useState<{
+    show: boolean;
+    message: string;
+  }>({
+    show: false,
+    message: '',
+  });
+
+  const [profundidadePorPassadaAutoAdjustAlert, setProfundidadePorPassadaAutoAdjustAlert] = React.useState<{
+    show: boolean;
+    message: string;
+  }>({
+    show: false,
+    message: '',
+  });
+
+  // Profundidade - editável, sem auto-ajuste
   const profundidadeInput = useValidatedInput(
     config.profundidade,
     (value) => onChange({ ...config, profundidade: value }),
     'profundidade'
   );
 
+  // Número de passadas - auto-ajusta profundidadePorPassada
+  const handleNumeroPassadasChange = (value: number) => {
+    // Calcula nova profundidade por passada
+    const novaProfundidadePorPassada = Math.round((config.profundidade / value) * 100) / 100;
+
+    // Mostra alerta se mudou
+    if (Math.abs(novaProfundidadePorPassada - config.profundidadePorPassada) > 0.01) {
+      setNumeroPassadasAutoAdjustAlert({
+        show: true,
+        message: `Profundidade por passada ajustada para ${novaProfundidadePorPassada.toFixed(2)}mm`,
+      });
+    }
+
+    onChange({
+      ...config,
+      numeroPassadas: value,
+      profundidadePorPassada: novaProfundidadePorPassada
+    });
+  };
+
   const numeroPassadasInput = useValidatedInput(
     config.numeroPassadas,
-    (value) => onChange({ ...config, numeroPassadas: value }),
+    handleNumeroPassadasChange,
     'numeroPassadas'
   );
 
+  // Profundidade por passada - auto-ajusta numeroPassadas
+  const handleProfundidadePorPassadaChange = (value: number) => {
+    // Calcula novo número de passadas
+    const novoNumeroPassadas = Math.max(1, Math.min(100, Math.round(config.profundidade / value)));
+
+    // Mostra alerta se mudou
+    if (novoNumeroPassadas !== config.numeroPassadas) {
+      setProfundidadePorPassadaAutoAdjustAlert({
+        show: true,
+        message: `Número de passadas ajustado para ${novoNumeroPassadas}`,
+      });
+    }
+
+    onChange({
+      ...config,
+      profundidadePorPassada: value,
+      numeroPassadas: novoNumeroPassadas
+    });
+  };
+
   const profundidadePorPassadaInput = useValidatedInput(
     config.profundidadePorPassada,
-    (value) => onChange({ ...config, profundidadePorPassada: value }),
+    handleProfundidadePorPassadaChange,
     'profundidadePorPassada'
   );
+
+  // Dismiss handlers para alertas de auto-ajuste
+  const dismissNumeroPassadasAutoAdjustAlert = React.useCallback(() => {
+    setNumeroPassadasAutoAdjustAlert({ show: false, message: '' });
+  }, []);
+
+  const dismissProfundidadePorPassadaAutoAdjustAlert = React.useCallback(() => {
+    setProfundidadePorPassadaAutoAdjustAlert({ show: false, message: '' });
+  }, []);
 
   const espacamentoInput = useValidatedInput(
     config.espacamento,
@@ -290,6 +356,18 @@ export function ConfiguracoesCorte({ onValidate }: ConfiguracoesCorteProps = {})
               alert={numeroPassadasInput.sanitizationAlert}
               onDismiss={numeroPassadasInput.dismissSanitizationAlert}
             />
+            {/* Alerta de auto-ajuste de profundidade por passada */}
+            {numeroPassadasAutoAdjustAlert.show && (
+              <SanitizationAlert
+                alert={{
+                  show: true,
+                  message: numeroPassadasAutoAdjustAlert.message,
+                  originalValue: 0,
+                  sanitizedValue: 0,
+                }}
+                onDismiss={dismissNumeroPassadasAutoAdjustAlert}
+              />
+            )}
           </div>
           <div className="space-y-1">
             <div className="flex items-center gap-1">
@@ -317,6 +395,18 @@ export function ConfiguracoesCorte({ onValidate }: ConfiguracoesCorteProps = {})
               alert={profundidadePorPassadaInput.sanitizationAlert}
               onDismiss={profundidadePorPassadaInput.dismissSanitizationAlert}
             />
+            {/* Alerta de auto-ajuste de número de passadas */}
+            {profundidadePorPassadaAutoAdjustAlert.show && (
+              <SanitizationAlert
+                alert={{
+                  show: true,
+                  message: profundidadePorPassadaAutoAdjustAlert.message,
+                  originalValue: 0,
+                  sanitizedValue: 0,
+                }}
+                onDismiss={dismissProfundidadePorPassadaAutoAdjustAlert}
+              />
+            )}
           </div>
         </div>
 
