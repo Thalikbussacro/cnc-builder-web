@@ -105,6 +105,7 @@ export const useConfigStore = create<ConfigStore>()(
     }),
     {
       name: 'cnc-config-storage',
+      version: 1,
       partialize: (state) => ({
         configChapa: state.configChapa,
         configCorte: state.configCorte,
@@ -112,6 +113,18 @@ export const useConfigStore = create<ConfigStore>()(
         metodoNesting: state.metodoNesting,
         pecas: state.pecas,
       }),
+      migrate: (persistedState: any, version: number) => {
+        // Migração para adicionar numeroPassadas aos dados existentes
+        if (version === 0) {
+          if (persistedState?.configCorte && !persistedState.configCorte.numeroPassadas) {
+            // Calcula numeroPassadas baseado nos valores existentes
+            const prof = persistedState.configCorte.profundidade || 15;
+            const profPorPassada = persistedState.configCorte.profundidadePorPassada || 3.75;
+            persistedState.configCorte.numeroPassadas = Math.max(1, Math.round(prof / profPorPassada));
+          }
+        }
+        return persistedState;
+      },
     }
   )
 );
