@@ -140,6 +140,7 @@ export default function Home() {
 
   // Extrai dados do preview (ou usa valores vazios)
   const pecasPosicionadas = previewData?.preview?.pecasPosicionadas ?? [];
+  const pecasNaoCouberam = previewData?.preview?.pecasNaoCouberam ?? [];
   const metricas = previewData?.preview?.metricas;
   const tempoEstimado = previewData?.preview?.tempoEstimado;
 
@@ -381,7 +382,7 @@ export default function Home() {
                     />
                   )}
                   {secaoAtiva === 'adicionar-peca' && (
-                    <CadastroPeca />
+                    <CadastroPeca pecasNaoCouberam={pecasNaoCouberam} />
                   )}
                 </div>
               </div>
