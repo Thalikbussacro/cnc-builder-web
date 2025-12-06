@@ -121,7 +121,7 @@ export default function Home() {
     configFerramenta,
   ]);
 
-  // Preview automático via React Query
+  // Preview automático via React Query com debounce de 1s
   const { data: previewData, isLoading: carregandoPreview } = useQuery({
     queryKey: ['preview', pecas, sanitizedConfigs, metodoNesting],
     queryFn: async () => {
@@ -134,7 +134,7 @@ export default function Home() {
       });
     },
     enabled: pecas.length > 0, // Só busca se houver peças
-    staleTime: 5000, // Cache de 5 segundos
+    staleTime: 1000, // Cache de 1 segundo (debounce para reduzir chamadas)
     retry: false, // Não retenta em caso de erro (preview não é crítico)
   });
 
