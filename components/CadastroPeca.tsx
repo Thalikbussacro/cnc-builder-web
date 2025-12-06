@@ -10,15 +10,16 @@ import { InfoTooltip } from "@/components/InfoTooltip";
 import { parametrosInfo } from "@/lib/parametros-info";
 import { sanitizeString } from "@/lib/sanitize";
 import { toast } from "sonner";
-import { FileDown, AlertTriangle } from "lucide-react";
+import { FileDown, AlertTriangle, Loader2 } from "lucide-react";
 import { useConfigStore } from "@/stores/useConfigStore";
 import type { Peca, TipoCorte } from "@/types";
 
 type CadastroPecaProps = {
   pecasNaoCouberam?: Peca[];
+  onValidarAntes?: (novasPecas: Peca[]) => Promise<boolean>;
 };
 
-export function CadastroPeca({ pecasNaoCouberam = [] }: CadastroPecaProps) {
+export function CadastroPeca({ pecasNaoCouberam = [], onValidarAntes }: CadastroPecaProps) {
   const { addPeca, configChapa, pecas } = useConfigStore();
   const pecasExistentes = pecas;
   const onAdicionar = addPeca;
@@ -28,6 +29,7 @@ export function CadastroPeca({ pecasNaoCouberam = [] }: CadastroPecaProps) {
   const [nome, setNome] = useState<string>("");
   const [quantidade, setQuantidade] = useState<string>("1");
   const [erro, setErro] = useState<string>("");
+  const [validando, setValidando] = useState<boolean>(false);
 
   // Alerta quando há peças que não couberam
   useEffect(() => {
@@ -44,56 +46,69 @@ export function CadastroPeca({ pecasNaoCouberam = [] }: CadastroPecaProps) {
     }
   }, [pecasNaoCouberam.length]);
 
-  const handleAdicionar = () => {
+  const handleAdicionar = async () => {
     setErro("");
+    setValidando(true);
 
-    const larguraNum = parseFloat(largura);
-    const alturaNum = parseFloat(altura);
-    const quantidadeNum = parseInt(quantidade);
+    try {
+      const larguraNum = parseFloat(largura);
+      const alturaNum = parseFloat(altura);
+      const quantidadeNum = parseInt(quantidade);
 
-    // Validações básicas
-    if (isNaN(larguraNum) || larguraNum <= 0) {
-      setErro("Informe uma largura válida.");
-      return;
+      // Validações básicas
+      if (isNaN(larguraNum) || larguraNum <= 0) {
+        setErro("Informe uma largura válida.");
+        return;
+      }
+
+      if (isNaN(alturaNum) || alturaNum <= 0) {
+        setErro("Informe uma altura válida.");
+        return;
+      }
+
+      if (isNaN(quantidadeNum) || quantidadeNum <= 0) {
+        setErro("Informe uma quantidade válida.");
+        return;
+      }
+
+      // Verifica se a peça é maior que a chapa
+      if (larguraNum > configChapa.largura || alturaNum > configChapa.altura) {
+        setErro("Peça maior que a chapa.");
+        return;
+      }
+
+      // Cria N peças idênticas
+      const novasPecas: Peca[] = [];
+      const nomeSanitizado = nome.trim() ? sanitizeString(nome.trim()) : undefined;
+      for (let i = 0; i < quantidadeNum; i++) {
+        novasPecas.push({
+          largura: larguraNum,
+          altura: alturaNum,
+          tipoCorte: tipoCorte,
+          id: crypto.randomUUID(),
+          nome: nomeSanitizado,
+          numeroOriginal: pecasExistentes.length + i + 1,
+        });
+      }
+
+      // Valida se as peças cabem ANTES de adicionar
+      if (onValidarAntes) {
+        const cabem = await onValidarAntes(novasPecas);
+        if (!cabem) {
+          setErro("Não há espaço na chapa para estas peças.");
+          return;
+        }
+      }
+
+      // Adiciona todas as peças de uma vez
+      onAdicionar(quantidadeNum === 1 ? novasPecas[0] : novasPecas);
+
+      // Reseta nome e quantidade após adicionar
+      setNome("");
+      setQuantidade("1");
+    } finally {
+      setValidando(false);
     }
-
-    if (isNaN(alturaNum) || alturaNum <= 0) {
-      setErro("Informe uma altura válida.");
-      return;
-    }
-
-    if (isNaN(quantidadeNum) || quantidadeNum <= 0) {
-      setErro("Informe uma quantidade válida.");
-      return;
-    }
-
-    // Verifica se a peça é maior que a chapa
-    if (larguraNum > configChapa.largura || alturaNum > configChapa.altura) {
-      setErro("Peça maior que a chapa.");
-      return;
-    }
-
-    // Cria N peças idênticas
-    const novasPecas: Peca[] = [];
-    const nomeSanitizado = nome.trim() ? sanitizeString(nome.trim()) : undefined;
-    for (let i = 0; i < quantidadeNum; i++) {
-      novasPecas.push({
-        largura: larguraNum,
-        altura: alturaNum,
-        tipoCorte: tipoCorte,
-        id: crypto.randomUUID(),
-        nome: nomeSanitizado,
-        numeroOriginal: pecasExistentes.length + i + 1,
-      });
-    }
-
-    // Adiciona todas as peças de uma vez
-    // Nota: Validação de espaço é feita pela API no preview
-    onAdicionar(quantidadeNum === 1 ? novasPecas[0] : novasPecas);
-
-    // Reseta nome e quantidade após adicionar
-    setNome("");
-    setQuantidade("1");
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -294,9 +309,17 @@ export function CadastroPeca({ pecasNaoCouberam = [] }: CadastroPecaProps) {
           onClick={handleAdicionar}
           className="w-full h-10 sm:h-11 font-semibold border-2 border-primary/50 shadow-md hover:shadow-lg transition-all"
           size="lg"
+          disabled={validando}
           data-testid="btn-adicionar-peca"
         >
-          Adicionar Peça
+          {validando ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Validando...
+            </>
+          ) : (
+            "Adicionar Peça"
+          )}
         </Button>
 
         {/* Separador */}
