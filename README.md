@@ -2,6 +2,10 @@
 
 Aplicação web para geração de código G-code para fresadoras CNC com algoritmo de nesting automático.
 
+## Escolha da Cloud e Diagramas
+
+Podem ser encontrados dentro da pasta docs/ no repositório.
+
 ## Descrição
 
 Este sistema permite a configuração de chapas, cadastro de peças retangulares e geração automática de código G-code otimizado para máquinas CNC. Inclui preview visual 2D, validação em tempo real e suporte a múltiplos formatos de arquivo (.tap, .nc, .gcode, .cnc).
