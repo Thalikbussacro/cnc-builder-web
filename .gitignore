@@ -4,9 +4,6 @@
 .pnp.js
 .yarn/install-state.gz
 
-#Claude
-.claude/
-
 # Testing
 /coverage
 
@@ -45,4 +42,4 @@ next-env.d.ts
 *~
 
 # Claude Code
-.claude/settings.local.json
+.claude/
