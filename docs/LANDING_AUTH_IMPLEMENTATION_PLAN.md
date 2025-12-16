@@ -529,12 +529,13 @@ NEXT_PUBLIC_API_URL=http://localhost:3001
 
 ### **Fase 9: Integracao UI de Auth na App** (30 min)
 
-- [ ] Adicionar `UserMenu` no header (`app/app/layout.tsx`)
-- [ ] Implementar botao de logout
-- [ ] Mostrar nome/email do usuario
-- [ ] Adicionar indicador de sessao
-- [ ] Testar logout funcionando
-- [ ] Commit: `feat: integra menu de usuario na aplicacao`
+- [x] Criar `SessionProvider` wrapper
+- [x] Adicionar `SessionProvider` no root layout
+- [x] Adicionar `UserMenu` no header da app
+- [x] Implementar botao de logout (ja feito no UserMenu)
+- [x] Mostrar nome/email do usuario (ja feito no UserMenu)
+- [ ] **[USUARIO]** Testar logout funcionando
+- [x] Commit: `feat: integra menu de usuario na aplicacao`
 
 ---
 

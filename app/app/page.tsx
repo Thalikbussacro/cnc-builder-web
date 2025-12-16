@@ -13,6 +13,7 @@ import { ListaPecas } from "@/components/ListaPecas";
 import { PreviewCanvas } from "@/components/PreviewCanvas";
 import { SeletorNesting } from "@/components/SeletorNesting";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { UserMenu } from "@/components/auth/UserMenu";
 import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
@@ -469,6 +470,7 @@ export default function Home() {
 
             <div className="flex items-center gap-2">
               <ThemeToggle />
+              <UserMenu />
               <DicionarioGCode />
               <Button
                 onClick={handleVisualizarGCode}
