@@ -448,12 +448,12 @@ NEXT_PUBLIC_API_URL=http://localhost:3001
 
 ### **Fase 3: Middleware & Protecao de Rotas** (20 min)
 
-- [ ] Criar `middleware.ts` na raiz
-- [ ] Configurar protecao da rota `/app/*`
-- [ ] Configurar redirect nao-autenticado → `/login`
-- [ ] Configurar redirect autenticado `/login` → `/app`
-- [ ] Testar middleware funcionando
-- [ ] Commit: `feat: adiciona middleware de protecao de rotas`
+- [x] Criar `middleware.ts` na raiz
+- [x] Configurar protecao da rota `/app/*`
+- [x] Configurar redirect nao-autenticado → `/login`
+- [x] Configurar redirect autenticado `/login` → `/app`
+- [ ] **[USUARIO]** Testar middleware funcionando
+- [x] Commit: `feat: adiciona middleware de protecao de rotas`
 
 ---
 
