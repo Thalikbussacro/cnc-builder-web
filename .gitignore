@@ -43,3 +43,6 @@ next-env.d.ts
 
 # Claude Code
 .claude/
+
+# Documentation (work in progress)
+/docs/LANDING_AUTH_IMPLEMENTATION_PLAN.md
