@@ -472,14 +472,15 @@ NEXT_PUBLIC_API_URL=http://localhost:3001
 ### **Fase 5: Componentes de Auth** (1h)
 
 #### Formularios:
-- [ ] Criar `components/auth/LoginForm.tsx`
-- [ ] Criar `components/auth/SignupForm.tsx`
-- [ ] Criar `components/auth/ForgotPasswordForm.tsx`
-- [ ] Criar `components/auth/UserMenu.tsx` (dropdown)
-- [ ] Adicionar validacao de formulario (zod)
-- [ ] Adicionar loading states
-- [ ] Adicionar feedback de erro (toast)
-- [ ] Commit: `feat: cria componentes de autenticacao`
+- [x] Criar `components/auth/LoginForm.tsx`
+- [x] Criar `components/auth/SignupForm.tsx`
+- [x] Criar `components/auth/ForgotPasswordForm.tsx`
+- [x] Criar `components/auth/UserMenu.tsx` (dropdown)
+- [x] Criar API routes (signup, forgot-password, verify-email)
+- [x] Adicionar validacao de formulario (nativa)
+- [x] Adicionar loading states
+- [x] Adicionar feedback de erro (toast)
+- [x] Commit: `feat: cria componentes e apis de autenticacao`
 
 ---
 
