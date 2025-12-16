@@ -6,6 +6,137 @@
 
 ---
 
+## 🔄 COMO RETOMAR SE A SESSAO CAIR
+
+Se a implementacao for interrompida (sessao do Claude Code expirar, erro, etc):
+
+1. **Verificar ultima fase concluida:**
+   - Procurar no documento por checkbox `[x]` (marcado)
+   - Ver ultimo commit: `git log --oneline -5`
+
+2. **Retomar de onde parou:**
+   - Pedir ao Claude: "Continue a implementacao da Fase X"
+   - Claude vai ler este documento e continuar
+
+3. **Verificar estado atual:**
+   ```bash
+   git status                    # Ver arquivos modificados
+   git diff                      # Ver mudancas nao commitadas
+   git log --oneline -10         # Ver ultimos commits
+   ```
+
+4. **Testar o que ja foi feito:**
+   - Se ja instalou dependencias: `npm run dev`
+   - Se ja criou rotas: testar manualmente
+
+---
+
+## 👤 TAREFAS DO USUARIO (NAO AUTOMATIZAVEIS)
+
+Estas tarefas **precisam ser feitas pelo usuario** (Claude nao consegue fazer):
+
+### 1. Criar conta Supabase (Fase 1)
+- [ ] Ir para [supabase.com](https://supabase.com)
+- [ ] Criar conta gratuita
+- [ ] Criar novo projeto: `cnc-builder-production`
+- [ ] Anotar credenciais:
+  - **Project URL**: `https://xxxxx.supabase.co`
+  - **Anon key**: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...`
+  - **Service role key**: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...`
+
+#### Como pegar as credenciais:
+1. No dashboard do Supabase
+2. Menu lateral: **Settings** → **API**
+3. Copiar:
+   - **URL** (Project URL)
+   - **anon public** (Anon key)
+   - **service_role** (Service role key - SECRETO)
+
+#### Executar SQL no Supabase:
+1. Menu lateral: **SQL Editor**
+2. Clicar **+ New query**
+3. Copiar e colar o SQL schema deste documento (secao "Setup do Banco de Dados")
+4. Clicar **Run** (ou F5)
+5. Verificar se tabelas foram criadas: **Table Editor** no menu
+
+---
+
+### 2. Criar conta Resend (Fase 1)
+- [ ] Ir para [resend.com](https://resend.com)
+- [ ] Criar conta gratuita
+- [ ] Pegar API Key:
+  - Dashboard → **API Keys** → **Create API Key**
+  - Nome: `cnc-builder-dev`
+  - Copiar a key: `re_xxxxxxxxxxxxx`
+  - **GUARDAR**: nao da pra ver de novo depois!
+
+#### Verificar dominio (opcional):
+- Para produção: verificar domínio proprio
+- Para desenvolvimento: usar `onboarding.resend.dev` (ja incluido)
+
+---
+
+### 3. Adicionar credenciais no .env.local (Fase 1)
+Criar/editar arquivo `.env.local` na raiz do projeto:
+
+```env
+# NextAuth
+NEXTAUTH_URL=http://localhost:3000
+NEXTAUTH_SECRET=<GERAR_ABAIXO>
+
+# Supabase (COLAR AQUI AS CREDENCIAIS DO SUPABASE)
+NEXT_PUBLIC_SUPABASE_URL=https://xxxxx.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+
+# Resend (COLAR AQUI A API KEY DO RESEND)
+RESEND_API_KEY=re_xxxxxxxxxxxxx
+
+# API Backend (ja existe)
+NEXT_PUBLIC_API_URL=http://localhost:3001
+```
+
+#### Gerar NEXTAUTH_SECRET:
+**Windows (PowerShell):**
+```powershell
+[Convert]::ToBase64String((1..32 | ForEach-Object { Get-Random -Maximum 256 }))
+```
+
+**Windows (Git Bash):**
+```bash
+openssl rand -base64 32
+```
+
+**Linux/Mac:**
+```bash
+openssl rand -base64 32
+```
+
+Copiar o resultado e colar em `NEXTAUTH_SECRET=`
+
+---
+
+### 4. Testar a aplicacao (apos cada fase)
+```bash
+npm run dev
+```
+
+Acessar: http://localhost:3000
+
+---
+
+### 5. Google OAuth (OPCIONAL - Fase Futura)
+Se quiser adicionar login com Google:
+- [ ] Ir para [console.cloud.google.com](https://console.cloud.google.com)
+- [ ] Criar projeto
+- [ ] Ativar Google+ API
+- [ ] Criar credenciais OAuth 2.0
+- [ ] Adicionar redirect URI: `http://localhost:3000/api/auth/callback/google`
+- [ ] Copiar Client ID e Client Secret
+- [ ] Adicionar no `.env.local`
+
+---
+
 ## ⚠️ REGRAS DE COMMIT
 
 **IMPORTANTE: Seguir estritamente estas regras em todos os commits:**
@@ -287,16 +418,16 @@ NEXT_PUBLIC_API_URL=http://localhost:3001
 
 ### **Fase 1: Setup Inicial** (30 min)
 
-- [ ] Criar branch `feature/landing-and-auth` no frontend
-- [ ] Criar branch `feature/landing-and-auth` no backend
-- [ ] Instalar dependencias no frontend
-- [ ] Criar conta Supabase e projeto
-- [ ] Executar SQL schema no Supabase
-- [ ] Criar conta Resend e obter API key
-- [ ] Adicionar variaveis de ambiente (`.env.local`)
-- [ ] Atualizar `.env.local.example`
-- [ ] Gerar `NEXTAUTH_SECRET`
-- [ ] Commit: `chore: instala nextauth e dependencias de auth`
+- [x] Criar branch `feature/landing-and-auth` no frontend
+- [x] Criar branch `feature/landing-and-auth` no backend
+- [x] Instalar dependencias no frontend
+- [ ] **[USUARIO]** Criar conta Supabase e projeto
+- [ ] **[USUARIO]** Executar SQL schema no Supabase
+- [ ] **[USUARIO]** Criar conta Resend e obter API key
+- [ ] **[USUARIO]** Adicionar variaveis de ambiente (`.env.local`)
+- [x] Atualizar `.env.local.example`
+- [ ] **[USUARIO]** Gerar `NEXTAUTH_SECRET`
+- [x] Commit: `chore: instala nextauth e dependencias de auth`
 
 ---
 
