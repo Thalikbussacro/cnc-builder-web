@@ -459,13 +459,13 @@ NEXT_PUBLIC_API_URL=http://localhost:3001
 
 ### **Fase 4: Reestruturacao de Rotas** (30 min)
 
-- [ ] Criar pasta `app/app/`
-- [ ] Mover `app/page.tsx` para `app/app/page.tsx`
-- [ ] Criar `app/app/layout.tsx` (copia do layout atual)
-- [ ] Ajustar imports em `app/app/layout.tsx`
-- [ ] Testar aplicacao funcionando em `/app`
-- [ ] Verificar que todas as rotas estao acessiveis
-- [ ] Commit: `refactor: move aplicacao principal para /app`
+- [x] Criar pasta `app/app/`
+- [x] Mover `app/page.tsx` para `app/app/page.tsx`
+- [x] Criar `app/app/layout.tsx` (layout de protecao)
+- [x] Ajustar imports em `app/app/layout.tsx`
+- [ ] **[USUARIO]** Testar aplicacao funcionando em `/app`
+- [ ] **[USUARIO]** Verificar que todas as rotas estao acessiveis
+- [x] Commit: `refactor: move aplicacao principal para /app`
 
 ---
 
