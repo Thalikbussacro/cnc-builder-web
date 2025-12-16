@@ -511,19 +511,19 @@ NEXT_PUBLIC_API_URL=http://localhost:3001
 ### **Fase 8: Landing Page** (1h 30min)
 
 #### Componentes:
-- [ ] Criar `components/landing/LandingNav.tsx`
-- [ ] Criar `components/landing/Hero.tsx`
-- [ ] Criar `components/landing/Features.tsx`
-- [ ] Criar `components/landing/CTASection.tsx`
-- [ ] Criar `components/landing/Footer.tsx`
+- [x] Criar `components/landing/LandingNav.tsx`
+- [x] Criar `components/landing/Hero.tsx`
+- [x] Criar `components/landing/Features.tsx`
+- [x] Criar `components/landing/CTASection.tsx`
+- [x] Criar `components/landing/Footer.tsx`
 
 #### Pagina:
-- [ ] Criar `app/page.tsx` (nova landing)
-- [ ] Integrar componentes da landing
-- [ ] Adicionar animacoes suaves (opcional)
-- [ ] Testar responsividade (mobile/tablet/desktop)
-- [ ] Ajustar tema dark/light
-- [ ] Commit: `feat: adiciona landing page`
+- [x] Criar `app/page.tsx` (nova landing)
+- [x] Integrar componentes da landing
+- [x] Design responsivo (mobile/tablet/desktop)
+- [x] Suporte a tema dark/light
+- [ ] **[USUARIO]** Testar responsividade em diferentes telas
+- [x] Commit: `feat: adiciona landing page`
 
 ---
 
