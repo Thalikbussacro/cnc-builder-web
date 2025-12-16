@@ -1,6 +1,6 @@
 # CNC Builder Web
 
-Aplicação web para geração de código G-code para fresadoras CNC com algoritmo de nesting automático.
+Aplicação web completa para geração de código G-code para fresadoras CNC com algoritmo de nesting automático, sistema de autenticação e landing page profissional.
 
 ## Escolha da Cloud e Diagramas
 
@@ -8,17 +8,89 @@ Podem ser encontrados dentro da pasta docs/ no repositório.
 
 ## Descrição
 
-Este sistema permite a configuração de chapas, cadastro de peças retangulares e geração automática de código G-code otimizado para máquinas CNC. Inclui preview visual 2D, validação em tempo real e suporte a múltiplos formatos de arquivo (.tap, .nc, .gcode, .cnc).
+Sistema profissional que permite configuração de chapas, cadastro de peças retangulares e geração automática de código G-code otimizado para máquinas CNC. Inclui:
+
+- Landing page responsiva com tema dark/light
+- Sistema de autenticação completo (login, cadastro, recuperação de senha)
+- Preview visual 2D em tempo real
+- Validação de segurança e feedback instantâneo
+- Suporte a múltiplos formatos (.tap, .nc, .gcode, .cnc)
+- Email notifications (verificação, boas-vindas, reset de senha)
 
 ## Requisitos
 
 - Node.js 18.x ou superior
 - npm 9.x ou superior
+- Conta Supabase (banco de dados PostgreSQL)
+- Conta Resend (envio de emails)
 
 ## Instalação
 
 ```bash
 npm install
+```
+
+## Configuração de Autenticação
+
+### 1. Criar conta Supabase
+
+1. Acesse [supabase.com](https://supabase.com) e crie uma conta
+2. Crie um novo projeto: `cnc-builder-production`
+3. Anote as credenciais em **Settings** → **API**:
+   - Project URL
+   - anon public key
+   - service_role key (secreto)
+
+### 2. Executar SQL no Supabase
+
+No dashboard do Supabase, vá em **SQL Editor** e execute o schema completo de autenticação:
+
+```sql
+-- Copiar e colar o SQL da seção "Setup do Banco de Dados"
+-- no arquivo docs/LANDING_AUTH_IMPLEMENTATION_PLAN.md
+```
+
+O schema cria as tabelas: `users`, `accounts`, `sessions`, `verification_tokens` com RLS habilitado.
+
+### 3. Criar conta Resend
+
+1. Acesse [resend.com](https://resend.com) e crie uma conta
+2. Vá em **API Keys** → **Create API Key**
+3. Nome: `cnc-builder-dev`
+4. Copie a key (começa com `re_`)
+5. **Importante**: guarde a key, não é possível visualizar novamente
+
+### 4. Configurar variáveis de ambiente
+
+Crie arquivo `.env.local` na raiz do projeto:
+
+```env
+# NextAuth
+NEXTAUTH_URL=http://localhost:3000
+NEXTAUTH_SECRET=<gerar_com_comando_abaixo>
+
+# Supabase
+NEXT_PUBLIC_SUPABASE_URL=https://xxxxx.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+
+# Resend
+RESEND_API_KEY=re_xxxxxxxxxxxxx
+
+# API Backend
+NEXT_PUBLIC_API_URL=http://localhost:3001
+```
+
+#### Gerar NEXTAUTH_SECRET
+
+**Windows (PowerShell):**
+```powershell
+[Convert]::ToBase64String((1..32 | ForEach-Object { Get-Random -Maximum 256 }))
+```
+
+**Windows (Git Bash) / Linux / Mac:**
+```bash
+openssl rand -base64 32
 ```
 
 ## Executar
@@ -29,7 +101,10 @@ npm install
 npm run dev
 ```
 
-Acesse `http://localhost:3000`
+**Acesse:**
+- Landing page: `http://localhost:3000`
+- Login: `http://localhost:3000/login`
+- Aplicação: `http://localhost:3000/app` (protegida, requer login)
 
 ### Produção
 
@@ -37,6 +112,38 @@ Acesse `http://localhost:3000`
 npm run build
 npm run start
 ```
+
+## Estrutura de Rotas
+
+```
+/                    → Landing page (pública)
+/login              → Página de login
+/signup             → Página de cadastro
+/forgot-password    → Recuperação de senha
+/app                → Aplicação principal (protegida)
+  /app/page.tsx     → Dashboard/gerador G-code
+```
+
+## Fluxo de Autenticação
+
+1. **Cadastro** (`/signup`):
+   - Usuário preenche nome, email e senha
+   - Sistema envia email de verificação
+   - Usuário clica no link e ativa a conta
+
+2. **Login** (`/login`):
+   - Usuário entra com email e senha
+   - Sistema valida credenciais
+   - Redireciona para `/app` (aplicação)
+
+3. **Recuperação de senha** (`/forgot-password`):
+   - Usuário informa email
+   - Sistema envia link de reset (válido por 1 hora)
+   - Usuário redefine senha
+
+4. **Logout**:
+   - Botão de logout no header da aplicação
+   - Redireciona para landing page (`/`)
 
 ## Funcionalidades
 
@@ -88,19 +195,33 @@ npm run start
 
 ## Stack Tecnológica
 
-- **Frontend**: Next.js 15 (App Router), React 19, TypeScript 5
+### Frontend
+- **Framework**: Next.js 16 (App Router), React 19, TypeScript 5
 - **Estilização**: Tailwind CSS 3, shadcn/ui
-- **Estado**: Zustand 5
-- **Validação**: Zod
+- **Estado**: Zustand 5 (persistência local)
+- **Autenticação**: NextAuth.js v5 (beta)
+- **Banco de Dados**: Supabase (PostgreSQL)
+- **Email**: Resend
+- **Validação**: Validação nativa HTML5 + custom validators
 - **Canvas**: API nativa do navegador
 - **Build**: Turbopack
 
+### Segurança
+- Senhas hasheadas com bcrypt (salt rounds: 10)
+- Session tokens JWT (httpOnly cookies)
+- Middleware de proteção de rotas
+- Row Level Security (RLS) no Supabase
+- Validação de email antes do primeiro login
+- Rate limiting via Resend (100 emails/dia no plano gratuito)
+
 ## Scripts Disponíveis
 
-- `npm run dev` - Servidor de desenvolvimento
+- `npm run dev` - Servidor de desenvolvimento (porta 3000)
 - `npm run build` - Build de produção
 - `npm run start` - Servidor de produção
 - `npm run lint` - Linter (ESLint)
+- `npm test` - Testes unitários (Vitest)
+- `npm run test:e2e` - Testes end-to-end (Playwright)
 
 ## Algoritmo de Nesting
 
@@ -111,13 +232,15 @@ O sistema utiliza uma estratégia greedy de bin packing 2D:
 3. Posicionamento iterativo com validação de colisões
 4. Geração de novos candidatos após cada posicionamento
 
-## Integração com API
+## Integração com Backend
 
-A aplicação se comunica com uma API externa para geração de G-code. Configure a URL da API através da variável de ambiente:
+A aplicação se comunica com uma API backend separada (`cnc-builder-api`) para geração de G-code. Configure a URL da API:
 
 ```bash
 NEXT_PUBLIC_API_URL=http://localhost:3001
 ```
+
+**Nota:** O backend NÃO precisa de autenticação nesta versão. A autenticação é gerenciada pelo frontend (NextAuth + Supabase).
 
 ## Formato do G-code Gerado
 
