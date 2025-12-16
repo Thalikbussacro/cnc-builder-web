@@ -433,16 +433,16 @@ NEXT_PUBLIC_API_URL=http://localhost:3001
 
 ### **Fase 2: Configuracao NextAuth** (1h)
 
-- [ ] Criar `lib/auth.ts` (config NextAuth)
-- [ ] Criar `lib/auth-utils.ts` (helpers: hash, verify password)
-- [ ] Criar `lib/email.ts` (cliente Resend)
-- [ ] Criar `app/api/auth/[...nextauth]/route.ts`
-- [ ] Configurar CredentialsProvider (email/senha)
-- [ ] Configurar adapter do Supabase
-- [ ] Configurar callbacks (jwt, session)
-- [ ] Criar tipos TypeScript para sessao
-- [ ] Testar NextAuth funcionando: `/api/auth/signin`
-- [ ] Commit: `feat: configura nextauth com supabase e resend`
+- [x] Criar `lib/auth.ts` (config NextAuth)
+- [x] Criar `lib/auth-utils.ts` (helpers: hash, verify password)
+- [x] Criar `lib/email.ts` (cliente Resend)
+- [x] Criar `app/api/auth/[...nextauth]/route.ts`
+- [x] Configurar CredentialsProvider (email/senha)
+- [x] Configurar adapter do Supabase
+- [x] Configurar callbacks (jwt, session)
+- [x] Criar tipos TypeScript para sessao
+- [ ] **[USUARIO]** Testar NextAuth funcionando: `/api/auth/signin`
+- [x] Commit: `feat: configura nextauth com supabase e resend`
 
 ---
 
