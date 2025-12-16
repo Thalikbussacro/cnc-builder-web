@@ -486,25 +486,25 @@ NEXT_PUBLIC_API_URL=http://localhost:3001
 
 ### **Fase 6: Paginas de Auth** (45 min)
 
-- [ ] Criar `app/login/page.tsx`
-- [ ] Criar `app/signup/page.tsx`
-- [ ] Criar `app/forgot-password/page.tsx`
-- [ ] Implementar logica de login
-- [ ] Implementar logica de cadastro
-- [ ] Implementar logica de recuperacao de senha
-- [ ] Testar fluxo completo de auth
-- [ ] Commit: `feat: adiciona paginas de login e cadastro`
+- [x] Criar `app/login/page.tsx`
+- [x] Criar `app/signup/page.tsx`
+- [x] Criar `app/forgot-password/page.tsx`
+- [x] Implementar logica de login (via LoginForm)
+- [x] Implementar logica de cadastro (via SignupForm)
+- [x] Implementar logica de recuperacao de senha (via ForgotPasswordForm)
+- [ ] **[USUARIO]** Testar fluxo completo de auth
+- [x] Commit: `feat: adiciona paginas de login e cadastro`
 
 ---
 
 ### **Fase 7: Email Templates** (30 min)
 
-- [ ] Criar template de verificacao de email
-- [ ] Criar template de recuperacao de senha
-- [ ] Criar template de boas-vindas
-- [ ] Integrar templates com Resend
-- [ ] Testar envio de emails
-- [ ] Commit: `feat: adiciona templates de email`
+- [x] Criar template de verificacao de email (ja feito em lib/email.ts)
+- [x] Criar template de recuperacao de senha (ja feito em lib/email.ts)
+- [x] Criar template de boas-vindas (ja feito em lib/email.ts)
+- [x] Integrar templates com Resend (ja feito)
+- [ ] **[USUARIO]** Testar envio de emails
+- [x] Commit: (nao necessario, ja incluido na Fase 2)
 
 ---
 
