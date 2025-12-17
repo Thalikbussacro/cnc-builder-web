@@ -3,7 +3,9 @@ import { Resend } from 'resend';
 // Inicializa cliente Resend
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-const FROM_EMAIL = 'onboarding@resend.dev'; // Dominio de teste do Resend (trocar em producao)
+// Email remetente (use variavel de ambiente para trocar em producao)
+const FROM_EMAIL = process.env.FROM_EMAIL || 'CNC Builder <onboarding@resend.dev>';
+const REPLY_TO = process.env.REPLY_TO_EMAIL || 'noreply@resend.dev';
 
 /**
  * Envia email de verificacao de conta
@@ -16,7 +18,9 @@ export async function sendVerificationEmail(
     await resend.emails.send({
       from: FROM_EMAIL,
       to: email,
+      replyTo: REPLY_TO,
       subject: 'Verifique seu email - CNC Builder',
+      text: `Bem-vindo ao CNC Builder!\n\nObrigado por se cadastrar. Para ativar sua conta, clique no link abaixo:\n\n${verificationUrl}\n\nEste link expira em 24 horas.\n\nSe voce nao criou esta conta, pode ignorar este email.\n\nCNC Builder - Gerador de G-code profissional`,
       html: `
         <!DOCTYPE html>
         <html>
@@ -71,7 +75,9 @@ export async function sendPasswordResetEmail(
     await resend.emails.send({
       from: FROM_EMAIL,
       to: email,
+      replyTo: REPLY_TO,
       subject: 'Recuperacao de senha - CNC Builder',
+      text: `Recuperacao de Senha\n\nRecebemos uma solicitacao para redefinir a senha da sua conta.\n\nClique no link abaixo para criar uma nova senha:\n\n${resetUrl}\n\nEste link expira em 1 hora.\n\nSe voce nao solicitou esta mudanca, pode ignorar este email. Sua senha permanecera inalterada.\n\nCNC Builder - Gerador de G-code profissional`,
       html: `
         <!DOCTYPE html>
         <html>
@@ -124,7 +130,9 @@ export async function sendWelcomeEmail(email: string, name: string) {
     await resend.emails.send({
       from: FROM_EMAIL,
       to: email,
+      replyTo: REPLY_TO,
       subject: 'Bem-vindo ao CNC Builder!',
+      text: `Ola, ${name}!\n\nSua conta foi verificada com sucesso. Bem-vindo ao CNC Builder!\n\nO que voce pode fazer agora:\n- Configurar suas chapas e ferramentas\n- Cadastrar pecas e usar nesting automatico\n- Gerar codigo G-code otimizado para sua CNC\n- Visualizar preview 2D antes de cortar\n\nComece agora: ${process.env.NEXTAUTH_URL}/app\n\nPrecisa de ajuda? Entre em contato conosco.\n\nCNC Builder - Gerador de G-code profissional`,
       html: `
         <!DOCTYPE html>
         <html>
