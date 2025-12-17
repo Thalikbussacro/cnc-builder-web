@@ -1,4 +1,4 @@
-import { NextAuthOptions } from 'next-auth';
+import NextAuth, { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { createClient } from '@supabase/supabase-js';
 import { verifyPassword, validateEmail } from './auth-utils';
@@ -191,3 +191,6 @@ export const authOptions: NextAuthOptions = {
   // Secret para assinar tokens JWT
   secret: process.env.NEXTAUTH_SECRET,
 };
+
+// Exporta handlers e funcoes auxiliares para NextAuth v5
+export const { handlers, auth, signIn, signOut } = NextAuth(authOptions);

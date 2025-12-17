@@ -1,6 +1,5 @@
-import { getServerSession } from 'next-auth';
 import { redirect } from 'next/navigation';
-import { authOptions } from '@/lib/auth';
+import { auth } from '@/lib/auth';
 
 export const metadata = {
   title: 'Aplicacao',
@@ -11,8 +10,8 @@ export default async function AppLayout({
 }: {
   children: React.ReactNode;
 }) {
-  // Verifica sessao no servidor (server component)
-  const session = await getServerSession(authOptions);
+  // Verifica sessao no servidor (server component) - NextAuth v5
+  const session = await auth();
 
   // Se nao tiver sessao, redireciona para login
   // (middleware ja faz isso, mas e bom ter dupla verificacao)
