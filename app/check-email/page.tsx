@@ -1,30 +1,25 @@
 "use client";
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Mail, AlertCircle } from 'lucide-react';
 
 export default function CheckEmailPage() {
   const router = useRouter();
-  const [email, setEmail] = useState<string>('');
+  const searchParams = useSearchParams();
+  const email = searchParams.get('email');
 
   useEffect(() => {
-    // Tenta recuperar email do router state
-    const storedEmail = sessionStorage.getItem('signup-email');
-    if (storedEmail) {
-      setEmail(storedEmail);
-      // Limpa do storage
-      sessionStorage.removeItem('signup-email');
-    } else {
-      // Se nao tem email, redireciona para signup
+    // Se nao tem email na URL, redireciona para signup
+    if (!email) {
       router.push('/signup');
     }
-  }, [router]);
+  }, [email, router]);
 
   if (!email) {
-    return null; // Aguarda carregamento
+    return null; // Aguarda carregamento ou redirect
   }
 
   return (

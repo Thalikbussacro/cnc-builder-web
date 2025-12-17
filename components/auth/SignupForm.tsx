@@ -52,11 +52,9 @@ export function SignupForm() {
         return;
       }
 
-      // Armazena email no sessionStorage para exibir na proxima pagina
-      sessionStorage.setItem('signup-email', email.toLowerCase().trim());
-
-      // Redireciona para pagina de verificacao de email
-      router.push('/check-email');
+      // Redireciona para pagina de verificacao de email com o email como parametro
+      const encodedEmail = encodeURIComponent(email.toLowerCase().trim());
+      router.push(`/check-email?email=${encodedEmail}`);
     } catch (error) {
       toast.error('Erro inesperado', {
         description: 'Tente novamente mais tarde',
