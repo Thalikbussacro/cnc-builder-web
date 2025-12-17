@@ -1,6 +1,5 @@
 import { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
-import { SupabaseAdapter } from '@auth/supabase-adapter';
 import { createClient } from '@supabase/supabase-js';
 import { verifyPassword, validateEmail } from './auth-utils';
 
@@ -14,7 +13,7 @@ if (!supabaseUrl || !supabaseServiceRoleKey) {
   );
 }
 
-// Cliente Supabase para o adapter (usa service role key)
+// Cliente Supabase para consultas diretas
 const supabase = createClient(supabaseUrl, supabaseServiceRoleKey, {
   auth: {
     autoRefreshToken: false,
@@ -23,11 +22,8 @@ const supabase = createClient(supabaseUrl, supabaseServiceRoleKey, {
 });
 
 export const authOptions: NextAuthOptions = {
-  // Adapter para conectar NextAuth com Supabase
-  adapter: SupabaseAdapter({
-    url: supabaseUrl,
-    secret: supabaseServiceRoleKey,
-  }),
+  // Sem adapter: usa apenas JWT (sessoes nao sao salvas no banco)
+  // Isso simplifica e evita problemas com NextAuth v5 beta
 
   // Providers de autenticacao
   providers: [
@@ -133,7 +129,7 @@ export const authOptions: NextAuthOptions = {
   // Callbacks para customizar comportamento
   callbacks: {
     // Callback JWT: adiciona dados extras no token
-    async jwt({ token, user, account }) {
+    async jwt({ token, user }) {
       // Primeiro login: adiciona dados do usuario ao token
       if (user) {
         token.id = user.id;
@@ -141,26 +137,6 @@ export const authOptions: NextAuthOptions = {
         token.name = user.name;
         token.image = user.image;
         token.emailVerified = user.emailVerified;
-      }
-
-      // Login via OAuth: busca ou cria usuario
-      if (account?.provider && account.provider !== 'credentials') {
-        try {
-          const { data: existingUser } = await supabase
-            .from('users')
-            .select('id, email, name, image, email_verified')
-            .eq('email', token.email!)
-            .single();
-
-          if (existingUser) {
-            token.id = existingUser.id;
-            token.emailVerified = existingUser.email_verified
-              ? new Date(existingUser.email_verified)
-              : null;
-          }
-        } catch (error) {
-          console.error('Erro ao buscar usuario OAuth:', error);
-        }
       }
 
       return token;
