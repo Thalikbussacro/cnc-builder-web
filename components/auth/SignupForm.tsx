@@ -52,14 +52,11 @@ export function SignupForm() {
         return;
       }
 
-      toast.success('Conta criada com sucesso!', {
-        description: 'Verifique seu email para ativar sua conta',
-      });
+      // Armazena email no sessionStorage para exibir na proxima pagina
+      sessionStorage.setItem('signup-email', email.toLowerCase().trim());
 
-      // Redireciona para login
-      setTimeout(() => {
-        router.push('/login');
-      }, 2000);
+      // Redireciona para pagina de verificacao de email
+      router.push('/check-email');
     } catch (error) {
       toast.error('Erro inesperado', {
         description: 'Tente novamente mais tarde',

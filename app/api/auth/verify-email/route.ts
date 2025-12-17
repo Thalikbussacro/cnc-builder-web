@@ -83,9 +83,9 @@ export async function GET(request: Request) {
       }
     }
 
-    // Redireciona para login com mensagem de sucesso
+    // Redireciona para login com flag de verificacao
     return NextResponse.redirect(
-      `${process.env.NEXTAUTH_URL}/login?success=Email verificado com sucesso`
+      `${process.env.NEXTAUTH_URL}/login?verified=true`
     );
   } catch (error) {
     console.error('Erro no verify-email:', error);
