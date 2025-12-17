@@ -5,7 +5,7 @@
   <!-- Borda sutil -->
   <rect x="1" y="1" width="30" height="30" fill="none" stroke="#f59e0b" stroke-width="0.5" rx="3" opacity="0.3"/>
 
-  <!-- Texto CNC em fonte bold e legível -->
+  <!-- Texto GCG em fonte bold e legível -->
   <text
     x="16"
     y="21"
@@ -14,7 +14,7 @@
     font-weight="900"
     fill="#f59e0b"
     text-anchor="middle"
-    letter-spacing="0.5">CNC</text>
+    letter-spacing="0.5">GCG</text>
 
   <!-- Detalhe geométrico no topo (representando máquina CNC) -->
   <circle cx="16" cy="7" r="1.5" fill="#f59e0b" opacity="0.8"/>
