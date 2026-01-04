@@ -192,5 +192,5 @@ export const authOptions: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET,
 };
 
-// Exporta handlers e funcoes auxiliares para NextAuth v5
-export const { handlers, auth, signIn, signOut } = NextAuth(authOptions);
+// Exporta handler default para NextAuth v4
+export default NextAuth(authOptions);

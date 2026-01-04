@@ -16,7 +16,7 @@ export async function GET() {
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     // Testa conexao listando tabelas
-    const { data: tables, error } = await supabase
+    const { error } = await supabase
       .from('users')
       .select('id')
       .limit(1);

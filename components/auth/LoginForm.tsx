@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { signIn } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
-export function LoginForm() {
+function LoginFormContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);
@@ -95,5 +95,13 @@ export function LoginForm() {
         {isLoading ? 'Entrando...' : 'Entrar'}
       </Button>
     </form>
+  );
+}
+
+export function LoginForm() {
+  return (
+    <Suspense fallback={<div className="text-center py-4">Carregando...</div>}>
+      <LoginFormContent />
+    </Suspense>
   );
 }

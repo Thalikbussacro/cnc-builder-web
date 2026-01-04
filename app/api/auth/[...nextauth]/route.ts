@@ -1,5 +1,7 @@
-import { handlers } from '@/lib/auth';
+import NextAuth from '@/lib/auth';
 
-// API Route do NextAuth v5 (App Router)
+// API Route do NextAuth v4 (App Router)
 // Captura todas as requisicoes para /api/auth/*
-export const { GET, POST } = handlers;
+const handler = NextAuth;
+
+export { handler as GET, handler as POST };
