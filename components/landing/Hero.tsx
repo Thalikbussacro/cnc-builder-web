@@ -18,17 +18,17 @@ export function Hero() {
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
           <Button asChild size="lg" className="w-full sm:w-auto">
             <Link href="/signup">
-              Comecar Gratis
+              Criar Conta Gratis
               <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
           </Button>
           <Button asChild variant="outline" size="lg" className="w-full sm:w-auto">
-            <Link href="/login">Fazer Login</Link>
+            <Link href="/demo">Testar sem Conta</Link>
           </Button>
         </div>
 
         <div className="pt-8 text-sm text-muted-foreground">
-          <p>Gratuito para sempre • Sem cartao de credito</p>
+          <p>Gratuito por tempo limitado • Sem cartao de credito</p>
         </div>
       </div>
     </section>
