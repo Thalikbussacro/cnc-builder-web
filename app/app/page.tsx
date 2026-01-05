@@ -38,6 +38,8 @@ import { toast } from "sonner";
 import { useConfigStore } from "@/stores/useConfigStore";
 import { useConfigValidation } from "@/hooks/useConfigValidation";
 import { ModalConfirmacaoRemocao } from "@/components/ModalConfirmacaoRemocao";
+import { SaveProjectDialog } from "@/components/projects/SaveProjectDialog";
+import { ProjectsDialog } from "@/components/projects/ProjectsDialog";
 
 // Componentes grandes carregados sob demanda (code splitting)
 const VisualizadorGCode = dynamic(() => import("@/components/VisualizadorGCode").then(mod => ({ default: mod.VisualizadorGCode })), {
@@ -98,6 +100,11 @@ export default function Home() {
 
   // Estado para modal de confirmação de limpar
   const [clearConfirmDialogOpen, setClearConfirmDialogOpen] = useState(false);
+
+  // Estados para dialogs de projetos
+  const [saveProjectDialogOpen, setSaveProjectDialogOpen] = useState(false);
+  const [projectsDialogOpen, setProjectsDialogOpen] = useState(false);
+  const [currentProjectId, setCurrentProjectId] = useState<string | null>(null);
 
   // Estado para adição de peças pendente (quando peças não cabem)
   const [pendingPecasAdicionais, setPendingPecasAdicionais] = useState<{
@@ -469,6 +476,25 @@ export default function Home() {
             </div>
 
             <div className="flex items-center gap-2">
+              <Button
+                onClick={() => setSaveProjectDialogOpen(true)}
+                variant="outline"
+                size="sm"
+                disabled={pecas.length === 0}
+                title="Salvar projeto atual"
+              >
+                <span className="hidden md:inline">Salvar Projeto</span>
+                <span className="md:hidden">Salvar</span>
+              </Button>
+              <Button
+                onClick={() => setProjectsDialogOpen(true)}
+                variant="outline"
+                size="sm"
+                title="Ver meus projetos salvos"
+              >
+                <span className="hidden md:inline">Meus Projetos</span>
+                <span className="md:hidden">Projetos</span>
+              </Button>
               <ThemeToggle />
               <UserMenu />
               <DicionarioGCode />
@@ -601,6 +627,17 @@ export default function Home() {
         pecasQueNaoCabem={pendingPecasAdicionais?.pecasQueNaoCabem || []}
         onConfirm={handleConfirmarAdicaoPecas}
         onCancel={handleCancelarAdicaoPecas}
+      />
+
+      {/* Projects Dialogs */}
+      <SaveProjectDialog
+        open={saveProjectDialogOpen}
+        onOpenChange={setSaveProjectDialogOpen}
+        currentProjectId={currentProjectId}
+      />
+      <ProjectsDialog
+        open={projectsDialogOpen}
+        onOpenChange={setProjectsDialogOpen}
       />
 
       {/* G-Code Viewer */}
