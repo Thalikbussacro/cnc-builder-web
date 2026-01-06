@@ -16,8 +16,8 @@ const supabase = createClient(supabaseUrl, supabaseServiceRoleKey, {
 
 // GET /api/projects/[id] - Obter projeto específico
 export async function GET(
-  request: Request,
-  { params }: { params: { id: string } }
+  _request: Request,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -25,10 +25,12 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const { id } = await params;
+
     const { data: project, error } = await supabase
       .from('projects')
       .select('*')
-      .eq('id', params.id)
+      .eq('id', id)
       .eq('user_id', session.user.id)
       .single();
 
@@ -41,7 +43,7 @@ export async function GET(
     await supabase
       .from('projects')
       .update({ last_opened_at: new Date().toISOString() })
-      .eq('id', params.id);
+      .eq('id', id);
 
     return NextResponse.json({ project });
   } catch (error) {
@@ -56,7 +58,7 @@ export async function GET(
 // PATCH /api/projects/[id] - Atualizar projeto
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -64,12 +66,13 @@ export async function PATCH(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const { id } = await params;
     const body: UpdateProjectInput = await request.json();
 
     const { data: project, error } = await supabase
       .from('projects')
       .update(body)
-      .eq('id', params.id)
+      .eq('id', id)
       .eq('user_id', session.user.id)
       .select()
       .single();
@@ -91,8 +94,8 @@ export async function PATCH(
 
 // DELETE /api/projects/[id] - Excluir projeto
 export async function DELETE(
-  request: Request,
-  { params }: { params: { id: string } }
+  _request: Request,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -100,10 +103,12 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const { id } = await params;
+
     const { error } = await supabase
       .from('projects')
       .delete()
-      .eq('id', params.id)
+      .eq('id', id)
       .eq('user_id', session.user.id);
 
     if (error) {

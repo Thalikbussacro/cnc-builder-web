@@ -7,9 +7,6 @@ import type {
   ConfiguracoesFerramenta,
   MetodoNesting,
   Peca,
-  FormatoArquivo,
-  TempoEstimado,
-  Metricas,
 } from './index';
 
 // ============================================

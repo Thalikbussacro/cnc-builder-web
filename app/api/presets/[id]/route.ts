@@ -16,8 +16,8 @@ const supabase = createClient(supabaseUrl, supabaseServiceRoleKey, {
 
 // GET /api/presets/[id] - Obter preset específico
 export async function GET(
-  request: Request,
-  { params }: { params: { id: string } }
+  _request: Request,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -25,10 +25,12 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const { id } = await params;
+
     const { data: preset, error } = await supabase
       .from('config_presets')
       .select('*')
-      .eq('id', params.id)
+      .eq('id', id)
       .eq('user_id', session.user.id)
       .single();
 
@@ -50,7 +52,7 @@ export async function GET(
 // PATCH /api/presets/[id] - Atualizar preset
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -58,12 +60,13 @@ export async function PATCH(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const { id } = await params;
     const body: UpdatePresetInput = await request.json();
 
     const { data: preset, error } = await supabase
       .from('config_presets')
       .update(body)
-      .eq('id', params.id)
+      .eq('id', id)
       .eq('user_id', session.user.id)
       .select()
       .single();
@@ -85,8 +88,8 @@ export async function PATCH(
 
 // DELETE /api/presets/[id] - Excluir preset
 export async function DELETE(
-  request: Request,
-  { params }: { params: { id: string } }
+  _request: Request,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -94,10 +97,12 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const { id } = await params;
+
     const { error } = await supabase
       .from('config_presets')
       .delete()
-      .eq('id', params.id)
+      .eq('id', id)
       .eq('user_id', session.user.id);
 
     if (error) {

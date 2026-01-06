@@ -104,7 +104,7 @@ export default function Home() {
   // Estados para dialogs de projetos
   const [saveProjectDialogOpen, setSaveProjectDialogOpen] = useState(false);
   const [projectsDialogOpen, setProjectsDialogOpen] = useState(false);
-  const [currentProjectId, setCurrentProjectId] = useState<string | null>(null);
+  const [currentProjectId] = useState<string | null>(null);
 
   // Estado para adição de peças pendente (quando peças não cabem)
   const [pendingPecasAdicionais, setPendingPecasAdicionais] = useState<{
