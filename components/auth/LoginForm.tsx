@@ -38,6 +38,9 @@ function LoginFormContent() {
         redirect: false,
       });
 
+      // NextAuth com redirect: false sempre retorna ok: true
+      // A diferenca esta na URL: se falhou, redireciona para /login
+      // Se teve sucesso, redireciona para /app (ou callbackUrl)
       if (result?.error) {
         toast.error('Erro ao fazer login', {
           description: result.error,
@@ -46,7 +49,8 @@ function LoginFormContent() {
         return;
       }
 
-      if (result?.ok) {
+      // Verifica se o login foi bem-sucedido checando a URL de redirect
+      if (result?.ok && result?.url && !result.url.includes('/login')) {
         toast.success('Login realizado com sucesso!');
 
         // Aguarda um pouco para garantir que o cookie seja salvo
@@ -54,6 +58,12 @@ function LoginFormContent() {
 
         // Usa window.location para forcar um reload completo
         window.location.href = '/app';
+      } else {
+        // Login falhou (NextAuth redirecionou para /login)
+        toast.error('Erro ao fazer login', {
+          description: 'Email ou senha incorretos',
+        });
+        setIsLoading(false);
       }
     } catch (error) {
       toast.error('Erro inesperado', {
