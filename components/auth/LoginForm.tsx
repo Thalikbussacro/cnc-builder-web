@@ -42,19 +42,23 @@ function LoginFormContent() {
         toast.error('Erro ao fazer login', {
           description: result.error,
         });
+        setIsLoading(false);
         return;
       }
 
       if (result?.ok) {
         toast.success('Login realizado com sucesso!');
-        router.push('/app');
-        router.refresh();
+
+        // Aguarda um pouco para garantir que o cookie seja salvo
+        await new Promise(resolve => setTimeout(resolve, 300));
+
+        // Usa window.location para forcar um reload completo
+        window.location.href = '/app';
       }
     } catch (error) {
       toast.error('Erro inesperado', {
         description: 'Tente novamente mais tarde',
       });
-    } finally {
       setIsLoading(false);
     }
   };
