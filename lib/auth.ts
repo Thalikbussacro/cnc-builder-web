@@ -43,6 +43,8 @@ export const authOptions: NextAuthOptions = {
         },
       },
       async authorize(credentials) {
+        console.log('[AUTH] authorize called for:', credentials?.email);
+
         if (!credentials?.email || !credentials?.password) {
           throw new Error('Email e senha sao obrigatorios');
         }
@@ -61,11 +63,15 @@ export const authOptions: NextAuthOptions = {
             .single();
 
           if (error || !user) {
+            console.error('[AUTH] Usuario nao encontrado:', credentials.email);
             throw new Error('Email ou senha incorretos');
           }
 
+          console.log('[AUTH] Usuario encontrado:', { id: user.id, email: user.email, emailVerified: !!user.email_verified });
+
           // Verifica se o email foi verificado
           if (!user.email_verified) {
+            console.error('[AUTH] Email nao verificado:', user.email);
             throw new Error(
               'Email nao verificado. Verifique sua caixa de entrada.'
             );
@@ -73,6 +79,7 @@ export const authOptions: NextAuthOptions = {
 
           // Verifica senha
           if (!user.password) {
+            console.error('[AUTH] Usuario sem senha (OAuth):', user.email);
             throw new Error(
               'Usuario criado via OAuth. Use login social ou redefina sua senha.'
             );
@@ -84,8 +91,11 @@ export const authOptions: NextAuthOptions = {
           );
 
           if (!isPasswordValid) {
+            console.error('[AUTH] Senha invalida para:', user.email);
             throw new Error('Email ou senha incorretos');
           }
+
+          console.log('[AUTH] Autenticacao bem-sucedida para:', user.email);
 
           // Retorna usuario (sem o campo password)
           return {
@@ -99,6 +109,7 @@ export const authOptions: NextAuthOptions = {
           };
         } catch (error) {
           if (error instanceof Error) {
+            console.error('[AUTH] Erro na autenticacao:', error.message);
             throw error;
           }
           throw new Error('Erro ao fazer login');
@@ -132,6 +143,7 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user }) {
       // Primeiro login: adiciona dados do usuario ao token
       if (user) {
+        console.log('[AUTH] JWT callback - adicionando usuario ao token:', user.email);
         token.id = user.id;
         token.email = user.email;
         token.name = user.name;
@@ -144,6 +156,7 @@ export const authOptions: NextAuthOptions = {
 
     // Callback Session: expoe dados do token para o cliente
     async session({ session, token }) {
+      console.log('[AUTH] Session callback - token:', { email: token?.email, id: token?.id });
       if (session.user && token) {
         session.user.id = token.id;
         session.user.email = token.email;

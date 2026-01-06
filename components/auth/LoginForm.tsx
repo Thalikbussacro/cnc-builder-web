@@ -32,6 +32,8 @@ function LoginFormContent() {
     setIsLoading(true);
 
     try {
+      console.log('[LOGIN] Iniciando login para:', email.toLowerCase().trim());
+
       const result = await signIn('credentials', {
         email: email.toLowerCase().trim(),
         password,
@@ -39,9 +41,17 @@ function LoginFormContent() {
         callbackUrl: '/app',
       });
 
+      console.log('[LOGIN] Resultado do signIn:', {
+        ok: result?.ok,
+        error: result?.error,
+        url: result?.url,
+        status: result?.status,
+      });
+
       // NextAuth com redirect: false sempre retorna ok: true
       // Precisamos verificar se ha erro explicito ou checar a sessao
       if (result?.error) {
+        console.error('[LOGIN] Erro no signIn:', result.error);
         toast.error('Erro ao fazer login', {
           description: result.error,
         });
@@ -50,6 +60,7 @@ function LoginFormContent() {
       }
 
       if (!result?.ok) {
+        console.error('[LOGIN] signIn retornou ok=false');
         toast.error('Erro ao fazer login', {
           description: 'Tente novamente',
         });
@@ -60,15 +71,19 @@ function LoginFormContent() {
       // Verifica se a URL de redirect indica sucesso
       // Se retornou /app, o login foi bem-sucedido
       if (result.url?.includes('/app')) {
+        console.log('[LOGIN] Login bem-sucedido, redirecionando para /app');
         toast.success('Login realizado com sucesso!');
 
         // Aguarda para garantir que o cookie seja salvo
+        console.log('[LOGIN] Aguardando 500ms para cookie ser salvo...');
         await new Promise(resolve => setTimeout(resolve, 500));
 
+        console.log('[LOGIN] Redirecionando para /app via window.location.href');
         // Forca reload completo para garantir que o middleware pegue o token
         window.location.href = '/app';
       } else {
         // Login falhou (URL aponta para /login)
+        console.error('[LOGIN] URL de redirect nao aponta para /app:', result.url);
         toast.error('Erro ao fazer login', {
           description: 'Email ou senha incorretos',
         });

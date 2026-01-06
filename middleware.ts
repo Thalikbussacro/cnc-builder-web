@@ -4,15 +4,24 @@ import { getToken } from 'next-auth/jwt';
 
 // Middleware para proteger rotas
 export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+
+  console.log('[MIDDLEWARE] Pathname:', pathname);
+  console.log('[MIDDLEWARE] Cookies:', request.cookies.getAll().map(c => c.name));
+
   const token = await getToken({
     req: request,
     secret: process.env.NEXTAUTH_SECRET,
   });
 
-  const { pathname } = request.nextUrl;
+  console.log('[MIDDLEWARE] Token encontrado:', !!token);
+  if (token) {
+    console.log('[MIDDLEWARE] Token user:', { email: token.email, id: token.id });
+  }
 
   // Se estiver tentando acessar /app/* sem estar logado
   if (pathname.startsWith('/app') && !token) {
+    console.log('[MIDDLEWARE] Acesso negado a /app - redirecionando para /login');
     const loginUrl = new URL('/login', request.url);
     loginUrl.searchParams.set('callbackUrl', pathname);
     return NextResponse.redirect(loginUrl);
@@ -20,9 +29,11 @@ export async function middleware(request: NextRequest) {
 
   // Se estiver logado e tentando acessar /login ou /signup
   if (token && (pathname === '/login' || pathname === '/signup')) {
+    console.log('[MIDDLEWARE] Usuario logado tentando acessar', pathname, '- redirecionando para /app');
     return NextResponse.redirect(new URL('/app', request.url));
   }
 
+  console.log('[MIDDLEWARE] Permitindo acesso a', pathname);
   return NextResponse.next();
 }
 
