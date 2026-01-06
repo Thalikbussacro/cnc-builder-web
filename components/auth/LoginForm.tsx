@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, Suspense } from 'react';
-import { signIn, getSession } from 'next-auth/react';
+import { signIn } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -57,19 +57,18 @@ function LoginFormContent() {
         return;
       }
 
-      // Verifica se a sessao foi criada com sucesso
-      const session = await getSession();
-
-      if (session?.user) {
+      // Verifica se a URL de redirect indica sucesso
+      // Se retornou /app, o login foi bem-sucedido
+      if (result.url?.includes('/app')) {
         toast.success('Login realizado com sucesso!');
 
-        // Aguarda um pouco para garantir que o cookie seja salvo
-        await new Promise(resolve => setTimeout(resolve, 100));
+        // Aguarda para garantir que o cookie seja salvo
+        await new Promise(resolve => setTimeout(resolve, 500));
 
-        // Usa window.location para forcar um reload completo
+        // Forca reload completo para garantir que o middleware pegue o token
         window.location.href = '/app';
       } else {
-        // Login falhou - sessao nao foi criada
+        // Login falhou (URL aponta para /login)
         toast.error('Erro ao fazer login', {
           description: 'Email ou senha incorretos',
         });
