@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, Suspense } from 'react';
-import { signIn } from 'next-auth/react';
+import { signIn, getSession } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -36,11 +36,11 @@ function LoginFormContent() {
         email: email.toLowerCase().trim(),
         password,
         redirect: false,
+        callbackUrl: '/app',
       });
 
       // NextAuth com redirect: false sempre retorna ok: true
-      // A diferenca esta na URL: se falhou, redireciona para /login
-      // Se teve sucesso, redireciona para /app (ou callbackUrl)
+      // Precisamos verificar se ha erro explicito ou checar a sessao
       if (result?.error) {
         toast.error('Erro ao fazer login', {
           description: result.error,
@@ -49,17 +49,27 @@ function LoginFormContent() {
         return;
       }
 
-      // Verifica se o login foi bem-sucedido checando a URL de redirect
-      if (result?.ok && result?.url && !result.url.includes('/login')) {
+      if (!result?.ok) {
+        toast.error('Erro ao fazer login', {
+          description: 'Tente novamente',
+        });
+        setIsLoading(false);
+        return;
+      }
+
+      // Verifica se a sessao foi criada com sucesso
+      const session = await getSession();
+
+      if (session?.user) {
         toast.success('Login realizado com sucesso!');
 
         // Aguarda um pouco para garantir que o cookie seja salvo
-        await new Promise(resolve => setTimeout(resolve, 300));
+        await new Promise(resolve => setTimeout(resolve, 100));
 
         // Usa window.location para forcar um reload completo
         window.location.href = '/app';
       } else {
-        // Login falhou (NextAuth redirecionou para /login)
+        // Login falhou - sessao nao foi criada
         toast.error('Erro ao fazer login', {
           description: 'Email ou senha incorretos',
         });
