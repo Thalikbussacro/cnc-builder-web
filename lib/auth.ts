@@ -13,6 +13,18 @@ if (!supabaseUrl || !supabaseServiceRoleKey) {
   );
 }
 
+// Log de configuracao critica
+console.log('[AUTH CONFIG] NEXTAUTH_URL:', process.env.NEXTAUTH_URL);
+console.log('[AUTH CONFIG] VERCEL_URL:', process.env.VERCEL_URL);
+console.log('[AUTH CONFIG] NEXTAUTH_SECRET present:', !!process.env.NEXTAUTH_SECRET);
+console.log('[AUTH CONFIG] NODE_ENV:', process.env.NODE_ENV);
+
+// Se estiver no Vercel e NEXTAUTH_URL nao estiver setado, use VERCEL_URL
+if (process.env.VERCEL_URL && !process.env.NEXTAUTH_URL) {
+  console.warn('[AUTH CONFIG] NEXTAUTH_URL nao definido, usando VERCEL_URL');
+  process.env.NEXTAUTH_URL = `https://${process.env.VERCEL_URL}`;
+}
+
 // Cliente Supabase para consultas diretas
 const supabase = createClient(supabaseUrl, supabaseServiceRoleKey, {
   auth: {
@@ -128,6 +140,19 @@ export const authOptions: NextAuthOptions = {
   session: {
     strategy: 'jwt', // Usa JWT em vez de sessoes no banco
     maxAge: 30 * 24 * 60 * 60, // 30 dias
+  },
+
+  // Configuracao de cookies
+  cookies: {
+    sessionToken: {
+      name: `next-auth.session-token`,
+      options: {
+        httpOnly: true,
+        sameSite: 'lax',
+        path: '/',
+        secure: process.env.NODE_ENV === 'production',
+      },
+    },
   },
 
   // Paginas customizadas
