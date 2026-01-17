@@ -164,7 +164,7 @@ export const authOptions: NextAuthOptions = {
   // Callbacks para customizar comportamento
   callbacks: {
     // Callback JWT: adiciona dados do usuario ao token JWT
-    async jwt({ token, user, account, profile }) {
+    async jwt({ token, user }) {
       // Primeiro login: adiciona dados do usuario ao token
       if (user) {
         console.log('[AUTH] JWT callback - primeiro login:', user.email);
