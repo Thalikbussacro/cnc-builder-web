@@ -1,5 +1,6 @@
 import NextAuth, { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
+import GoogleProvider from 'next-auth/providers/google';
 import { createClient } from '@supabase/supabase-js';
 import { verifyPassword, validateEmail } from './auth-utils';
 
@@ -34,12 +35,16 @@ const supabase = createClient(supabaseUrl, supabaseServiceRoleKey, {
 });
 
 export const authOptions: NextAuthOptions = {
-  // Sem adapter: usa apenas JWT (sessoes nao sao salvas no banco)
-  // Isso simplifica e evita problemas com NextAuth v5 beta
-
   // Providers de autenticacao
   providers: [
-    // Login com email e senha
+    // Google OAuth (método primário)
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      allowDangerousEmailAccountLinking: true, // Permite auto-linking de contas
+    }),
+
+    // Login com email e senha (método secundário)
     CredentialsProvider({
       id: 'credentials',
       name: 'Email e Senha',
@@ -128,17 +133,11 @@ export const authOptions: NextAuthOptions = {
         }
       },
     }),
-
-    // TODO: Adicionar Google OAuth aqui (Fase futura)
-    // GoogleProvider({
-    //   clientId: process.env.GOOGLE_CLIENT_ID!,
-    //   clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-    // }),
   ],
 
   // Configuracao de sessoes
   session: {
-    strategy: 'jwt', // Usa JWT em vez de sessoes no banco
+    strategy: 'jwt', // Usa JWT tokens (sem necessidade de adapter)
     maxAge: 30 * 24 * 60 * 60, // 30 dias
   },
 
@@ -164,11 +163,11 @@ export const authOptions: NextAuthOptions = {
 
   // Callbacks para customizar comportamento
   callbacks: {
-    // Callback JWT: adiciona dados extras no token
-    async jwt({ token, user }) {
+    // Callback JWT: adiciona dados do usuario ao token JWT
+    async jwt({ token, user, account, profile }) {
       // Primeiro login: adiciona dados do usuario ao token
       if (user) {
-        console.log('[AUTH] JWT callback - adicionando usuario ao token:', user.email);
+        console.log('[AUTH] JWT callback - primeiro login:', user.email);
         token.id = user.id;
         token.email = user.email;
         token.name = user.name;
@@ -183,13 +182,98 @@ export const authOptions: NextAuthOptions = {
     async session({ session, token }) {
       console.log('[AUTH] Session callback - token:', { email: token?.email, id: token?.id });
       if (session.user && token) {
-        session.user.id = token.id;
-        session.user.email = token.email;
-        session.user.name = token.name;
-        session.user.image = token.image;
-        session.user.emailVerified = token.emailVerified;
+        session.user.id = token.id as string;
+        session.user.email = token.email as string;
+        session.user.name = token.name as string;
+        session.user.image = token.image as string;
+        session.user.emailVerified = token.emailVerified as Date | null;
       }
       return session;
+    },
+
+    // Callback SignIn: cria/atualiza usuario no banco e controla acesso
+    async signIn({ user, account, profile }) {
+      console.log('[AUTH] signIn callback:', {
+        provider: account?.provider,
+        email: user.email
+      });
+
+      // Para Google OAuth: criar ou atualizar usuario no banco
+      if (account?.provider === 'google') {
+        // Verifica se email está verificado pelo Google
+        const emailVerified = (profile as any)?.email_verified || (profile as any)?.verified_email;
+
+        if (!emailVerified) {
+          console.error('[AUTH] Email não verificado pelo Google:', user.email);
+          return false; // Bloqueia login
+        }
+
+        try {
+          // Verifica se usuario ja existe
+          const { data: existingUser } = await supabase
+            .from('users')
+            .select('id, email, name, image')
+            .eq('email', user.email)
+            .single();
+
+          if (existingUser) {
+            // Usuario existe: atualiza dados e marca email como verificado
+            console.log('[AUTH] Usuario Google existente, atualizando:', user.email);
+
+            const { error: updateError } = await supabase
+              .from('users')
+              .update({
+                name: user.name || existingUser.name,
+                image: user.image || existingUser.image,
+                email_verified: new Date().toISOString(),
+                updated_at: new Date().toISOString(),
+              })
+              .eq('email', user.email);
+
+            if (updateError) {
+              console.error('[AUTH] Erro ao atualizar usuario Google:', updateError);
+              return false;
+            }
+
+            // Atualiza o user.id para o ID do banco
+            user.id = existingUser.id;
+            console.log('[AUTH] Usuario Google atualizado com sucesso:', user.email);
+          } else {
+            // Usuario novo: cria no banco
+            console.log('[AUTH] Criando novo usuario Google:', user.email);
+
+            const { data: newUser, error: insertError } = await supabase
+              .from('users')
+              .insert({
+                email: user.email,
+                name: user.name,
+                image: user.image,
+                email_verified: new Date().toISOString(),
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString(),
+              })
+              .select('id')
+              .single();
+
+            if (insertError || !newUser) {
+              console.error('[AUTH] Erro ao criar usuario Google:', insertError);
+              return false;
+            }
+
+            // Atualiza o user.id para o ID do banco
+            user.id = newUser.id;
+            console.log('[AUTH] Usuario Google criado com sucesso:', user.email, 'ID:', newUser.id);
+          }
+
+          // Define emailVerified para o objeto user
+          user.emailVerified = new Date();
+        } catch (error) {
+          console.error('[AUTH] Erro ao processar usuario Google:', error);
+          return false;
+        }
+      }
+
+      return true; // Permite login
     },
 
     // Callback Redirect: controla redirecionamentos apos login/logout
