@@ -11,11 +11,13 @@ export function SessionProvider({
   const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
 
   if (!googleClientId) {
-    console.warn('Google OAuth Client ID not configured');
+    console.warn('Google OAuth Client ID not configured - Google login will not work');
+    // Still render children even without Google OAuth
+    return <AuthProvider>{children}</AuthProvider>;
   }
 
   return (
-    <GoogleOAuthProvider clientId={googleClientId || ''}>
+    <GoogleOAuthProvider clientId={googleClientId}>
       <AuthProvider>{children}</AuthProvider>
     </GoogleOAuthProvider>
   );
