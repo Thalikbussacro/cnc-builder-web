@@ -1,26 +1,15 @@
-import { redirect } from 'next/navigation';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+import { ProtectedRoute } from '@/components/ProtectedRoute';
 
 export const metadata = {
-  title: 'Aplicacao',
+  title: 'Aplicação',
 };
 
-export default async function AppLayout({
+export default function AppLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  // Verifica sessao no servidor (server component) - NextAuth v4
-  const session = await getServerSession(authOptions);
-
-  // Se nao tiver sessao, redireciona para login
-  // (middleware ja faz isso, mas e bom ter dupla verificacao)
-  if (!session) {
-    redirect('/login');
-  }
-
-  // Layout da aplicacao protegida
-  // O conteudo ja vem com todos os providers do root layout
-  return <>{children}</>;
+  // Layout da aplicação protegida
+  // ProtectedRoute verifica autenticação no client-side
+  return <ProtectedRoute>{children}</ProtectedRoute>;
 }

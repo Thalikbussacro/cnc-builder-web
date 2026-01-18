@@ -1,17 +1,17 @@
 import { useConfigStore } from '@/stores/useConfigStore';
 import { useCreateProject, useUpdateProject } from './useProjects';
-import { useSession } from 'next-auth/react';
+import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import type { Project } from '@/types/database';
 
 export function useProjectSync() {
-  const { data: session } = useSession();
+  const { user } = useAuth();
   const store = useConfigStore();
   const createProject = useCreateProject();
   const updateProject = useUpdateProject();
 
   const saveAsNewProject = async (name: string, description?: string) => {
-    if (!session?.user) {
+    if (!user) {
       toast.error('Você precisa estar logado para salvar projetos');
       return null;
     }
@@ -39,7 +39,7 @@ export function useProjectSync() {
   };
 
   const saveProject = async (id: string) => {
-    if (!session?.user) {
+    if (!user) {
       toast.error('Você precisa estar logado');
       return null;
     }

@@ -1,6 +1,6 @@
 "use client";
 
-import { signOut, useSession } from 'next-auth/react';
+import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import {
   AlertDialog,
@@ -17,36 +17,29 @@ import { LogOut, User } from 'lucide-react';
 import { toast } from 'sonner';
 
 export function UserMenu() {
-  const { data: session } = useSession();
+  const { user, logout } = useAuth();
 
-  const handleLogout = async () => {
-    try {
-      await signOut({
-        callbackUrl: '/',
-        redirect: true,
-      });
-      toast.success('Logout realizado com sucesso!');
-    } catch (error) {
-      toast.error('Erro ao fazer logout');
-    }
+  const handleLogout = () => {
+    logout();
+    toast.success('Logout realizado com sucesso!');
   };
 
-  if (!session?.user) {
+  if (!user) {
     return null;
   }
 
   return (
     <div className="flex items-center gap-3">
       <div className="hidden md:flex flex-col items-end text-sm">
-        <p className="font-medium">{session.user.name || 'Usuario'}</p>
+        <p className="font-medium">{user.name || 'Usuário'}</p>
         <p className="text-xs text-muted-foreground">
-          {session.user.email}
+          {user.email}
         </p>
       </div>
 
       <div className="flex items-center justify-center w-9 h-9 rounded-full bg-primary text-primary-foreground font-medium">
-        {session.user.name ? (
-          session.user.name.charAt(0).toUpperCase()
+        {user.name ? (
+          user.name.charAt(0).toUpperCase()
         ) : (
           <User className="h-4 w-4" />
         )}

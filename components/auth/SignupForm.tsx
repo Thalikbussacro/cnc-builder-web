@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from 'react';
-import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -11,6 +11,7 @@ import { toast } from 'sonner';
 
 export function SignupForm() {
   const router = useRouter();
+  const { signup } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -21,15 +22,15 @@ export function SignupForm() {
   const handleGoogleSignUp = async () => {
     setIsLoading(true);
     try {
-      console.log('[SIGNUP] Iniciando cadastro com Google');
-      await signIn('google', {
-        callbackUrl: '/app',
-        redirect: true,
+      // TODO: Implement Google OAuth flow
+      toast.error('Cadastro com Google temporariamente indisponível', {
+        description: 'Use cadastro com email por enquanto',
       });
+      setIsLoading(false);
     } catch (error) {
       console.error('[SIGNUP] Erro no cadastro Google:', error);
       toast.error('Erro ao cadastrar com Google', {
-        description: 'Tente novamente mais tarde',
+        description: error instanceof Error ? error.message : 'Tente novamente mais tarde',
       });
       setIsLoading(false);
     }
@@ -40,43 +41,31 @@ export function SignupForm() {
 
     // Validacoes basicas
     if (password !== confirmPassword) {
-      toast.error('As senhas nao coincidem');
+      toast.error('As senhas não coincidem');
       return;
     }
 
     if (password.length < 8) {
-      toast.error('A senha deve ter no minimo 8 caracteres');
+      toast.error('A senha deve ter no mínimo 8 caracteres');
       return;
     }
 
     setIsLoading(true);
 
     try {
-      const response = await fetch('/api/auth/signup', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name,
-          email: email.toLowerCase().trim(),
-          password,
-        }),
+      const result = await signup(email.toLowerCase().trim(), name, password);
+
+      toast.success('Conta criada com sucesso!', {
+        description: result.message || 'Verifique seu email para ativar sua conta',
       });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        toast.error('Erro ao criar conta', {
-          description: data.error || 'Tente novamente mais tarde',
-        });
-        return;
-      }
 
       // Redireciona para pagina de verificacao de email com o email como parametro
       const encodedEmail = encodeURIComponent(email.toLowerCase().trim());
       router.push(`/check-email?email=${encodedEmail}`);
     } catch (error) {
-      toast.error('Erro inesperado', {
-        description: 'Tente novamente mais tarde',
+      console.error('[SIGNUP] Erro ao criar conta:', error);
+      toast.error('Erro ao criar conta', {
+        description: error instanceof Error ? error.message : 'Tente novamente mais tarde',
       });
     } finally {
       setIsLoading(false);

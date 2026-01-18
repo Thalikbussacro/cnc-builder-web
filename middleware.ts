@@ -1,49 +1,37 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { getToken } from 'next-auth/jwt';
 
-// Middleware para proteger rotas
-export async function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl;
+/**
+ * Middleware simplificado
+ *
+ * Nota: A proteção de rotas agora é feita principalmente no client-side
+ * através do AuthContext, já que o token JWT é armazenado no localStorage.
+ *
+ * Este middleware apenas lida com redirecionamentos básicos e headers.
+ */
+export async function middleware(_request: NextRequest) {
+  // Permite todas as requisições passarem
+  // A proteção de rotas será feita no client-side pelo AuthContext
+  const response = NextResponse.next();
 
-  console.log('[MIDDLEWARE] Pathname:', pathname);
-  console.log('[MIDDLEWARE] Cookies:', request.cookies.getAll().map(c => c.name));
+  // Adiciona headers de segurança
+  response.headers.set('X-Frame-Options', 'DENY');
+  response.headers.set('X-Content-Type-Options', 'nosniff');
+  response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
 
-  const token = await getToken({
-    req: request,
-    secret: process.env.NEXTAUTH_SECRET,
-  });
-
-  console.log('[MIDDLEWARE] Token encontrado:', !!token);
-  if (token) {
-    console.log('[MIDDLEWARE] Token user:', { email: token.email, id: token.id });
-  }
-
-  // Se estiver tentando acessar /app/* sem estar logado
-  if (pathname.startsWith('/app') && !token) {
-    console.log('[MIDDLEWARE] Acesso negado a /app - redirecionando para /login');
-    const loginUrl = new URL('/login', request.url);
-    loginUrl.searchParams.set('callbackUrl', pathname);
-    return NextResponse.redirect(loginUrl);
-  }
-
-  // Se estiver logado e tentando acessar /login ou /signup
-  if (token && (pathname === '/login' || pathname === '/signup')) {
-    console.log('[MIDDLEWARE] Usuario logado tentando acessar', pathname, '- redirecionando para /app');
-    return NextResponse.redirect(new URL('/app', request.url));
-  }
-
-  console.log('[MIDDLEWARE] Permitindo acesso a', pathname);
-  return NextResponse.next();
+  return response;
 }
 
-// Configuracao: quais rotas o middleware protege
+// Configuracao: aplica a todas as rotas
 export const config = {
   matcher: [
-    // Protege todas as rotas em /app
-    '/app/:path*',
-    // Redireciona usuario logado que tenta acessar login/signup
-    '/login',
-    '/signup',
+    /*
+     * Match all request paths except:
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     * - public files (public folder)
+     */
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 };
