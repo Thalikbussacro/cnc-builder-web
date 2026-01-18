@@ -166,7 +166,7 @@ LOG_LEVEL=info
 ALLOWED_ORIGINS=http://localhost:3000,https://cnc-builder-web.vercel.app
 
 # JWT
-JWT_SECRET=xANU1vK3kiCAKkwtAegaLjJeI/866asAt7ZGLpxCaEw=
+JWT_SECRET=your_jwt_secret_here
 JWT_EXPIRES_IN=30d
 
 # Supabase (service role key com acesso admin)
@@ -174,7 +174,7 @@ SUPABASE_URL=https://qbfdqrfogdoucmtyvdee.supabase.co
 SUPABASE_SERVICE_ROLE_KEY=eyJhbGci...
 
 # Email
-RESEND_API_KEY=re_AyMitM9b_HsT8fDHEGA12sbqSG8Z82G86
+RESEND_API_KEY=re_xxxxxxxxxxxxx
 FROM_EMAIL=noreply@seudominio.com
 
 # Google OAuth
