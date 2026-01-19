@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import dynamic from "next/dynamic";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { MainLayout } from "@/components/MainLayout";
@@ -12,7 +12,6 @@ import { CadastroPeca } from "@/components/CadastroPeca";
 import { ListaPecas } from "@/components/ListaPecas";
 import { PreviewCanvas } from "@/components/PreviewCanvas";
 import { SeletorNesting } from "@/components/SeletorNesting";
-import { ThemeToggle } from "@/components/ThemeToggle";
 import { UserMenu } from "@/components/auth/UserMenu";
 import { Button } from "@/components/ui/button";
 import {
@@ -25,7 +24,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Menu, Loader2 } from "lucide-react";
+import { Menu, Loader2, Save, FolderOpen, Download, Trash2 } from "lucide-react";
 import type { FormatoArquivo, VersaoGerador, ValidationResult, Peca } from "@/types";
 import { downloadGCode } from "@/lib/utils";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
@@ -90,7 +89,7 @@ export default function Home() {
   const [incluirComentarios, setIncluirComentarios] = useLocalStorage<boolean>('cnc-incluir-comentarios', true);
   const [visualizadorAberto, setVisualizadorAberto] = useState(false);
   const [gcodeGerado, setGcodeGerado] = useState("");
-  const [secaoAtiva, setSecaoAtiva] = useLocalStorage<SecaoSidebar>('cnc-secao-ativa', 'chapa');
+  const [secaoAtiva, setSecaoAtiva] = useLocalStorage<SecaoSidebar>('cnc-secao-ativa', 'adicionar-peca');
   const [sidebarMobileOpen, setSidebarMobileOpen] = useState(false);
 
   // Estados de validação
@@ -111,6 +110,13 @@ export default function Home() {
     novasPecas: Peca[];
     pecasQueNaoCabem: Peca[];
   } | null>(null);
+
+  // Fallback para usuários com seções antigas no localStorage
+  useEffect(() => {
+    if (!['adicionar-peca', 'configuracoes'].includes(secaoAtiva)) {
+      setSecaoAtiva('adicionar-peca');
+    }
+  }, [secaoAtiva, setSecaoAtiva]);
 
   // Debounce para valores que mudam frequentemente durante digitação
   const debouncedLargura = useDebounce(configChapa.largura, 300);
@@ -456,26 +462,24 @@ export default function Home() {
         {/* Main Content */}
         <div id="main-content" className="flex-1 flex flex-col overflow-hidden">
           {/* Top Actions Bar */}
-          <div className="flex items-center justify-between gap-2 px-4 py-3 border-b flex-shrink-0 bg-card/50">
+          <div className="flex items-center justify-between gap-4 px-4 py-3 border-b flex-shrink-0 bg-card/50">
+            {/* Left: Branding/Navigation */}
             <div className="flex items-center gap-3">
-              {/* Menu Button (Mobile) */}
               <Button
                 variant="ghost"
-                size="sm"
+                size="icon"
                 className="lg:hidden"
                 onClick={() => setSidebarMobileOpen(true)}
               >
                 <Menu className="h-5 w-5" />
               </Button>
-
-              {/* Logo/Title */}
-              <div className="flex items-center gap-2">
-                <h1 className="text-lg font-semibold hidden sm:block">G-Code Generator</h1>
-                <h1 className="text-lg font-semibold sm:hidden">GCG</h1>
-              </div>
+              <h1 className="text-xl font-semibold hidden sm:block">G-Code Generator</h1>
+              <h1 className="text-xl font-semibold sm:hidden">GCG</h1>
             </div>
 
+            {/* Center: Utility Actions */}
             <div className="flex items-center gap-2">
+              <UserMenu />
               <Button
                 onClick={() => setSaveProjectDialogOpen(true)}
                 variant="outline"
@@ -483,8 +487,9 @@ export default function Home() {
                 disabled={pecas.length === 0}
                 title="Salvar projeto atual"
               >
-                <span className="hidden md:inline">Salvar Projeto</span>
-                <span className="md:hidden">Salvar</span>
+                <Save className="h-4 w-4 mr-2" />
+                <span className="hidden sm:inline">Salvar Projeto</span>
+                <span className="sm:hidden">Salvar</span>
               </Button>
               <Button
                 onClick={() => setProjectsDialogOpen(true)}
@@ -492,12 +497,14 @@ export default function Home() {
                 size="sm"
                 title="Ver meus projetos salvos"
               >
-                <span className="hidden md:inline">Meus Projetos</span>
-                <span className="md:hidden">Projetos</span>
+                <FolderOpen className="h-4 w-4 mr-2" />
+                <span className="hidden sm:inline">Meus Projetos</span>
+                <span className="sm:hidden">Projetos</span>
               </Button>
-              <ThemeToggle />
-              <UserMenu />
-              <DicionarioGCode />
+            </div>
+
+            {/* Right: Primary Action */}
+            <div className="flex items-center gap-2">
               <Button
                 onClick={handleVisualizarGCode}
                 variant="default"
@@ -506,23 +513,9 @@ export default function Home() {
                 title={hasErrors() ? "Corrija os erros nos campos antes de gerar o G-code" : undefined}
               >
                 {generateGCodeMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                <span className="hidden md:inline">Baixar/Copiar </span>G-code
-                <kbd className="hidden xl:inline ml-2 px-1.5 py-0.5 text-[10px] font-mono bg-background/20 rounded border border-background/30 opacity-60">
-                  Ctrl+Enter
-                </kbd>
-              </Button>
-              <Button
-                onClick={handleLimpar}
-                variant="destructive"
-                size="sm"
-                disabled={pecas.length === 0}
-                title="Limpar todas as peças"
-              >
-                <span className="hidden sm:inline">Limpar</span>
-                <span className="sm:hidden">✕</span>
-                <kbd className="hidden xl:inline ml-2 px-1.5 py-0.5 text-[10px] font-mono bg-background/20 rounded border border-background/30 opacity-60">
-                  Ctrl+K
-                </kbd>
+                <Download className="h-4 w-4 mr-2" />
+                <span className="hidden sm:inline">Gerar G-code</span>
+                <span className="sm:hidden">Gerar</span>
               </Button>
             </div>
           </div>
@@ -541,48 +534,68 @@ export default function Home() {
           )}
 
           {/* Content Area */}
-          <div className="flex-1 overflow-hidden">
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 p-4 h-full overflow-auto">
-              {/* Left Panel - Configuration Form */}
-              <div className="overflow-auto h-full">
-                <div className="max-w-3xl">
-                  {secaoAtiva === 'chapa' && (
-                    <ConfiguracoesChapa onValidate={validateChapaChange} />
-                  )}
-                  {secaoAtiva === 'corte' && (
-                    <ConfiguracoesCorte onValidate={validateCorteChange} />
-                  )}
-                  {secaoAtiva === 'ferramenta' && (
-                    <ConfiguracoesFerramenta onValidate={validateFerramentaChange} />
-                  )}
-                  {secaoAtiva === 'nesting' && (
-                    <SeletorNesting
-                      metricas={metricas}
-                      tempoEstimado={tempoEstimado}
-                      onValidate={validateNestingChange}
-                    />
-                  )}
-                  {secaoAtiva === 'adicionar-peca' && (
+          <div className="flex-1 overflow-auto">
+            {/* Seção: Adicionar Peça */}
+            {secaoAtiva === 'adicionar-peca' && (
+              <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 p-4 h-full">
+                {/* Left Panel: Form + Dictionary */}
+                <div className="overflow-auto h-full">
+                  <div className="max-w-3xl space-y-4">
                     <CadastroPeca
                       pecasNaoCouberam={pecasNaoCouberam}
                       onValidarAntes={validarPecasAntes}
                     />
-                  )}
+
+                    {/* Dicionário G-code (movido do top bar) */}
+                    <div className="flex justify-start">
+                      <DicionarioGCode />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Right Panel: Preview + List + Clear */}
+                <div className="flex flex-col gap-4 overflow-auto h-full">
+                  <PreviewCanvas
+                    chapaLargura={configChapa.largura}
+                    chapaAltura={configChapa.altura}
+                    pecasPosicionadas={pecasPosicionadas}
+                    tempoEstimado={tempoEstimado}
+                    carregando={carregandoPreview}
+                  />
+                  <ListaPecas pecas={pecas} onRemover={handleRemoverPeca} onToggleIgnorar={handleToggleIgnorar} />
+
+                  {/* Limpar button (movido do top bar) */}
+                  <div className="flex justify-end">
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={handleLimpar}
+                      disabled={pecas.length === 0}
+                      title="Limpar todas as peças"
+                    >
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Limpar
+                    </Button>
+                  </div>
                 </div>
               </div>
+            )}
 
-              {/* Right Panel - Preview and List */}
-              <div className="flex flex-col gap-4 overflow-auto h-full">
-                <PreviewCanvas
-                  chapaLargura={configChapa.largura}
-                  chapaAltura={configChapa.altura}
-                  pecasPosicionadas={pecasPosicionadas}
-                  tempoEstimado={tempoEstimado}
-                  carregando={carregandoPreview}
-                />
-                <ListaPecas pecas={pecas} onRemover={handleRemoverPeca} onToggleIgnorar={handleToggleIgnorar} />
+            {/* Seção: Configurações (todas juntas) */}
+            {secaoAtiva === 'configuracoes' && (
+              <div className="p-4 h-full overflow-auto">
+                <div className="max-w-4xl mx-auto space-y-4">
+                  <ConfiguracoesChapa onValidate={validateChapaChange} />
+                  <ConfiguracoesCorte onValidate={validateCorteChange} />
+                  <ConfiguracoesFerramenta onValidate={validateFerramentaChange} />
+                  <SeletorNesting
+                    metricas={metricas}
+                    tempoEstimado={tempoEstimado}
+                    onValidate={validateNestingChange}
+                  />
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
       </div>
