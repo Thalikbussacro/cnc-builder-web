@@ -7,7 +7,7 @@ export function CTASection() {
     <section className="container py-20 md:py-28">
       <div className="mx-auto max-w-3xl rounded-2xl border bg-card p-8 md:p-12 text-center space-y-6">
         <h2 className="text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">
-          Pronto para otimizar sua producao?
+          Pronto para otimizar sua produção?
         </h2>
         <p className="text-lg text-muted-foreground md:text-xl">
           Comece a gerar G-code profissional agora mesmo. Gratuito e sem burocracia.
@@ -15,12 +15,12 @@ export function CTASection() {
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
           <Button asChild size="lg" className="w-full sm:w-auto">
             <Link href="/signup">
-              Criar Conta Gratis
+              Criar Conta Grátis
               <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
           </Button>
           <Button asChild variant="outline" size="lg" className="w-full sm:w-auto">
-            <Link href="/login">Ja Tenho Conta</Link>
+            <Link href="/login">Já Tenho Conta</Link>
           </Button>
         </div>
       </div>

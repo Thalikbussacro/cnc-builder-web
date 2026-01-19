@@ -12,13 +12,13 @@ export function Hero() {
         </h1>
 
         <p className="mx-auto max-w-2xl text-lg text-muted-foreground md:text-xl">
-          Plataforma completa para gerar codigo G-code otimizado com algoritmo de nesting automatico, validacoes em tempo real e preview 2D.
+          Plataforma completa para gerar código G-code otimizado com algoritmo de nesting automático, validações em tempo real e preview 2D.
         </p>
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
           <Button asChild size="lg" className="w-full sm:w-auto">
             <Link href="/signup">
-              Criar Conta Gratis
+              Criar Conta Grátis
               <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
           </Button>
@@ -28,7 +28,7 @@ export function Hero() {
         </div>
 
         <div className="pt-8 text-sm text-muted-foreground">
-          <p>Gratuito por tempo limitado • Sem cartao de credito</p>
+          <p>Gratuito por tempo limitado • Sem cartão de crédito</p>
         </div>
       </div>
     </section>

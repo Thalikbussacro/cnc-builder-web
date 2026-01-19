@@ -17,7 +17,7 @@ export function Footer() {
             <ul className="space-y-2 text-sm">
               <li>
                 <Link href="/login" className="text-muted-foreground hover:text-foreground">
-                  Aplicacao
+                  Aplicação
                 </Link>
               </li>
               <li>
@@ -32,7 +32,7 @@ export function Footer() {
             <h4 className="font-semibold">Recursos</h4>
             <ul className="space-y-2 text-sm">
               <li>
-                <span className="text-muted-foreground">Documentacao</span>
+                <span className="text-muted-foreground">Documentação</span>
               </li>
               <li>
                 <span className="text-muted-foreground">Guias</span>

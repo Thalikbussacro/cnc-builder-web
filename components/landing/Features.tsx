@@ -3,39 +3,39 @@ import { Box, Zap, Shield, Eye, Settings, Download } from 'lucide-react';
 const features = [
   {
     icon: Box,
-    title: 'Nesting Automatico',
+    title: 'Nesting Automático',
     description:
-      'Algoritmo inteligente que otimiza o posicionamento das pecas na chapa, maximizando aproveitamento de material.',
+      'Algoritmo inteligente que otimiza o posicionamento das peças na chapa, maximizando aproveitamento de material.',
   },
   {
     icon: Zap,
-    title: 'Geracao Rapida',
+    title: 'Geração Rápida',
     description:
-      'Gere codigo G-code profissional em segundos com validacoes automaticas e preview em tempo real.',
+      'Gere código G-code profissional em segundos com validações automáticas e preview em tempo real.',
   },
   {
     icon: Shield,
-    title: 'Validacoes de Seguranca',
+    title: 'Validações de Segurança',
     description:
-      'Sistema completo de validacao que previne erros de configuracao e garante operacao segura da maquina.',
+      'Sistema completo de validação que previne erros de configuração e garante operação segura da máquina.',
   },
   {
     icon: Eye,
     title: 'Preview 2D',
     description:
-      'Visualize exatamente como sera o corte antes de enviar para a CNC, com metricas de aproveitamento.',
+      'Visualize exatamente como será o corte antes de enviar para a CNC, com métricas de aproveitamento.',
   },
   {
     icon: Settings,
-    title: 'Configuracao Flexivel',
+    title: 'Configuração Flexível',
     description:
-      'Configure parametros de corte, ferramenta, velocidades e profundidades de acordo com seu equipamento.',
+      'Configure parâmetros de corte, ferramenta, velocidades e profundidades de acordo com seu equipamento.',
   },
   {
     icon: Download,
-    title: 'Multiplos Formatos',
+    title: 'Múltiplos Formatos',
     description:
-      'Exporte G-code nos formatos .tap, .nc, .gcode e .cnc, compativel com a maioria das maquinas CNC.',
+      'Exporte G-code nos formatos .tap, .nc, .gcode e .cnc, compatível com a maioria das máquinas CNC.',
   },
 ];
 
@@ -43,12 +43,12 @@ export function Features() {
   return (
     <section className="container py-20 md:py-28">
       <div className="mx-auto max-w-5xl">
-        <div className="text-center space-y-4 mb-16">
+        <div className="text-center space-y-4 mb-12 md:mb-16">
           <h2 className="text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">
-            Tudo que voce precisa para gerar G-code
+            Tudo que você precisa para gerar G-code
           </h2>
           <p className="mx-auto max-w-2xl text-lg text-muted-foreground">
-            Ferramentas profissionais para otimizar sua producao CNC
+            Ferramentas profissionais para otimizar sua produção CNC
           </p>
         </div>
 

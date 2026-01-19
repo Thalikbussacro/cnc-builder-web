@@ -7,12 +7,12 @@ export function AccountBenefits() {
   return (
     <section className="container py-20 md:py-28">
       <div className="mx-auto max-w-5xl">
-        <div className="text-center space-y-4 mb-16">
+        <div className="text-center space-y-4 mb-12 md:mb-16">
           <h2 className="text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">
             Experimente Agora ou Crie sua Conta
           </h2>
           <p className="mx-auto max-w-2xl text-lg text-muted-foreground">
-            Escolha a melhor forma de comecar a usar o CNC Builder
+            Escolha a melhor forma de começar a usar o CNC Builder
           </p>
         </div>
 
@@ -39,7 +39,7 @@ export function AccountBenefits() {
               <Star className="h-6 w-6 text-primary" />
             </div>
 
-            <h3 className="mb-3 text-2xl font-semibold">Crie sua Conta Gratis</h3>
+            <h3 className="mb-3 text-2xl font-semibold">Crie sua Conta Grátis</h3>
 
             <ul className="space-y-3 mb-6">
               <li className="flex items-start gap-3">
@@ -57,19 +57,19 @@ export function AccountBenefits() {
               <li className="flex items-start gap-3">
                 <Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
                 <span className="text-muted-foreground">
-                  Historico completo de G-code gerado <span className="text-xs">(em breve)</span>
+                  Histórico completo de G-code gerado <span className="text-xs">(em breve)</span>
                 </span>
               </li>
               <li className="flex items-start gap-3">
                 <Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
                 <span className="text-muted-foreground">
-                  Configuracoes personalizadas sempre disponiveis
+                  Configurações personalizadas sempre disponíveis
                 </span>
               </li>
             </ul>
 
             <Button asChild size="lg" className="w-full">
-              <Link href="/signup">Criar Conta Gratis</Link>
+              <Link href="/signup">Criar Conta Grátis</Link>
             </Button>
           </div>
         </div>
