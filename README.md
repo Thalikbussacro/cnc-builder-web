@@ -156,7 +156,7 @@ A autenticação é gerenciada pelo backend Express com JWT. O frontend apenas c
 
 - Configuração de dimensões da chapa (largura, altura, espessura)
 - Configuração de parâmetros de corte (profundidade, espaçamento, velocidades)
-- Cadastro manual ou importação via CSV de peças retangulares
+- Cadastro manual de peças retangulares
 - Algoritmo de nesting automático (bin packing 2D)
 - Preview visual 2D com Canvas API
 - Validação em tempo real de dimensões
