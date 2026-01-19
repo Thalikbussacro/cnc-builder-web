@@ -76,15 +76,15 @@ function LoginFormContent() {
     <div className="space-y-4">
       {/* Botão Google - Primário */}
       <div className="w-full flex justify-center">
-        <div className="w-full max-w-md">
+        <div className="w-full scale-110 origin-center">
           <GoogleLogin
             onSuccess={handleGoogleSuccess}
             onError={handleGoogleError}
             text="continue_with"
             size="large"
-            width="400"
-            theme="filled_blue"
-            shape="rectangular"
+            width="100%"
+            theme="outline"
+            shape="pill"
           />
         </div>
       </div>
