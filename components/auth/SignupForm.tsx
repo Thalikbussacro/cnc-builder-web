@@ -88,13 +88,17 @@ export function SignupForm() {
     <div className="space-y-4">
       {/* Botão Google - Primário */}
       <div className="w-full flex justify-center">
-        <GoogleLogin
-          onSuccess={handleGoogleSuccess}
-          onError={handleGoogleError}
-          text="signup_with"
-          size="large"
-          width="100%"
-        />
+        <div className="w-full max-w-md">
+          <GoogleLogin
+            onSuccess={handleGoogleSuccess}
+            onError={handleGoogleError}
+            text="signup_with"
+            size="large"
+            width="400"
+            theme="filled_blue"
+            shape="rectangular"
+          />
+        </div>
       </div>
 
       {/* Divisor */}
