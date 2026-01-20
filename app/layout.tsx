@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Plus_Jakarta_Sans, JetBrains_Mono } from "next/font/google";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { Providers } from "@/components/Providers";
+import { SessionProvider } from "@/components/SessionProvider";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { OfflineIndicator } from "@/components/OfflineIndicator";
 import { Toaster } from "@/components/ui/sonner";
@@ -86,11 +87,13 @@ export default function RootLayout({
         </a>
         <ErrorBoundary>
           <ThemeProvider defaultTheme="light" storageKey="gcg-theme">
-            <Providers>
-              {children}
-              <Toaster />
-              <OfflineIndicator />
-            </Providers>
+            <SessionProvider>
+              <Providers>
+                {children}
+                <Toaster />
+                <OfflineIndicator />
+              </Providers>
+            </SessionProvider>
           </ThemeProvider>
         </ErrorBoundary>
       </body>

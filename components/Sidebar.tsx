@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { Settings, Scissors, Wrench, Package, PlusCircle, X, ChevronLeft, ChevronRight, AlertCircle } from "lucide-react";
+import { Settings, PlusCircle, FolderOpen, X, ChevronLeft, ChevronRight, AlertCircle } from "lucide-react";
 import { Button } from "./ui/button";
 import { useState } from "react";
 import dynamic from "next/dynamic";
@@ -12,7 +12,7 @@ const ThemeToggle = dynamic(() => import("./ThemeToggle").then(mod => ({ default
   loading: () => <div className="h-8 w-8" />
 });
 
-export type SecaoSidebar = 'chapa' | 'corte' | 'ferramenta' | 'nesting' | 'adicionar-peca';
+export type SecaoSidebar = 'adicionar-peca' | 'configuracoes' | 'projetos';
 
 interface SidebarProps {
   secaoAtiva: SecaoSidebar;
@@ -21,37 +21,24 @@ interface SidebarProps {
   onMobileOpenChange: (open: boolean) => void;
 }
 
-const secaoAdicionar = {
-  id: 'adicionar-peca' as const,
-  label: 'Adicionar Peça',
-  icon: PlusCircle,
-  descricao: 'Cadastrar nova peça'
-};
-
-const configuracoes = [
+const secoes = [
   {
-    id: 'chapa' as const,
-    label: 'Chapa',
+    id: 'adicionar-peca' as const,
+    label: 'Adicionar Peça',
+    icon: PlusCircle,
+    descricao: 'Cadastrar nova peça'
+  },
+  {
+    id: 'configuracoes' as const,
+    label: 'Configurações',
     icon: Settings,
-    descricao: 'Dimensões da chapa'
+    descricao: 'Sistema e parâmetros'
   },
   {
-    id: 'corte' as const,
-    label: 'Corte',
-    icon: Scissors,
-    descricao: 'Parâmetros de corte'
-  },
-  {
-    id: 'ferramenta' as const,
-    label: 'Ferramenta',
-    icon: Wrench,
-    descricao: 'Configuração da fresa'
-  },
-  {
-    id: 'nesting' as const,
-    label: 'Nesting',
-    icon: Package,
-    descricao: 'Algoritmo de otimização'
+    id: 'projetos' as const,
+    label: 'Projetos',
+    icon: FolderOpen,
+    descricao: 'Gerenciar projetos salvos'
   }
 ];
 
@@ -64,10 +51,13 @@ export function Sidebar({ secaoAtiva, onSecaoChange, mobileOpen, onMobileOpenCha
     onMobileOpenChange(false); // Fecha menu mobile após seleção
   };
 
-  const renderSecaoButton = (secao: typeof secaoAdicionar | typeof configuracoes[0]) => {
+  const renderSecaoButton = (secao: typeof secoes[0]) => {
     const Icon = secao.icon;
     const isActive = secaoAtiva === secao.id;
-    const hasErrors = secao.id !== 'adicionar-peca' && secao.id !== 'nesting' && tabHasErrors(secao.id as 'chapa' | 'corte' | 'ferramenta');
+    // Show error badge on Configurações if any config tab has errors
+    const hasErrors = secao.id === 'configuracoes' && (
+      tabHasErrors('chapa') || tabHasErrors('corte') || tabHasErrors('ferramenta')
+    );
 
     return (
       <button
@@ -134,25 +124,9 @@ export function Sidebar({ secaoAtiva, onSecaoChange, mobileOpen, onMobileOpenCha
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 p-3 space-y-4 overflow-y-auto">
-        {/* Adicionar Peça - Destaque no topo */}
+      <nav className="flex-1 p-3 overflow-y-auto">
         <div className="space-y-1">
-          {renderSecaoButton(secaoAdicionar)}
-        </div>
-
-        {/* Separador */}
-        <div className="border-t" />
-
-        {/* Configurações */}
-        <div className="space-y-1">
-          {!collapsed && (
-            <div className="px-3 py-1.5">
-              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                Configurações
-              </span>
-            </div>
-          )}
-          {configuracoes.map(renderSecaoButton)}
+          {secoes.map(renderSecaoButton)}
         </div>
       </nav>
 

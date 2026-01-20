@@ -18,12 +18,12 @@ const securityHeaders = [
     key: 'Content-Security-Policy',
     value: `
       default-src 'self';
-      script-src 'self' 'unsafe-inline';
-      style-src 'self' 'unsafe-inline';
-      img-src 'self' data: blob:;
-      connect-src 'self' ${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'};
-      font-src 'self' data:;
-      frame-src 'none';
+      script-src 'self' 'unsafe-inline' 'unsafe-eval' https://accounts.google.com https://gstatic.com https://*.gstatic.com;
+      style-src 'self' 'unsafe-inline' https://accounts.google.com;
+      img-src 'self' data: blob: https://*.googleusercontent.com https://*.gstatic.com;
+      connect-src 'self' ${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'} https://accounts.google.com https://*.googleapis.com;
+      font-src 'self' data: https://fonts.gstatic.com;
+      frame-src https://accounts.google.com;
       object-src 'none';
       base-uri 'self';
       form-action 'self';
