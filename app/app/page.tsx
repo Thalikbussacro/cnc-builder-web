@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import dynamic from "next/dynamic";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { MainLayout } from "@/components/MainLayout";
@@ -24,7 +24,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Menu, Loader2, Save, FolderOpen, Download, Trash2 } from "lucide-react";
+import { Menu, Loader2 } from "lucide-react";
 import type { FormatoArquivo, VersaoGerador, ValidationResult, Peca } from "@/types";
 import { downloadGCode } from "@/lib/utils";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
@@ -38,7 +38,10 @@ import { useConfigStore } from "@/stores/useConfigStore";
 import { useConfigValidation } from "@/hooks/useConfigValidation";
 import { ModalConfirmacaoRemocao } from "@/components/ModalConfirmacaoRemocao";
 import { SaveProjectDialog } from "@/components/projects/SaveProjectDialog";
-import { ProjectsDialog } from "@/components/projects/ProjectsDialog";
+import { Breadcrumb } from "@/components/Breadcrumb";
+import { ProjectsDropdown } from "@/components/ProjectsDropdown";
+import { ActionBar } from "@/components/ActionBar";
+import { ProjectsSection } from "@/components/projects/ProjectsSection";
 
 // Componentes grandes carregados sob demanda (code splitting)
 const VisualizadorGCode = dynamic(() => import("@/components/VisualizadorGCode").then(mod => ({ default: mod.VisualizadorGCode })), {
@@ -102,7 +105,6 @@ export default function Home() {
 
   // Estados para dialogs de projetos
   const [saveProjectDialogOpen, setSaveProjectDialogOpen] = useState(false);
-  const [projectsDialogOpen, setProjectsDialogOpen] = useState(false);
   const [currentProjectId] = useState<string | null>(null);
 
   // Estado para adição de peças pendente (quando peças não cabem)
@@ -111,9 +113,12 @@ export default function Home() {
     pecasQueNaoCabem: Peca[];
   } | null>(null);
 
+  // Ref para o DicionarioGCode (para acionar via Action Bar)
+  const dicionarioRef = useRef<HTMLDivElement>(null);
+
   // Fallback para usuários com seções antigas no localStorage
   useEffect(() => {
-    if (!['adicionar-peca', 'configuracoes'].includes(secaoAtiva)) {
+    if (!['adicionar-peca', 'configuracoes', 'projetos'].includes(secaoAtiva)) {
       setSecaoAtiva('adicionar-peca');
     }
   }, [secaoAtiva, setSecaoAtiva]);
@@ -267,6 +272,53 @@ export default function Home() {
     toast.success('Peças limpas', {
       description: 'Todas as peças foram removidas',
     });
+  };
+
+  // Handler para novo projeto
+  const handleNewProject = () => {
+    // TODO: Adicionar confirmação se houver peças não salvas
+    setPecas([]);
+    toast.success('Novo projeto iniciado', {
+      description: 'Todas as peças foram removidas',
+    });
+  };
+
+  // Handler para ver todos os projetos
+  const handleViewAllProjects = () => {
+    setSecaoAtiva('projetos');
+  };
+
+  // Handler para validação manual (Action Bar)
+  const handleValidate = () => {
+    if (pecas.length === 0) return;
+
+    // Mostrar toast com resultado da validação
+    if (hasErrors()) {
+      toast.error('Validação falhou', {
+        description: 'Corrija os erros destacados nos campos de configuração',
+      });
+    } else {
+      toast.success('Validação bem-sucedida', {
+        description: 'Todas as configurações estão corretas',
+      });
+    }
+  };
+
+  // Handler para download rápido do G-code (Action Bar)
+  const handleQuickDownload = () => {
+    if (!gcodeGerado) return;
+    // Download no formato padrão (.nc)
+    downloadGCode(gcodeGerado, 'nc');
+    toast.success('G-code baixado!', {
+      description: 'Arquivo baixado como .nc',
+    });
+  };
+
+  // Handler para abrir dicionário G-code (Action Bar)
+  const handleOpenDictionary = () => {
+    // Encontrar e clicar no botão dentro do DicionarioGCode
+    const button = dicionarioRef.current?.querySelector('button');
+    button?.click();
   };
 
   // Handlers de confirmação de mudanças que causam remoção de peças
@@ -461,9 +513,9 @@ export default function Home() {
 
         {/* Main Content */}
         <div id="main-content" className="flex-1 flex flex-col overflow-hidden">
-          {/* Top Actions Bar */}
+          {/* Top Bar - Minimalista */}
           <div className="flex items-center justify-between gap-4 px-4 py-3 border-b flex-shrink-0 bg-card/50">
-            {/* Left: Branding/Navigation */}
+            {/* Left: Breadcrumb */}
             <div className="flex items-center gap-3">
               <Button
                 variant="ghost"
@@ -473,50 +525,18 @@ export default function Home() {
               >
                 <Menu className="h-5 w-5" />
               </Button>
-              <h1 className="text-xl font-semibold hidden sm:block">G-Code Generator</h1>
-              <h1 className="text-xl font-semibold sm:hidden">GCG</h1>
+              <Breadcrumb secaoAtiva={secaoAtiva} />
             </div>
 
-            {/* Center: Utility Actions */}
+            {/* Right: Projects + User */}
             <div className="flex items-center gap-2">
+              <ProjectsDropdown
+                onSaveProject={() => setSaveProjectDialogOpen(true)}
+                onNewProject={handleNewProject}
+                onViewAllProjects={handleViewAllProjects}
+                hasPieces={pecas.length > 0}
+              />
               <UserMenu />
-              <Button
-                onClick={() => setSaveProjectDialogOpen(true)}
-                variant="outline"
-                size="sm"
-                disabled={pecas.length === 0}
-                title="Salvar projeto atual"
-              >
-                <Save className="h-4 w-4 mr-2" />
-                <span className="hidden sm:inline">Salvar Projeto</span>
-                <span className="sm:hidden">Salvar</span>
-              </Button>
-              <Button
-                onClick={() => setProjectsDialogOpen(true)}
-                variant="outline"
-                size="sm"
-                title="Ver meus projetos salvos"
-              >
-                <FolderOpen className="h-4 w-4 mr-2" />
-                <span className="hidden sm:inline">Meus Projetos</span>
-                <span className="sm:hidden">Projetos</span>
-              </Button>
-            </div>
-
-            {/* Right: Primary Action */}
-            <div className="flex items-center gap-2">
-              <Button
-                onClick={handleVisualizarGCode}
-                variant="default"
-                size="sm"
-                disabled={pecas.length === 0 || generateGCodeMutation.isPending || hasErrors()}
-                title={hasErrors() ? "Corrija os erros nos campos antes de gerar o G-code" : undefined}
-              >
-                {generateGCodeMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                <Download className="h-4 w-4 mr-2" />
-                <span className="hidden sm:inline">Gerar G-code</span>
-                <span className="sm:hidden">Gerar</span>
-              </Button>
             </div>
           </div>
 
@@ -533,55 +553,45 @@ export default function Home() {
             </div>
           )}
 
-          {/* Content Area */}
-          <div className="flex-1 overflow-auto">
-            {/* Seção: Adicionar Peça */}
+          {/* Content Area - com pb para não ficar atrás da action bar */}
+          <div className="flex-1 overflow-auto pb-20">
+            {/* Seção: Adicionar Peça - NOVO LAYOUT */}
             {secaoAtiva === 'adicionar-peca' && (
-              <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 p-4 h-full">
-                {/* Left Panel: Form + Dictionary */}
-                <div className="overflow-auto h-full">
-                  <div className="max-w-3xl space-y-4">
+              <div className="p-4 space-y-4">
+                {/* Top Grid: Form | Preview */}
+                <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+                  {/* Left: Form */}
+                  <div className="overflow-auto">
                     <CadastroPeca
                       pecasNaoCouberam={pecasNaoCouberam}
                       onValidarAntes={validarPecasAntes}
                     />
+                  </div>
 
-                    {/* Dicionário G-code (movido do top bar) */}
-                    <div className="flex justify-start">
-                      <DicionarioGCode />
-                    </div>
+                  {/* Right: Preview */}
+                  <div className="overflow-auto">
+                    <PreviewCanvas
+                      chapaLargura={configChapa.largura}
+                      chapaAltura={configChapa.altura}
+                      pecasPosicionadas={pecasPosicionadas}
+                      tempoEstimado={tempoEstimado}
+                      carregando={carregandoPreview}
+                    />
                   </div>
                 </div>
 
-                {/* Right Panel: Preview + List + Clear */}
-                <div className="flex flex-col gap-4 overflow-auto h-full">
-                  <PreviewCanvas
-                    chapaLargura={configChapa.largura}
-                    chapaAltura={configChapa.altura}
-                    pecasPosicionadas={pecasPosicionadas}
-                    tempoEstimado={tempoEstimado}
-                    carregando={carregandoPreview}
+                {/* Bottom: Lista de Peças (Full Width) */}
+                <div className="w-full">
+                  <ListaPecas
+                    pecas={pecas}
+                    onRemover={handleRemoverPeca}
+                    onToggleIgnorar={handleToggleIgnorar}
                   />
-                  <ListaPecas pecas={pecas} onRemover={handleRemoverPeca} onToggleIgnorar={handleToggleIgnorar} />
-
-                  {/* Limpar button (movido do top bar) */}
-                  <div className="flex justify-end">
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      onClick={handleLimpar}
-                      disabled={pecas.length === 0}
-                      title="Limpar todas as peças"
-                    >
-                      <Trash2 className="h-4 w-4 mr-2" />
-                      Limpar
-                    </Button>
-                  </div>
                 </div>
               </div>
             )}
 
-            {/* Seção: Configurações (todas juntas) */}
+            {/* Seção: Configurações (sem mudanças) */}
             {secaoAtiva === 'configuracoes' && (
               <div className="p-4 h-full overflow-auto">
                 <div className="max-w-4xl mx-auto space-y-4">
@@ -596,8 +606,30 @@ export default function Home() {
                 </div>
               </div>
             )}
+
+            {/* Seção: Projetos - NOVA */}
+            {secaoAtiva === 'projetos' && <ProjectsSection />}
           </div>
+
+          {/* Action Bar - Fixa no Rodapé */}
+          <ActionBar
+            onSaveProject={() => setSaveProjectDialogOpen(true)}
+            onClearPieces={handleLimpar}
+            onValidate={handleValidate}
+            onGenerateGCode={handleVisualizarGCode}
+            onDownloadGCode={handleQuickDownload}
+            onOpenDictionary={handleOpenDictionary}
+            hasPieces={pecas.length > 0}
+            hasErrors={hasErrors()}
+            isGenerating={generateGCodeMutation.isPending}
+            hasGeneratedGCode={!!gcodeGerado}
+          />
         </div>
+      </div>
+
+      {/* DicionarioGCode escondido (acionado via ref) */}
+      <div ref={dicionarioRef} style={{ display: 'none' }}>
+        <DicionarioGCode />
       </div>
 
       {/* Validation Dialog */}
@@ -647,10 +679,6 @@ export default function Home() {
         open={saveProjectDialogOpen}
         onOpenChange={setSaveProjectDialogOpen}
         currentProjectId={currentProjectId}
-      />
-      <ProjectsDialog
-        open={projectsDialogOpen}
-        onOpenChange={setProjectsDialogOpen}
       />
 
       {/* G-Code Viewer */}

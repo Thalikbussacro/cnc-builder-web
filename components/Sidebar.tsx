@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { Settings, PlusCircle, X, ChevronLeft, ChevronRight, AlertCircle } from "lucide-react";
+import { Settings, PlusCircle, FolderOpen, X, ChevronLeft, ChevronRight, AlertCircle } from "lucide-react";
 import { Button } from "./ui/button";
 import { useState } from "react";
 import dynamic from "next/dynamic";
@@ -12,7 +12,7 @@ const ThemeToggle = dynamic(() => import("./ThemeToggle").then(mod => ({ default
   loading: () => <div className="h-8 w-8" />
 });
 
-export type SecaoSidebar = 'adicionar-peca' | 'configuracoes';
+export type SecaoSidebar = 'adicionar-peca' | 'configuracoes' | 'projetos';
 
 interface SidebarProps {
   secaoAtiva: SecaoSidebar;
@@ -33,6 +33,12 @@ const secoes = [
     label: 'Configurações',
     icon: Settings,
     descricao: 'Sistema e parâmetros'
+  },
+  {
+    id: 'projetos' as const,
+    label: 'Projetos',
+    icon: FolderOpen,
+    descricao: 'Gerenciar projetos salvos'
   }
 ];
 
