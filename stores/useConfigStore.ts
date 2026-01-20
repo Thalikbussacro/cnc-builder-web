@@ -38,8 +38,12 @@ const defaultCorte: ConfiguracoesCorte = {
   rapidsSpeed: 4000,
   spindleSpeed: 18000,
   usarRampa: false,
+  tipoRampa: 'linear',
   anguloRampa: 3,
   aplicarRampaEm: 'primeira-passada',
+  zigZagAmplitude: 2,
+  zigZagPitch: 5,
+  maxRampStepZ: 0.5,
   usarMesmoEspacamentoBorda: true,
   margemBorda: 50,
 };
@@ -105,7 +109,7 @@ export const useConfigStore = create<ConfigStore>()(
     }),
     {
       name: 'cnc-config-storage',
-      version: 1,
+      version: 2,
       partialize: (state) => ({
         configChapa: state.configChapa,
         configCorte: state.configCorte,
@@ -114,7 +118,12 @@ export const useConfigStore = create<ConfigStore>()(
         pecas: state.pecas,
       }),
       migrate: (persistedState: any, version: number) => {
-        // Migração para adicionar numeroPassadas aos dados existentes
+        // Garante que persistedState existe
+        if (!persistedState) {
+          return persistedState;
+        }
+        
+        // Migração versão 0 → 1: adiciona numeroPassadas
         if (version === 0) {
           if (persistedState?.configCorte && !persistedState.configCorte.numeroPassadas) {
             // Calcula numeroPassadas baseado nos valores existentes
@@ -122,7 +131,36 @@ export const useConfigStore = create<ConfigStore>()(
             const profPorPassada = persistedState.configCorte.profundidadePorPassada || 3.75;
             persistedState.configCorte.numeroPassadas = Math.max(1, Math.round(prof / profPorPassada));
           }
+          // Atualiza versão para continuar migração
+          version = 1;
         }
+        
+        // Migração versão 1 → 2: adiciona campos zig-zag
+        if (version === 1) {
+          // Garante que configCorte existe
+          if (!persistedState.configCorte) {
+            persistedState.configCorte = {};
+          }
+          
+          // Inicializa tipoRampa se não existir ou for null/undefined
+          if (persistedState.configCorte.tipoRampa === undefined || persistedState.configCorte.tipoRampa === null) {
+            persistedState.configCorte.tipoRampa = 'linear';
+          }
+          
+          // Inicializa parâmetros zig-zag se não existirem ou forem null/undefined
+          if (persistedState.configCorte.zigZagAmplitude === undefined || persistedState.configCorte.zigZagAmplitude === null) {
+            persistedState.configCorte.zigZagAmplitude = 2;
+          }
+          
+          if (persistedState.configCorte.zigZagPitch === undefined || persistedState.configCorte.zigZagPitch === null) {
+            persistedState.configCorte.zigZagPitch = 5;
+          }
+          
+          if (persistedState.configCorte.maxRampStepZ === undefined || persistedState.configCorte.maxRampStepZ === null) {
+            persistedState.configCorte.maxRampStepZ = 0.5;
+          }
+        }
+        
         return persistedState;
       },
     }

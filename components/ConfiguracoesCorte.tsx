@@ -11,7 +11,7 @@ import { InfoTooltip } from "@/components/InfoTooltip";
 import { SanitizationAlert } from "@/components/SanitizationAlert";
 import { parametrosInfo } from "@/lib/parametros-info";
 import { VALIDATION_RULES } from "@/lib/validation-rules";
-import type { AplicarRampaEm, ConfiguracoesCorte as ConfiguracoesCorteType } from "@/types";
+import type { AplicarRampaEm, TipoRampa, ConfiguracoesCorte as ConfiguracoesCorteType } from "@/types";
 import { cn } from "@/lib/utils";
 import { useValidatedInput } from "@/hooks/useValidatedInput";
 import { useValidationContext } from "@/contexts/ValidationContext";
@@ -174,6 +174,24 @@ export function ConfiguracoesCorte({ onValidate }: ConfiguracoesCorteProps = {})
     'anguloRampa'
   );
 
+  const zigZagAmplitudeInput = useValidatedInput(
+    config.zigZagAmplitude ?? 2,
+    (value) => onChange({ ...config, zigZagAmplitude: value }),
+    'zigZagAmplitude'
+  );
+
+  const zigZagPitchInput = useValidatedInput(
+    config.zigZagPitch ?? 5,
+    (value) => onChange({ ...config, zigZagPitch: value }),
+    'zigZagPitch'
+  );
+
+  const maxRampStepZInput = useValidatedInput(
+    config.maxRampStepZ ?? 0.5,
+    (value) => onChange({ ...config, maxRampStepZ: value }),
+    'maxRampStepZ'
+  );
+
   // Validação matemática: numeroPassadas × profundidadePorPassada deve = profundidade
   useEffect(() => {
     const total = config.numeroPassadas * config.profundidadePorPassada;
@@ -271,13 +289,38 @@ export function ConfiguracoesCorte({ onValidate }: ConfiguracoesCorteProps = {})
     }
   }, [anguloRampaInput.hasError, registerError, clearError]);
 
-  // Força usarRampa para false enquanto recurso está desabilitado (em desenvolvimento)
   useEffect(() => {
-    if (config.usarRampa) {
-      onChange({ ...config, usarRampa: false });
+    if (zigZagAmplitudeInput.hasError) {
+      registerError('corte', 'zigZagAmplitude');
+    } else {
+      clearError('corte', 'zigZagAmplitude');
+    }
+  }, [zigZagAmplitudeInput.hasError, registerError, clearError]);
+
+  useEffect(() => {
+    if (zigZagPitchInput.hasError) {
+      registerError('corte', 'zigZagPitch');
+    } else {
+      clearError('corte', 'zigZagPitch');
+    }
+  }, [zigZagPitchInput.hasError, registerError, clearError]);
+
+  useEffect(() => {
+    if (maxRampStepZInput.hasError) {
+      registerError('corte', 'maxRampStepZ');
+    } else {
+      clearError('corte', 'maxRampStepZ');
+    }
+  }, [maxRampStepZInput.hasError, registerError, clearError]);
+
+  // Inicializa tipoRampa quando usarRampa é ativado
+  useEffect(() => {
+    if (config.usarRampa && !config.tipoRampa) {
+      setConfigCorte({ ...config, tipoRampa: 'linear' });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [config.usarRampa, config.tipoRampa]);
+
 
   const handleCheckboxChange = (campo: keyof ConfiguracoesCorteType, valor: boolean) => {
     onChange({ ...config, [campo]: valor });
@@ -619,12 +662,11 @@ export function ConfiguracoesCorte({ onValidate }: ConfiguracoesCorteProps = {})
               <Checkbox
                 id="usarRampa"
                 checked={config.usarRampa}
-                disabled={true}
                 onCheckedChange={(checked) => handleCheckboxChange("usarRampa", checked as boolean)}
               />
               <Label
                 htmlFor="usarRampa"
-                className="text-sm font-normal cursor-not-allowed opacity-60"
+                className="text-sm font-normal cursor-pointer"
               >
                 Usar rampa de entrada
               </Label>
@@ -632,15 +674,6 @@ export function ConfiguracoesCorte({ onValidate }: ConfiguracoesCorteProps = {})
                 title={parametrosInfo.usarRampa.title}
                 content={parametrosInfo.usarRampa.content}
               />
-            </div>
-
-            <div className="ml-6 text-xs text-amber-600 dark:text-amber-500 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/50 p-2 rounded flex items-start gap-2">
-              <svg className="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-              </svg>
-              <span>
-                <strong>Recurso em desenvolvimento:</strong> A rampa de entrada está temporariamente desabilitada enquanto implementamos melhorias na funcionalidade.
-              </span>
             </div>
 
             {config.usarRampa && (
@@ -669,34 +702,146 @@ export function ConfiguracoesCorte({ onValidate }: ConfiguracoesCorteProps = {})
 
                 <div className="space-y-1">
                   <div className="flex items-center gap-1">
-                    <Label htmlFor="anguloRampa">Ângulo da Rampa (°)</Label>
+                    <Label htmlFor="tipoRampa">Tipo de Rampa</Label>
                     <InfoTooltip
-                      title={parametrosInfo.anguloRampa.title}
-                      content={parametrosInfo.anguloRampa.content}
+                      title="Tipo de Rampa"
+                      content="Escolha entre rampa linear (descida suave em linha reta) ou zig-zag (descida com oscilação lateral para melhor remoção de cavaco)."
                     />
                   </div>
-                  <Input
-                    id="anguloRampa"
-                    type="number"
-                    value={anguloRampaInput.inputValue}
-                    onChange={anguloRampaInput.handleChange}
-                    onBlur={anguloRampaInput.handleBlur}
-                    min={VALIDATION_RULES.anguloRampa.min}
-                    max={VALIDATION_RULES.anguloRampa.max}
-                    step="0.5"
-                    className={cn(anguloRampaInput.hasError && "border-destructive focus-visible:ring-destructive")}
-                  />
-                  {anguloRampaInput.hasError && anguloRampaInput.errorMessage && (
-                    <p className="text-xs text-destructive mt-1">{anguloRampaInput.errorMessage}</p>
-                  )}
-                  <SanitizationAlert
-                    alert={anguloRampaInput.sanitizationAlert}
-                    onDismiss={anguloRampaInput.dismissSanitizationAlert}
-                  />
-                  <div className="text-xs text-muted-foreground mt-1 p-2 bg-muted rounded">
-                    Recomendado: 3° (equilíbrio ideal). Mínimo: 2° (mais suave). Máximo: 5° (mais rápido)
-                  </div>
+                  <Select
+                    value={config.tipoRampa ?? 'linear'}
+                    onValueChange={(value) => handleSelectChange("tipoRampa", value as TipoRampa)}
+                  >
+                    <SelectTrigger id="tipoRampa">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="linear">Linear</SelectItem>
+                      <SelectItem value="zigzag">Zig-Zag</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
+
+                {(config.tipoRampa ?? 'linear') === 'linear' && (
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-1">
+                      <Label htmlFor="anguloRampa">Ângulo da Rampa (°)</Label>
+                      <InfoTooltip
+                        title={parametrosInfo.anguloRampa.title}
+                        content={parametrosInfo.anguloRampa.content}
+                      />
+                    </div>
+                    <Input
+                      id="anguloRampa"
+                      type="number"
+                      value={anguloRampaInput.inputValue}
+                      onChange={anguloRampaInput.handleChange}
+                      onBlur={anguloRampaInput.handleBlur}
+                      min={VALIDATION_RULES.anguloRampa.min}
+                      max={VALIDATION_RULES.anguloRampa.max}
+                      step="0.5"
+                      className={cn(anguloRampaInput.hasError && "border-destructive focus-visible:ring-destructive")}
+                    />
+                    {anguloRampaInput.hasError && anguloRampaInput.errorMessage && (
+                      <p className="text-xs text-destructive mt-1">{anguloRampaInput.errorMessage}</p>
+                    )}
+                    <SanitizationAlert
+                      alert={anguloRampaInput.sanitizationAlert}
+                      onDismiss={anguloRampaInput.dismissSanitizationAlert}
+                    />
+                    <div className="text-xs text-muted-foreground mt-1 p-2 bg-muted rounded">
+                      Recomendado: 3° (equilíbrio ideal). Mínimo: 2° (mais suave). Máximo: 5° (mais rápido)
+                    </div>
+                  </div>
+                )}
+
+                {(config.tipoRampa ?? 'linear') === 'zigzag' && (
+                  <div className="space-y-3">
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-1">
+                        <Label htmlFor="zigZagAmplitude">Amplitude Zig-Zag (mm)</Label>
+                        <InfoTooltip
+                          title={parametrosInfo.zigZagAmplitude?.title || "Amplitude Zig-Zag"}
+                          content={parametrosInfo.zigZagAmplitude?.content || "Distância lateral máxima da oscilação do zig-zag."}
+                        />
+                      </div>
+                      <Input
+                        id="zigZagAmplitude"
+                        type="number"
+                        value={zigZagAmplitudeInput.inputValue}
+                        onChange={zigZagAmplitudeInput.handleChange}
+                        onBlur={zigZagAmplitudeInput.handleBlur}
+                        min={VALIDATION_RULES.zigZagAmplitude.min}
+                        max={VALIDATION_RULES.zigZagAmplitude.max}
+                        step="0.1"
+                        className={cn(zigZagAmplitudeInput.hasError && "border-destructive focus-visible:ring-destructive")}
+                      />
+                      {zigZagAmplitudeInput.hasError && zigZagAmplitudeInput.errorMessage && (
+                        <p className="text-xs text-destructive mt-1">{zigZagAmplitudeInput.errorMessage}</p>
+                      )}
+                      <SanitizationAlert
+                        alert={zigZagAmplitudeInput.sanitizationAlert}
+                        onDismiss={zigZagAmplitudeInput.dismissSanitizationAlert}
+                      />
+                    </div>
+
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-1">
+                        <Label htmlFor="zigZagPitch">Pitch Zig-Zag (mm)</Label>
+                        <InfoTooltip
+                          title={parametrosInfo.zigZagPitch?.title || "Pitch Zig-Zag"}
+                          content={parametrosInfo.zigZagPitch?.content || "Distância de avanço em cada zigue do zig-zag."}
+                        />
+                      </div>
+                      <Input
+                        id="zigZagPitch"
+                        type="number"
+                        value={zigZagPitchInput.inputValue}
+                        onChange={zigZagPitchInput.handleChange}
+                        onBlur={zigZagPitchInput.handleBlur}
+                        min={VALIDATION_RULES.zigZagPitch.min}
+                        max={VALIDATION_RULES.zigZagPitch.max}
+                        step="0.5"
+                        className={cn(zigZagPitchInput.hasError && "border-destructive focus-visible:ring-destructive")}
+                      />
+                      {zigZagPitchInput.hasError && zigZagPitchInput.errorMessage && (
+                        <p className="text-xs text-destructive mt-1">{zigZagPitchInput.errorMessage}</p>
+                      )}
+                      <SanitizationAlert
+                        alert={zigZagPitchInput.sanitizationAlert}
+                        onDismiss={zigZagPitchInput.dismissSanitizationAlert}
+                      />
+                    </div>
+
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-1">
+                        <Label htmlFor="maxRampStepZ">Máx. Descida por Segmento (mm)</Label>
+                        <InfoTooltip
+                          title={parametrosInfo.maxRampStepZ?.title || "Máximo Descida por Segmento"}
+                          content={parametrosInfo.maxRampStepZ?.content || "Máximo de descida em Z por segmento do zig-zag. Valores menores geram mais segmentos e descida mais suave."}
+                        />
+                      </div>
+                      <Input
+                        id="maxRampStepZ"
+                        type="number"
+                        value={maxRampStepZInput.inputValue}
+                        onChange={maxRampStepZInput.handleChange}
+                        onBlur={maxRampStepZInput.handleBlur}
+                        min={VALIDATION_RULES.maxRampStepZ.min}
+                        max={VALIDATION_RULES.maxRampStepZ.max}
+                        step="0.1"
+                        className={cn(maxRampStepZInput.hasError && "border-destructive focus-visible:ring-destructive")}
+                      />
+                      {maxRampStepZInput.hasError && maxRampStepZInput.errorMessage && (
+                        <p className="text-xs text-destructive mt-1">{maxRampStepZInput.errorMessage}</p>
+                      )}
+                      <SanitizationAlert
+                        alert={maxRampStepZInput.sanitizationAlert}
+                        onDismiss={maxRampStepZInput.dismissSanitizationAlert}
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>

@@ -147,6 +147,10 @@ export default function Home() {
       rapidsSpeed: sanitizeValue('rapidsSpeed', configCorte.rapidsSpeed),
       spindleSpeed: sanitizeValue('spindleSpeed', configCorte.spindleSpeed),
       anguloRampa: sanitizeValue('anguloRampa', configCorte.anguloRampa),
+      tipoRampa: configCorte.tipoRampa,
+      zigZagAmplitude: configCorte.zigZagAmplitude ? sanitizeValue('zigZagAmplitude', configCorte.zigZagAmplitude) : undefined,
+      zigZagPitch: configCorte.zigZagPitch ? sanitizeValue('zigZagPitch', configCorte.zigZagPitch) : undefined,
+      maxRampStepZ: configCorte.maxRampStepZ ? sanitizeValue('maxRampStepZ', configCorte.maxRampStepZ) : undefined,
     },
     configFerramenta: {
       diametro: sanitizeValue('diametroFresa', configFerramenta.diametro),

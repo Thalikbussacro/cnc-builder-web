@@ -103,6 +103,27 @@ export const VALIDATION_RULES = {
     min: 1,
     max: 100,
   },
+
+  zigZagAmplitude: {
+    min: 0.5,
+    max: 10,
+    recomendadoMin: 1,
+    recomendadoMax: 5,
+  },
+
+  zigZagPitch: {
+    min: 1,
+    max: 20,
+    recomendadoMin: 3,
+    recomendadoMax: 10,
+  },
+
+  maxRampStepZ: {
+    min: 0.1,
+    max: 2,
+    recomendadoMin: 0.3,
+    recomendadoMax: 1,
+  },
 } as const;
 
 export type FieldValidationResult = {
