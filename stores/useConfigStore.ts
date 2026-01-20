@@ -41,9 +41,8 @@ const defaultCorte: ConfiguracoesCorte = {
   tipoRampa: 'linear',
   anguloRampa: 3,
   aplicarRampaEm: 'primeira-passada',
-  zigZagAmplitude: 2,
-  zigZagPitch: 5,
-  maxRampStepZ: 0.5,
+  zigZagDistancia: 5,        // mm - Distância de cada zigue
+  anguloRampaZigZag: 20,     // graus - Ângulo de descida do zig-zag
   usarMesmoEspacamentoBorda: true,
   margemBorda: 50,
 };
@@ -109,7 +108,7 @@ export const useConfigStore = create<ConfigStore>()(
     }),
     {
       name: 'cnc-config-storage',
-      version: 2,
+      version: 3,
       partialize: (state) => ({
         configChapa: state.configChapa,
         configCorte: state.configCorte,
@@ -135,7 +134,7 @@ export const useConfigStore = create<ConfigStore>()(
           version = 1;
         }
         
-        // Migração versão 1 → 2: adiciona campos zig-zag
+        // Migração versão 1 → 2: adiciona campos zig-zag antigos (amplitude/pitch/maxStepZ)
         if (version === 1) {
           // Garante que configCorte existe
           if (!persistedState.configCorte) {
@@ -147,17 +146,29 @@ export const useConfigStore = create<ConfigStore>()(
             persistedState.configCorte.tipoRampa = 'linear';
           }
           
-          // Inicializa parâmetros zig-zag se não existirem ou forem null/undefined
-          if (persistedState.configCorte.zigZagAmplitude === undefined || persistedState.configCorte.zigZagAmplitude === null) {
-            persistedState.configCorte.zigZagAmplitude = 2;
+          // Atualiza versão para continuar migração
+          version = 2;
+        }
+        
+        // Migração versão 2 → 3: substitui amplitude/pitch/maxStepZ por distancia/angulo
+        if (version === 2) {
+          // Garante que configCorte existe
+          if (!persistedState.configCorte) {
+            persistedState.configCorte = {};
           }
           
-          if (persistedState.configCorte.zigZagPitch === undefined || persistedState.configCorte.zigZagPitch === null) {
-            persistedState.configCorte.zigZagPitch = 5;
+          // Remove campos antigos se existirem
+          delete persistedState.configCorte.zigZagAmplitude;
+          delete persistedState.configCorte.zigZagPitch;
+          delete persistedState.configCorte.maxRampStepZ;
+          
+          // Inicializa novos parâmetros zig-zag
+          if (persistedState.configCorte.zigZagDistancia === undefined || persistedState.configCorte.zigZagDistancia === null) {
+            persistedState.configCorte.zigZagDistancia = 5;
           }
           
-          if (persistedState.configCorte.maxRampStepZ === undefined || persistedState.configCorte.maxRampStepZ === null) {
-            persistedState.configCorte.maxRampStepZ = 0.5;
+          if (persistedState.configCorte.anguloRampaZigZag === undefined || persistedState.configCorte.anguloRampaZigZag === null) {
+            persistedState.configCorte.anguloRampaZigZag = 20;
           }
         }
         

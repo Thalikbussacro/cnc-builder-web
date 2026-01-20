@@ -104,25 +104,18 @@ export const VALIDATION_RULES = {
     max: 100,
   },
 
-  zigZagAmplitude: {
-    min: 0.5,
-    max: 10,
-    recomendadoMin: 1,
-    recomendadoMax: 5,
-  },
-
-  zigZagPitch: {
+  zigZagDistancia: {
     min: 1,
-    max: 20,
+    max: 50,
     recomendadoMin: 3,
     recomendadoMax: 10,
   },
 
-  maxRampStepZ: {
-    min: 0.1,
-    max: 2,
-    recomendadoMin: 0.3,
-    recomendadoMax: 1,
+  anguloRampaZigZag: {
+    min: 1,
+    max: 45,
+    recomendadoMin: 10,
+    recomendadoMax: 30,
   },
 } as const;
 

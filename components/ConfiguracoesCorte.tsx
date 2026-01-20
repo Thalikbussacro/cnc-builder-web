@@ -174,22 +174,16 @@ export function ConfiguracoesCorte({ onValidate }: ConfiguracoesCorteProps = {})
     'anguloRampa'
   );
 
-  const zigZagAmplitudeInput = useValidatedInput(
-    config.zigZagAmplitude ?? 2,
-    (value) => onChange({ ...config, zigZagAmplitude: value }),
-    'zigZagAmplitude'
+  const zigZagDistanciaInput = useValidatedInput(
+    config.zigZagDistancia ?? 5,
+    (value) => onChange({ ...config, zigZagDistancia: value }),
+    'zigZagDistancia'
   );
 
-  const zigZagPitchInput = useValidatedInput(
-    config.zigZagPitch ?? 5,
-    (value) => onChange({ ...config, zigZagPitch: value }),
-    'zigZagPitch'
-  );
-
-  const maxRampStepZInput = useValidatedInput(
-    config.maxRampStepZ ?? 0.5,
-    (value) => onChange({ ...config, maxRampStepZ: value }),
-    'maxRampStepZ'
+  const anguloRampaZigZagInput = useValidatedInput(
+    config.anguloRampaZigZag ?? 20,
+    (value) => onChange({ ...config, anguloRampaZigZag: value }),
+    'anguloRampaZigZag'
   );
 
   // Validação matemática: numeroPassadas × profundidadePorPassada deve = profundidade
@@ -290,28 +284,20 @@ export function ConfiguracoesCorte({ onValidate }: ConfiguracoesCorteProps = {})
   }, [anguloRampaInput.hasError, registerError, clearError]);
 
   useEffect(() => {
-    if (zigZagAmplitudeInput.hasError) {
-      registerError('corte', 'zigZagAmplitude');
+    if (zigZagDistanciaInput.hasError) {
+      registerError('corte', 'zigZagDistancia');
     } else {
-      clearError('corte', 'zigZagAmplitude');
+      clearError('corte', 'zigZagDistancia');
     }
-  }, [zigZagAmplitudeInput.hasError, registerError, clearError]);
+  }, [zigZagDistanciaInput.hasError, registerError, clearError]);
 
   useEffect(() => {
-    if (zigZagPitchInput.hasError) {
-      registerError('corte', 'zigZagPitch');
+    if (anguloRampaZigZagInput.hasError) {
+      registerError('corte', 'anguloRampaZigZag');
     } else {
-      clearError('corte', 'zigZagPitch');
+      clearError('corte', 'anguloRampaZigZag');
     }
-  }, [zigZagPitchInput.hasError, registerError, clearError]);
-
-  useEffect(() => {
-    if (maxRampStepZInput.hasError) {
-      registerError('corte', 'maxRampStepZ');
-    } else {
-      clearError('corte', 'maxRampStepZ');
-    }
-  }, [maxRampStepZInput.hasError, registerError, clearError]);
+  }, [anguloRampaZigZagInput.hasError, registerError, clearError]);
 
   // Inicializa tipoRampa quando usarRampa é ativado
   useEffect(() => {
@@ -759,86 +745,78 @@ export function ConfiguracoesCorte({ onValidate }: ConfiguracoesCorteProps = {})
                   <div className="space-y-3">
                     <div className="space-y-1">
                       <div className="flex items-center gap-1">
-                        <Label htmlFor="zigZagAmplitude">Amplitude Zig-Zag (mm)</Label>
+                        <Label htmlFor="zigZagDistancia">Distância do Zigue (mm)</Label>
                         <InfoTooltip
-                          title={parametrosInfo.zigZagAmplitude?.title || "Amplitude Zig-Zag"}
-                          content={parametrosInfo.zigZagAmplitude?.content || "Distância lateral máxima da oscilação do zig-zag."}
+                          title={parametrosInfo.zigZagDistancia?.title || "Distância do Zigue"}
+                          content={parametrosInfo.zigZagDistancia?.content || "Comprimento de cada movimento de vai-e-vem do zig-zag."}
                         />
                       </div>
                       <Input
-                        id="zigZagAmplitude"
+                        id="zigZagDistancia"
                         type="number"
-                        value={zigZagAmplitudeInput.inputValue}
-                        onChange={zigZagAmplitudeInput.handleChange}
-                        onBlur={zigZagAmplitudeInput.handleBlur}
-                        min={VALIDATION_RULES.zigZagAmplitude.min}
-                        max={VALIDATION_RULES.zigZagAmplitude.max}
-                        step="0.1"
-                        className={cn(zigZagAmplitudeInput.hasError && "border-destructive focus-visible:ring-destructive")}
-                      />
-                      {zigZagAmplitudeInput.hasError && zigZagAmplitudeInput.errorMessage && (
-                        <p className="text-xs text-destructive mt-1">{zigZagAmplitudeInput.errorMessage}</p>
-                      )}
-                      <SanitizationAlert
-                        alert={zigZagAmplitudeInput.sanitizationAlert}
-                        onDismiss={zigZagAmplitudeInput.dismissSanitizationAlert}
-                      />
-                    </div>
-
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-1">
-                        <Label htmlFor="zigZagPitch">Pitch Zig-Zag (mm)</Label>
-                        <InfoTooltip
-                          title={parametrosInfo.zigZagPitch?.title || "Pitch Zig-Zag"}
-                          content={parametrosInfo.zigZagPitch?.content || "Distância de avanço em cada zigue do zig-zag."}
-                        />
-                      </div>
-                      <Input
-                        id="zigZagPitch"
-                        type="number"
-                        value={zigZagPitchInput.inputValue}
-                        onChange={zigZagPitchInput.handleChange}
-                        onBlur={zigZagPitchInput.handleBlur}
-                        min={VALIDATION_RULES.zigZagPitch.min}
-                        max={VALIDATION_RULES.zigZagPitch.max}
+                        value={zigZagDistanciaInput.inputValue}
+                        onChange={zigZagDistanciaInput.handleChange}
+                        onBlur={zigZagDistanciaInput.handleBlur}
+                        min={VALIDATION_RULES.zigZagDistancia.min}
+                        max={VALIDATION_RULES.zigZagDistancia.max}
                         step="0.5"
-                        className={cn(zigZagPitchInput.hasError && "border-destructive focus-visible:ring-destructive")}
+                        className={cn(zigZagDistanciaInput.hasError && "border-destructive focus-visible:ring-destructive")}
                       />
-                      {zigZagPitchInput.hasError && zigZagPitchInput.errorMessage && (
-                        <p className="text-xs text-destructive mt-1">{zigZagPitchInput.errorMessage}</p>
+                      {zigZagDistanciaInput.hasError && zigZagDistanciaInput.errorMessage && (
+                        <p className="text-xs text-destructive mt-1">{zigZagDistanciaInput.errorMessage}</p>
                       )}
                       <SanitizationAlert
-                        alert={zigZagPitchInput.sanitizationAlert}
-                        onDismiss={zigZagPitchInput.dismissSanitizationAlert}
+                        alert={zigZagDistanciaInput.sanitizationAlert}
+                        onDismiss={zigZagDistanciaInput.dismissSanitizationAlert}
                       />
                     </div>
 
                     <div className="space-y-1">
                       <div className="flex items-center gap-1">
-                        <Label htmlFor="maxRampStepZ">Máx. Descida por Segmento (mm)</Label>
+                        <Label htmlFor="anguloRampaZigZag">Ângulo de Descida (°)</Label>
                         <InfoTooltip
-                          title={parametrosInfo.maxRampStepZ?.title || "Máximo Descida por Segmento"}
-                          content={parametrosInfo.maxRampStepZ?.content || "Máximo de descida em Z por segmento do zig-zag. Valores menores geram mais segmentos e descida mais suave."}
+                          title={parametrosInfo.anguloRampaZigZag?.title || "Ângulo de Descida"}
+                          content={parametrosInfo.anguloRampaZigZag?.content || "Ângulo de inclinação da rampa zig-zag. Valores menores geram descida mais suave."}
                         />
                       </div>
                       <Input
-                        id="maxRampStepZ"
+                        id="anguloRampaZigZag"
                         type="number"
-                        value={maxRampStepZInput.inputValue}
-                        onChange={maxRampStepZInput.handleChange}
-                        onBlur={maxRampStepZInput.handleBlur}
-                        min={VALIDATION_RULES.maxRampStepZ.min}
-                        max={VALIDATION_RULES.maxRampStepZ.max}
-                        step="0.1"
-                        className={cn(maxRampStepZInput.hasError && "border-destructive focus-visible:ring-destructive")}
+                        value={anguloRampaZigZagInput.inputValue}
+                        onChange={anguloRampaZigZagInput.handleChange}
+                        onBlur={anguloRampaZigZagInput.handleBlur}
+                        min={VALIDATION_RULES.anguloRampaZigZag.min}
+                        max={VALIDATION_RULES.anguloRampaZigZag.max}
+                        step="1"
+                        className={cn(anguloRampaZigZagInput.hasError && "border-destructive focus-visible:ring-destructive")}
                       />
-                      {maxRampStepZInput.hasError && maxRampStepZInput.errorMessage && (
-                        <p className="text-xs text-destructive mt-1">{maxRampStepZInput.errorMessage}</p>
+                      {anguloRampaZigZagInput.hasError && anguloRampaZigZagInput.errorMessage && (
+                        <p className="text-xs text-destructive mt-1">{anguloRampaZigZagInput.errorMessage}</p>
                       )}
                       <SanitizationAlert
-                        alert={maxRampStepZInput.sanitizationAlert}
-                        onDismiss={maxRampStepZInput.dismissSanitizationAlert}
+                        alert={anguloRampaZigZagInput.sanitizationAlert}
+                        onDismiss={anguloRampaZigZagInput.dismissSanitizationAlert}
                       />
+                    </div>
+
+                    {/* Distância Total Calculada (readonly, como no Aspire) */}
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-1">
+                        <Label>Distância Total Calculada</Label>
+                        <InfoTooltip
+                          title="Distância Total"
+                          content="Distância total que a ferramenta percorrerá durante a rampa zig-zag, calculada automaticamente baseado na profundidade e ângulo."
+                        />
+                      </div>
+                      <div className="text-sm text-muted-foreground bg-muted/50 px-3 py-2 rounded-md border">
+                        {(() => {
+                          const angulo = config.anguloRampaZigZag ?? 20;
+                          const prof = config.profundidadePorPassada ?? 3.75;
+                          const anguloRad = (angulo * Math.PI) / 180;
+                          const distTotal = prof / Math.tan(anguloRad);
+                          return `${distTotal.toFixed(1)} mm`;
+                        })()}
+                      </div>
                     </div>
                   </div>
                 )}

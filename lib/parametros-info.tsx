@@ -441,90 +441,60 @@ export const parametrosInfo = {
     ),
   },
 
-  zigZagAmplitude: {
-    title: "Amplitude Zig-Zag",
+  zigZagDistancia: {
+    title: "Distância do Zigue",
     content: (
       <>
         <div>
-          <strong>O que é:</strong> Distância lateral máxima da oscilação do zig-zag durante a rampa de entrada.
+          <strong>O que é:</strong> Comprimento de cada movimento de vai-e-vem do zig-zag durante a rampa de entrada.
         </div>
         <div>
-          <strong>Como funciona:</strong> Define o quanto a fresa oscila para os lados enquanto desce. Valores maiores criam movimento mais amplo, melhorando a remoção de cavaco.
+          <strong>Como funciona:</strong> A ferramenta avança essa distância, depois volta, repetindo até atingir a profundidade. Similar ao parâmetro &quot;Distância&quot; do Aspire.
         </div>
         <div>
           <strong>Valores recomendados:</strong>
           <ul className="list-disc ml-5 mt-2 space-y-1">
-            <li><strong>1-2mm:</strong> Oscilação suave, ideal para peças pequenas</li>
-            <li><strong>2-3mm (recomendado):</strong> Equilíbrio ideal para maioria dos casos</li>
-            <li><strong>3-5mm:</strong> Oscilação mais ampla, melhor remoção de cavaco</li>
+            <li><strong>3-5mm:</strong> Zigues curtos, descida mais gradual</li>
+            <li><strong>5-7mm (recomendado):</strong> Equilíbrio ideal para maioria dos casos</li>
+            <li><strong>7-10mm:</strong> Zigues mais longos, menos movimentos</li>
           </ul>
         </div>
         <div className="bg-blue-50 dark:bg-blue-950/30 p-2 rounded border border-blue-200 dark:border-blue-800 mt-3">
           <strong className="text-blue-700 dark:text-blue-400">Importante:</strong>
           <ul className="list-disc ml-5 mt-1 space-y-1 text-sm">
-            <li>A amplitude não pode ultrapassar 30% do comprimento do lado da peça</li>
-            <li>O sistema ajusta automaticamente se o valor for muito grande</li>
-            <li>A oscilação sempre acontece "para dentro" da peça (mais seguro)</li>
+            <li>A distância é limitada entre 1mm e 50mm</li>
+            <li>Valores maiores geram menos zigues mas com mais descida por movimento</li>
+            <li>O movimento acontece no mesmo eixo do lado da peça (vai e volta)</li>
           </ul>
         </div>
       </>
     ),
   },
 
-  zigZagPitch: {
-    title: "Pitch Zig-Zag",
+  anguloRampaZigZag: {
+    title: "Ângulo de Descida Zig-Zag",
     content: (
       <>
         <div>
-          <strong>O que é:</strong> Distância de avanço em cada zigue do zig-zag. Define a frequência da oscilação.
+          <strong>O que é:</strong> Ângulo de inclinação da rampa zig-zag em graus. Similar ao parâmetro &quot;Ângulo&quot; do Aspire.
         </div>
         <div>
-          <strong>Como funciona:</strong> Valores menores criam mais segmentos (zig-zag mais frequente), valores maiores criam menos segmentos (zig-zag mais espaçado).
+          <strong>Como funciona:</strong> Define o quão íngreme é a descida. Ângulos menores geram rampa mais suave (mais zigues), ângulos maiores geram rampa mais íngreme (menos zigues).
         </div>
         <div>
           <strong>Valores recomendados:</strong>
           <ul className="list-disc ml-5 mt-2 space-y-1">
-            <li><strong>3-5mm:</strong> Zig-zag frequente, descida mais suave</li>
-            <li><strong>5-7mm (recomendado):</strong> Equilíbrio ideal</li>
-            <li><strong>7-10mm:</strong> Zig-zag mais espaçado, descida mais rápida</li>
+            <li><strong>10-15°:</strong> Rampa muito suave, ideal para materiais duros</li>
+            <li><strong>15-25° (recomendado):</strong> Equilíbrio ideal</li>
+            <li><strong>25-35°:</strong> Rampa mais íngreme, descida mais rápida</li>
           </ul>
         </div>
         <div className="bg-blue-50 dark:bg-blue-950/30 p-2 rounded border border-blue-200 dark:border-blue-800 mt-3">
           <strong className="text-blue-700 dark:text-blue-400">Importante:</strong>
           <ul className="list-disc ml-5 mt-1 space-y-1 text-sm">
-            <li>O pitch não pode ser maior que 50% do comprimento do lado</li>
-            <li>O sistema ajusta automaticamente se não houver espaço suficiente</li>
-            <li>Valores muito pequenos podem gerar muitos segmentos (mais lento)</li>
-          </ul>
-        </div>
-      </>
-    ),
-  },
-
-  maxRampStepZ: {
-    title: "Máximo Descida por Segmento",
-    content: (
-      <>
-        <div>
-          <strong>O que é:</strong> Máximo de descida em Z permitido por segmento do zig-zag. Controla a suavidade da descida.
-        </div>
-        <div>
-          <strong>Como funciona:</strong> Valores menores garantem descida mais gradual e suave, distribuindo a profundidade total em mais segmentos. Valores maiores permitem descida mais rápida.
-        </div>
-        <div>
-          <strong>Valores recomendados:</strong>
-          <ul className="list-disc ml-5 mt-2 space-y-1">
-            <li><strong>0.3-0.5mm:</strong> Descida muito suave, ideal para materiais duros</li>
-            <li><strong>0.5-0.8mm (recomendado):</strong> Equilíbrio ideal para maioria dos casos</li>
-            <li><strong>0.8-1.2mm:</strong> Descida mais rápida, ainda segura</li>
-          </ul>
-        </div>
-        <div className="bg-blue-50 dark:bg-blue-950/30 p-2 rounded border border-blue-200 dark:border-blue-800 mt-3">
-          <strong className="text-blue-700 dark:text-blue-400">Importante:</strong>
-          <ul className="list-disc ml-5 mt-1 space-y-1 text-sm">
-            <li>Valores muito pequenos podem gerar muitos segmentos (mais tempo de usinagem)</li>
-            <li>Valores muito grandes podem causar carga excessiva na ferramenta</li>
-            <li>O sistema distribui a descida uniformemente entre os segmentos</li>
+            <li>O ângulo é limitado entre 1° e 45°</li>
+            <li>Ângulos muito pequenos podem gerar muitos zigues</li>
+            <li>Ângulos muito grandes podem sobrecarregar a ferramenta</li>
           </ul>
         </div>
       </>
